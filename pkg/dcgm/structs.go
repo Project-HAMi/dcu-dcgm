@@ -32,3 +32,11 @@ type RSMIVersion struct {
 	Patch uint32
 	Build string
 }
+
+type RSMISwComponent C.rsmi_sw_component_t
+
+const (
+	RSMISwCompFirst  RSMISwComponent = C.RSMISwCompFirst
+	RSMISwCompDriver RSMISwComponent = C.RSMISwCompDriver
+	RSMISwCompLast   RSMISwComponent = C.RSMISwCompLast
+)
