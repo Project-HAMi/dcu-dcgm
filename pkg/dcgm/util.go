@@ -9,7 +9,10 @@ package dcgm
 #include <rocm_smi.h>
 */
 import "C"
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 type RSMIStatus C.rsmi_status_t
 
@@ -76,4 +79,11 @@ func errorString(result C.rsmi_status_t) error {
 	}
 	goStatusString := C.GoString(cStatusString)
 	return fmt.Errorf("%v", goStatusString)
+}
+func dataToJson(data any) string {
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		fmt.Println("Error serializing to JSON:", err)
+	}
+	return string(jsonData)
 }

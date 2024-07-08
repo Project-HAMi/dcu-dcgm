@@ -74,23 +74,6 @@ type RSMIUtilizationCounter struct {
 	Value uint64
 }
 
-type RSMIDevPerfLevel C.rsmi_dev_perf_level_t
-
-const (
-	RSMI_DEV_PERF_LEVEL_AUTO            RSMIDevPerfLevel = C.RSMI_DEV_PERF_LEVEL_AUTO
-	RSMI_DEV_PERF_LEVEL_FIRST           RSMIDevPerfLevel = C.RSMI_DEV_PERF_LEVEL_FIRST
-	RSMI_DEV_PERF_LEVEL_LOW             RSMIDevPerfLevel = C.RSMI_DEV_PERF_LEVEL_LOW
-	RSMI_DEV_PERF_LEVEL_HIGH            RSMIDevPerfLevel = C.RSMI_DEV_PERF_LEVEL_HIGH
-	RSMI_DEV_PERF_LEVEL_MANUAL          RSMIDevPerfLevel = C.RSMI_DEV_PERF_LEVEL_MANUAL
-	RSMI_DEV_PERF_LEVEL_STABLE_STD      RSMIDevPerfLevel = C.RSMI_DEV_PERF_LEVEL_STABLE_STD
-	RSMI_DEV_PERF_LEVEL_STABLE_PEAK     RSMIDevPerfLevel = C.RSMI_DEV_PERF_LEVEL_STABLE_PEAK
-	RSMI_DEV_PERF_LEVEL_STABLE_MIN_MCLK RSMIDevPerfLevel = C.RSMI_DEV_PERF_LEVEL_STABLE_MIN_MCLK
-	RSMI_DEV_PERF_LEVEL_STABLE_MIN_SCLK RSMIDevPerfLevel = C.RSMI_DEV_PERF_LEVEL_STABLE_MIN_SCLK
-	RSMI_DEV_PERF_LEVEL_DETERMINISM     RSMIDevPerfLevel = C.RSMI_DEV_PERF_LEVEL_DETERMINISM
-	RSMI_DEV_PERF_LEVEL_LAST            RSMIDevPerfLevel = C.RSMI_DEV_PERF_LEVEL_LAST
-	RSMI_DEV_PERF_LEVEL_UNKNOWN         RSMIDevPerfLevel = C.RSMI_DEV_PERF_LEVEL_UNKNOWN
-)
-
 type RSMIClkType C.rsmi_clk_type_t
 
 const (
@@ -255,6 +238,7 @@ func go_rsmi_dev_perf_level_get(dvInd int) (perf RSMIDevPerfLevel, err error) {
 		return RSMIDevPerfLevel(cPerfLevel), fmt.Errorf("Error go_rsmi_dev_perf_level_get:%s", err)
 	}
 	perf = RSMIDevPerfLevel(cPerfLevel)
+	log.Println("dev_perf_level:", perf)
 	return perf, nil
 }
 
@@ -343,18 +327,41 @@ func go_rsmi_dev_gpu_metrics_info_get(dvInd int) (gpuMetrics RSMIGPUMetrics, err
 			FormatRevision:  uint8(cgpuMetrics.common_header.format_revision),
 			ContentRevision: uint8(cgpuMetrics.common_header.content_revision),
 		},
-		TemperatureEdge:    uint16(cgpuMetrics.temperature_edge),
-		TemperatureHotspot: uint16(cgpuMetrics.temperature_hotspot),
-		TemperatureMem:     uint16(cgpuMetrics.temperature_mem),
-		TemperatureVRGfx:   uint16(cgpuMetrics.temperature_vrgfx),
-		TemperatureVRSoc:   uint16(cgpuMetrics.temperature_vrsoc),
-		TemperatureVRMem:   uint16(cgpuMetrics.temperature_vrmem),
-		AverageGfxActivity: uint16(cgpuMetrics.average_gfx_activity),
-		AverageUmcActivity: uint16(cgpuMetrics.average_umc_activity),
-		AverageMmActivity:  uint16(cgpuMetrics.average_mm_activity),
-		AverageSocketPower: uint16(cgpuMetrics.average_socket_power),
-		EnergyAccumulator:  uint64(cgpuMetrics.energy_accumulator),
+		TemperatureEdge:        uint16(cgpuMetrics.temperature_edge),
+		TemperatureHotspot:     uint16(cgpuMetrics.temperature_hotspot),
+		TemperatureMem:         uint16(cgpuMetrics.temperature_mem),
+		TemperatureVRGfx:       uint16(cgpuMetrics.temperature_vrgfx),
+		TemperatureVRSoc:       uint16(cgpuMetrics.temperature_vrsoc),
+		TemperatureVRMem:       uint16(cgpuMetrics.temperature_vrmem),
+		AverageGfxActivity:     uint16(cgpuMetrics.average_gfx_activity),
+		AverageUmcActivity:     uint16(cgpuMetrics.average_umc_activity),
+		AverageMmActivity:      uint16(cgpuMetrics.average_mm_activity),
+		AverageSocketPower:     uint16(cgpuMetrics.average_socket_power),
+		EnergyAccumulator:      uint64(cgpuMetrics.energy_accumulator),
+		SystemClockCounter:     uint64(cgpuMetrics.system_clock_counter),
+		AverageGfxclkFrequency: uint16(cgpuMetrics.average_gfxclk_frequency),
+		AverageSocclkFrequency: uint16(cgpuMetrics.average_socclk_frequency),
+		AverageUclkFrequency:   uint16(cgpuMetrics.average_uclk_frequency),
+		AverageVclk0Frequency:  uint16(cgpuMetrics.average_vclk0_frequency),
+		AverageDclk0Frequency:  uint16(cgpuMetrics.average_dclk0_frequency),
+		AverageVclk1Frequency:  uint16(cgpuMetrics.average_vclk1_frequency),
+		AverageDclk1Frequency:  uint16(cgpuMetrics.average_dclk1_frequency),
+		CurrentGfxclk:          uint16(cgpuMetrics.current_gfxclk),
+		CurrentSocclk:          uint16(cgpuMetrics.current_socclk),
+		CurrentUclk:            uint16(cgpuMetrics.current_uclk),
+		CurrentVclk0:           uint16(cgpuMetrics.current_vclk0),
+		CurrentDclk0:           uint16(cgpuMetrics.current_dclk0),
+		CurrentVclk1:           uint16(cgpuMetrics.current_vclk1),
+		CurrentDclk1:           uint16(cgpuMetrics.current_dclk1),
+		ThrottleStatus:         uint32(cgpuMetrics.throttle_status),
+		CurrentFanSpeed:        uint16(cgpuMetrics.current_fan_speed),
+		PcieLinkWidth:          uint16(cgpuMetrics.pcie_link_width),
+		PcieLinkSpeed:          uint16(cgpuMetrics.pcie_link_speed),
+		Padding:                uint16(cgpuMetrics.padding),
+		GfxActivityAcc:         uint32(cgpuMetrics.gfx_activity_acc),
+		MemActivityAcc:         uint32(cgpuMetrics.mem_actvity_acc),
+		TemperatureHBM:         *((*[4]uint16)(unsafe.Pointer(&cgpuMetrics.temperature_hbm))),
 	}
-
+	log.Printf("go_rsmi_dev_gpu_metrics_info_get:%s", dataToJson(gpuMetrics))
 	return
 }

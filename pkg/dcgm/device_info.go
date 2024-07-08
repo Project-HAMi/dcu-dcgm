@@ -69,6 +69,11 @@ const (
 	RSMI_MEM_PAGE_STATUS_UNRESERVABLE RSMIMemoryPageStatus = C.RSMI_MEM_PAGE_STATUS_UNRESERVABLE
 )
 
+type RSMIFreqVoltRegion struct {
+	FreqRange RSMIRange
+	VoltRange RSMIRange
+}
+
 // go_rsmi_num_monitor_devices 获取gpu数量 *
 func go_rsmi_num_monitor_devices() (gpuNum int, err error) {
 	var p C.uint
@@ -296,6 +301,7 @@ func go_rsmi_dev_memory_usage_get(dvInd int, memoryType RSMIMemoryType) (used in
 func go_rsmi_dev_memory_busy_percent_get(dvInd int) int {
 	var busyPercent C.uint32_t
 	C.rsmi_dev_memory_busy_percent_get(C.uint32_t(dvInd), &busyPercent)
+	log.Println("busy_percent:", busyPercent)
 	return int(busyPercent)
 }
 
@@ -350,4 +356,58 @@ func go_rsmi_dev_fan_speed_max_get(dvInd, sensorInd int) int64 {
 	var maxSpeed C.uint64_t
 	C.rsmi_dev_fan_speed_max_get(C.uint32_t(dvInd), C.uint32_t(sensorInd), &maxSpeed)
 	return int64(maxSpeed)
+}
+
+// go_ rsmi_dev_od_volt_curve_regions_get
+func rsmi_dev_od_volt_curve_regions_get(dvInd int) (numRegions int, buffer RSMIFreqVoltRegion, err error) {
+	var cnumRegions C.uint32_t
+	var cbuffer C.rsmi_freq_volt_region_t
+	ret := C.rsmi_dev_od_volt_curve_regions_get(C.uint32_t(dvInd), &cnumRegions, &cbuffer)
+	if err = errorString(ret); err != nil {
+		return 0, buffer, fmt.Errorf("Error dev_od_volt_curve_regions_get:%S", err)
+	}
+	numRegions = int(cnumRegions)
+	buffer = RSMIFreqVoltRegion{
+		FreqRange: RSMIRange{
+			LowerBound: uint64(cbuffer.freq_range.lower_bound),
+			UpperBound: uint64(cbuffer.freq_range.upper_bound),
+		},
+		VoltRange: RSMIRange{
+			LowerBound: uint64(cbuffer.freq_range.lower_bound),
+			UpperBound: uint64(cbuffer.freq_range.upper_bound),
+		},
+	}
+	return
+}
+
+// go_rsmi_dev_power_profile_presets_get 获取可用预设电源配置文件列表并指示当前活动的配置文件
+func go_rsmi_dev_power_profile_presets_get(dvInd, sensorInd int) (powerProfileStatus RSMPowerProfileStatus, err error) {
+	var cpowerProfileStatus C.rsmi_power_profile_status_t
+	ret := C.rsmi_dev_power_profile_presets_get(C.uint32_t(dvInd), C.uint32_t(sensorInd), &cpowerProfileStatus)
+	if err = errorString(ret); err != nil {
+		return powerProfileStatus, fmt.Errorf("Error dev_power_profile_presets_get:%s", err)
+	}
+	powerProfileStatus = RSMPowerProfileStatus{
+		AvailableProfiles: RSMIBitField(cpowerProfileStatus.available_profiles),
+		Current:           RSMIPowerProfilePresetMasks(cpowerProfileStatus.current),
+		NumProfiles:       uint32(cpowerProfileStatus.num_profiles),
+	}
+	return
+}
+
+// go_rsmi_version_get 获取当前运行的RSMI版本
+func go_rsmi_version_get() (version RSMIVersion, err error) {
+
+	var cVersion C.rsmi_version_t
+	ret := C.rsmi_version_get(&cVersion)
+	if err = errorString(ret); err != nil {
+		return version, fmt.Errorf("Error to get version: %s", err)
+	}
+	version = RSMIVersion{
+		Major: uint32(cVersion.major),
+		Minor: uint32(cVersion.minor),
+		Patch: uint32(cVersion.patch),
+		Build: C.GoString(cVersion.build),
+	}
+	return
 }
