@@ -12,6 +12,7 @@ import "C"
 import (
 	"encoding/json"
 	"fmt"
+	"unsafe"
 )
 
 type RSMIStatus C.rsmi_status_t
@@ -73,12 +74,12 @@ func errorString(result C.rsmi_status_t) error {
 		return nil
 	}
 	var cStatusString *C.char
-	statusCode := C.rsmi_status_string(result, &cStatusString)
+	statusCode := C.rsmi_status_string(result, (**C.char)(unsafe.Pointer(&cStatusString)))
 	if RSMIStatus(statusCode) != RSMI_STATUS_SUCCESS {
-		return fmt.Errorf("error: %v", statusCode)
+		return fmt.Errorf("error: %s", statusCode)
 	}
 	goStatusString := C.GoString(cStatusString)
-	return fmt.Errorf("%v", goStatusString)
+	return fmt.Errorf("%s", goStatusString)
 }
 func dataToJson(data any) string {
 	jsonData, err := json.Marshal(data)
@@ -86,4 +87,15 @@ func dataToJson(data any) string {
 		fmt.Println("Error serializing to JSON:", err)
 	}
 	return string(jsonData)
+}
+
+// 获取所提供的RSMI错误状态的描述
+func go_rsmi_status_string(status RSMIStatus) (statusStr string, err error) {
+	var cstatusStr *C.char
+	ret := C.rsmi_status_string(C.rsmi_status_t(status), (**C.char)(unsafe.Pointer(&cstatusStr)))
+	if err = errorString(ret); err != nil {
+		return statusStr, fmt.Errorf("Error go_rsmi_status_string:%s", err)
+	}
+	statusStr = C.GoString(cstatusStr)
+	return
 }

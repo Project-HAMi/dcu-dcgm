@@ -78,3 +78,68 @@ func go_rsmi_dev_gpu_clk_freq_set(dvInd int, clkType RSMIClkType, freqBitmask in
 	}
 	return nil
 }
+
+// go_rsmi_dev_counter_group_supported 判断设备是否支持特定事件组
+func go_rsmi_dev_counter_group_supported(dvInd int, group RSMIEventGroup) (err error) {
+	ret := C.rsmi_dev_counter_group_supported(C.uint32_t(dvInd), C.rsmi_event_group_t(group))
+	if err = errorString(ret); err != nil {
+		return fmt.Errorf("Error go_rsmi_dev_counter_group_supported:%s", err)
+	}
+	return
+}
+
+// go_rsmi_dev_counter_create 创建性能计数器对象
+func go_rsmi_dev_counter_create(dvInd int, eventType RSMIEventType) (eventHandle EventHandle, err error) {
+	var ceventHandle C.rsmi_event_handle_t
+	ret := C.rsmi_dev_counter_create(C.uint32_t(dvInd), C.rsmi_event_type_t(eventType), &ceventHandle)
+	if err = errorString(ret); err != nil {
+		return eventHandle, fmt.Errorf("Error go_rsmi_dev_counter_create:%s", err)
+	}
+	eventHandle = EventHandle(ceventHandle)
+	return
+}
+
+// go_rsmi_dev_counter_destroy 释放性能计数器对象
+func go_rsmi_dev_counter_destroy(handle EventHandle) (err error) {
+	var chandle C.rsmi_event_handle_t
+	ret := C.rsmi_dev_counter_destroy(C.rsmi_event_handle_t(chandle))
+	if err = errorString(ret); err != nil {
+		return fmt.Errorf("Error go_rsmi_dev_counter_destroy:%s", err)
+	}
+	return
+}
+
+// rsmiCounterControl 发布性能计数器控制命令
+func rsmiCounterControl(evtHandle EventHandle, cmd RSMICounterCommand) (err error) {
+	ret := C.rsmi_counter_control(C.rsmi_event_handle_t(evtHandle), C.rsmi_counter_command_t(cmd), nil)
+
+	if err := errorString(ret); err != nil {
+		return fmt.Errorf("Error in go_rsmi_counter_control: %s", err)
+	}
+	return
+}
+
+// rsmiCounterRead 读取性能计数器的当前值
+func rsmiCounterRead(handle EventHandle) (counterValue RSMICounterValue, err error) {
+	var ccounterValue C.rsmi_counter_value_t
+	ret := C.rsmi_counter_read(C.rsmi_event_handle_t(handle), &ccounterValue)
+	if err = errorString(ret); err != nil {
+		return counterValue, fmt.Errorf("Error rsmiCounterRead:%s", err)
+	}
+	ccounterValue = RSMICounterValue{
+		Value:       uint64(ccounterValue.value),
+		TimeEnabled: uint64(ccounterValue.time_enabled),
+		TimeRunning: uint64(ccounterValue.time_running),
+	}
+	return
+}
+
+func rsmiCounterAvailableCountersGet(dvInd int, group RSMIEventGroup) (availAble int, err error) {
+	var cavailAble C.uint32_t
+	ret := C.rsmi_counter_available_counters_get(C.uint32_t(dvInd), C.rsmi_event_group_t(group), &cavailAble)
+	if err = errorString(ret); err != nil {
+		return availAble, fmt.Errorf("Error rsmiCounterAvailableCountersGet:%s", err)
+	}
+	availAble = int(cavailAble)
+	return
+}

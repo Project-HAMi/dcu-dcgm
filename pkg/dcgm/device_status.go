@@ -365,3 +365,14 @@ func go_rsmi_dev_gpu_metrics_info_get(dvInd int) (gpuMetrics RSMIGPUMetrics, err
 	log.Printf("go_rsmi_dev_gpu_metrics_info_get:%s", dataToJson(gpuMetrics))
 	return
 }
+
+// go_rsmi_dev_ecc_status_get 获取GPU块的ECC状态
+func rsmi_dev_ecc_status_get(dvInd int, block RSMIGpuBlock) (state RSMIRasErrState, err error) {
+	var sstate C.rsmi_ras_err_state_t
+	ret := C.rsmi_dev_ecc_status_get(C.uint32_t(dvInd), C.rsmi_gpu_block_t(block), &sstate)
+	if err = errorString(ret); err != nil {
+		return state, fmt.Errorf("Error go_rsmi_dev_ecc_status_get:%s", err)
+	}
+	state = RSMIRasErrState(sstate)
+	return
+}

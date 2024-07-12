@@ -45,16 +45,6 @@ const (
 	RSMI_PWR_PROF_PRST_INVALID RSNIPowerProfilePresetMasks = C.RSMI_PWR_PROF_PRST_INVALID
 )
 
-type RSMIMemoryType C.rsmi_memory_type_t
-
-const (
-	RSMI_MEM_TYPE_FIRST    RSMIMemoryType = C.RSMI_MEM_TYPE_FIRST
-	RSMI_MEM_TYPE_VRAM     RSMIMemoryType = C.RSMI_MEM_TYPE_VRAM
-	RSMI_MEM_TYPE_VIS_VRAM RSMIMemoryType = C.RSMI_MEM_TYPE_VIS_VRAM
-	RSMI_MEM_TYPE_GTT      RSMIMemoryType = C.RSMI_MEM_TYPE_GTT
-	RSMI_MEM_TYPE_LAST     RSMIMemoryType = C.RSMI_MEM_TYPE_LAST
-)
-
 type RSMIRetiredPageRecord struct {
 	PageAddress uint64               //!< Start address of page
 	PageSize    uint64               //!< Page size
@@ -319,7 +309,7 @@ func go_rsmi_dev_memory_reserved_pages_get(dvInd int) (numPages int, records []R
 		return 0, nil, nil // No pages to retrieve
 	}
 	cRecords := make([]C.rsmi_retired_page_record_t, numPages)
-	ret = C.rsmi_dev_memory_reserved_pages_get(C.uint32_t(dvInd), &cnumPages, (*C.rsmi_retired_page_record_t)(unsafe.Pointer(&records[0])))
+	ret = C.rsmi_dev_memory_reserved_pages_get(C.uint32_t(dvInd), &cnumPages, (*C.rsmi_retired_page_record_t)(unsafe.Pointer(&cRecords[0])))
 	if ret != 0 {
 		return 0, nil, fmt.Errorf("failed to get the page records, error code: %d", ret)
 	}
@@ -409,5 +399,63 @@ func go_rsmi_version_get() (version RSMIVersion, err error) {
 		Patch: uint32(cVersion.patch),
 		Build: C.GoString(cVersion.build),
 	}
+	return
+}
+
+// go_rsmi_version_str_get 获取当前系统的驱动程序版本
+func go_rsmi_version_str_get(component RSMISwComponent, len int) (varStr string, err error) {
+	var cvarStr C.char
+	ret := C.rsmi_version_str_get(C.rsmi_sw_component_t(component), &cvarStr)
+	if err = errorString(ret); err != nil {
+		return "", fmt.Errorf("Error go_rsmi_version_str_get:%s", err)
+	}
+	varStr = string(cvarStr)
+	return
+}
+
+// go_rsmi_dev_vbios_version_get 获取VBIOS版本
+func go_rsmi_dev_vbios_version_get(dvInd, len int) (vbios string, err error) {
+	var cvbios C.char
+	ret := C.rsmi_dev_vbios_version_get(C.uint32_t(dvInd), &cvbios, C.uint32_t(len))
+	if err = errorString(ret); err != nil {
+		return vbios, fmt.Errorf("Error go_rsmi_dev_vbios_version_get:%s", err)
+	}
+	vbios = string(cvbios)
+	return
+}
+
+// go_rsmi_dev_firmware_version_get 获取设备的固件版本
+func go_rsmi_dev_firmware_version_get(dvInd int, fwBlock RSMIFwBlock) (fwVersion int64, err error) {
+	var cfwBlock C.uint64_t
+	ret := C.rsmi_dev_firmware_version_get(C.uint32_t(dvInd), C.rsmi_fw_block_t(fwBlock), &cfwBlock)
+	if err = errorString(ret); err != nil {
+		return fwVersion, fmt.Errorf("Error go_rsmi_dev_firmware_version_get:%s", err)
+	}
+	fwVersion = int64(cfwBlock)
+	return
+}
+
+// go_rsmi_dev_ecc_count_get 获取GPU块的错误计数
+func go_rsmi_dev_ecc_count_get(dvInd int, gpuBlock RSMIGpuBlock) (errorCount RSMIErrorCount, err error) {
+	var cerrorCount C.rsmi_error_count_t
+	ret := C.rsmi_dev_ecc_count_get(C.uint32_t(dvInd), C.rsmi_gpu_block_t(gpuBlock), &cerrorCount)
+	if err = errorString(ret); err != nil {
+		return cerrorCount, fmt.Errorf("Error go_rsmi_dev_ecc_count_get:%s", err)
+	}
+	errorCount = RSMIErrorCount{
+		CorrectableErr:   uint64(cerrorCount.correctable_err),
+		UncorrectableErr: uint64(cerrorCount.uncorrectable_err),
+	}
+	return
+}
+
+// go_rsmi_dev_ecc_enabled_get 获取已启用的ECC位掩码
+func go_rsmi_dev_ecc_enabled_get(dvInd int) (enabledBlocks int64, err error) {
+	var cenabledBlocks C.uint64_t
+	ret := C.rsmi_dev_ecc_enabled_get(C.uint32_t(dvInd), &cenabledBlocks)
+	if err = errorString(ret); err != nil {
+		return enabledBlocks, fmt.Errorf("Error go_rsmi_dev_ecc_enabled_get:%s", err)
+	}
+	enabledBlocks = int64(cenabledBlocks)
 	return
 }
