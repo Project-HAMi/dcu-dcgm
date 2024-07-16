@@ -14,8 +14,8 @@ import (
 	"log"
 )
 
-// go_rsmi_init 初始化rocm_smi
-func go_rsmi_init() (err error) {
+// rsmiInit 初始化rocm_smi
+func rsmiInit() (err error) {
 	ret := C.rsmi_init(0)
 	log.Println("go_rsmi_init_ret:", ret)
 	if err = errorString(ret); err != nil {
@@ -24,8 +24,8 @@ func go_rsmi_init() (err error) {
 	return nil
 }
 
-// go_rsmi_shutdown 关闭rocm_smi
-func go_rsmi_shutdown() (err error) {
+// rsmiShutdown 关闭rocm_smi
+func rsmiShutdown() (err error) {
 	ret := C.rsmi_shut_down()
 	log.Println("go_rsmi_shutdown_ret:", ret)
 	if err = errorString(ret); err != nil {

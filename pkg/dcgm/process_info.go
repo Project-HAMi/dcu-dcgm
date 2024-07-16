@@ -50,7 +50,7 @@ func rsmiComputeProcessInfoByPidGet(pid int) (proc RSMIProcessInfo, err error) {
 	return
 }
 
-// rsmi_compute_process_gpus_get 获取进程当前正在使用的设备索引
+// rsmiComputeProcessGpusGet 获取进程当前正在使用的设备索引
 func rsmiComputeProcessGpusGet(pid int) (dvIndices []int, err error) {
 	var cnumDevices C.uint32_t
 	// 第一次调用以获取numDevices的值
