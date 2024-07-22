@@ -1,8 +1,8 @@
 package dcgm
 
 /*
-#cgo CFLAGS: -Wall -I/opt/dtk-24.04/rocm_smi/include/rocm_smi
-#cgo LDFLAGS: -L/opt/dtk-24.04/rocm_smi/lib -lrocm_smi64 -Wl,--unresolved-symbols=ignore-in-object-files
+#cgo CFLAGS: -Wall -I./include
+#cgo LDFLAGS: -L./lib -lrocm_smi64 -Wl,--unresolved-symbols=ignore-in-object-files
 #include <stdint.h>
 #include <kfd_ioctl.h>
 #include <rocm_smi64Config.h>
@@ -12,28 +12,34 @@ import "C"
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"unsafe"
+
+	"github.com/golang/glog"
 )
 
 // rsmiNumMonitorDevices 获取gpu数量 *
 func rsmiNumMonitorDevices() (gpuNum int, err error) {
 	var p C.uint
 	ret := C.rsmi_num_monitor_devices(&p)
-	log.Println("go_rsmi_num_monitor_devices_ret:", ret)
+	glog.Info("go_rsmi_num_monitor_devices_ret:", ret)
 	if err = errorString(ret); err != nil {
 		return 0, fmt.Errorf("Error go_rsmi_num_monitor_devices_ret: %s", err)
 	}
 	gpuNum = int(p)
-	log.Println("go_rsmi_num_monitor_devices:", gpuNum)
+	glog.Info("go_rsmi_num_monitor_devices:", gpuNum)
 	return gpuNum, nil
 }
 
 // rsmiDevSkuGet 获取设备sku
-func rsmiDevSkuGet(dvInd int) string {
-	var sku C.char
-	C.rsmi_dev_sku_get(C.uint32_t(dvInd), &sku)
-	return string(sku)
+func rsmiDevSkuGet(dvInd int) (sku int, err error) {
+	var csku C.uint16_t
+	ret := C.rsmi_dev_sku_get(C.uint32_t(dvInd), &csku)
+	if err = errorString(ret); err != nil {
+		return sku, err
+	}
+	sku = int(csku)
+	glog.Info("rsmiDevSkuGet:", sku)
+	return
 }
 
 // rsmiDevVendorIdGet 获取设备供应商id
@@ -43,11 +49,16 @@ func rsmiDevVendorIdGet(dvInd int) uint {
 	return uint(vid)
 }
 
-// rsmiDevIdGet 获取设备id
-func rsmiDevIdGet(dvInd int) uint {
-	var id C.uint16_t
-	C.rsmi_dev_id_get(C.uint32_t(dvInd), &id)
-	return uint(id)
+// rsmiDevIdGet 获取设备类型标识id
+func rsmiDevIdGet(dvInd int) (id int, err error) {
+	var cid C.uint16_t
+	ret := C.rsmi_dev_id_get(C.uint32_t(dvInd), &cid)
+	if err = errorString(ret); err != nil {
+		return 0, fmt.Errorf("Error rsmiDevIdGet:%s", err)
+	}
+	id = int(cid)
+	glog.Info("rsmiDevIdGet:", id, fmt.Sprintf("%x", id))
+	return
 }
 
 // rsmiDevNameGet 获取设备名称
@@ -58,16 +69,17 @@ func rsmiDevNameGet(dvInd int) (nameStr string, err error) {
 		return nameStr, fmt.Errorf("Error go_rsmi_dev_name_get: %s", err)
 	}
 	nameStr = C.GoString(&name[0])
-	log.Println("go_rsmi_dev_name_get:", nameStr)
+	glog.Info("rsmiDevNameGet:", nameStr)
 	return
 }
 
 // rsmiDevBrandGet 获取设备品牌名称
-func rsmiDevBrandGet(dvInd int) string {
-	brand := make([]C.char, uint32(256))
-	C.rsmi_dev_brand_get(C.uint32_t(dvInd), &brand[0], 256)
-	result := C.GoString(&brand[0])
-	return result
+func rsmiDevBrandGet(dvInd int) (brand string, err error) {
+	brands := make([]C.char, uint32(256))
+	C.rsmi_dev_brand_get(C.uint32_t(dvInd), &brands[0], 256)
+	brand = C.GoString(&brands[0])
+	glog.Info("rsmiDevBrandGet:", brand)
+	return
 }
 
 // rsmiDevVendorNameGet 获取设备供应商名称
@@ -75,6 +87,7 @@ func rsmiDevVendorNameGet(dvInd int) string {
 	bname := make([]C.char, uint32(256))
 	C.rsmi_dev_vendor_name_get(C.uint32_t(dvInd), &bname[0], 80)
 	result := C.GoString(&bname[0])
+	fmt.Println("rsmiDevVendorNameGet:", result)
 	return result
 }
 
@@ -83,6 +96,7 @@ func rsmiDevVramVendorGet(dvInd int) string {
 	bname := make([]C.char, uint32(256))
 	C.rsmi_dev_vram_vendor_get(C.uint32_t(dvInd), &bname[0], 80)
 	result := C.GoString(&bname[0])
+	fmt.Printf("rsmiDevVramVendorGet: %s\n", result)
 	return result
 }
 
@@ -106,6 +120,7 @@ func rsmiDevSubsystemNameGet(dvInd int) string {
 	subSystemName := make([]C.char, uint32(256))
 	C.rsmi_dev_subsystem_name_get(C.uint32_t(dvInd), &subSystemName[0], 256)
 	result := C.GoString(&subSystemName[0])
+	fmt.Printf("rsmiDevSubsystemNameGet:%s\n", result)
 	return result
 }
 
@@ -144,15 +159,19 @@ func rsmiDevPciBandwidthGet(dvInd int) RSMIPcieBandwidth {
 		},
 		lanes: *(*[32]uint32)(unsafe.Pointer(&bandwidth.lanes)),
 	}
-	log.Println("RSMIPcieBandwidth:%s", rsmiPcieBandwidth)
+	glog.Info("RSMIPcieBandwidth:%s", rsmiPcieBandwidth)
 	return rsmiPcieBandwidth
 }
 
 // rsmiDevPciIdGet 获取唯一pci设备标识符
-func rsmiDevPciIdGet(dvInd int) int64 {
-	var bdfid C.uint64_t
-	C.rsmi_dev_pci_id_get(C.uint32_t(dvInd), &bdfid)
-	return int64(bdfid)
+func rsmiDevPciIdGet(dvInd int) (bdfid int64, err error) {
+	var cbdfid C.uint64_t
+	ret := C.rsmi_dev_pci_id_get(C.uint32_t(dvInd), &cbdfid)
+	if err = errorString(ret); err != nil {
+		return bdfid, err
+	}
+	bdfid = int64(cbdfid)
+	return
 }
 
 // rsmiTopoNumaAffinityGet 获取与设备关联的numa节点
@@ -169,7 +188,7 @@ func rsmiDevPciThroughputGet(dvInd int) (sent int64, received int64, maxPktSz in
 	sent = int64(cmaxpktsz)
 	received = int64(csent)
 	maxPktSz = int64(creceived)
-	log.Printf("sent: %d, received: %d, maxPktSz: %d\n", sent, received, maxPktSz)
+	glog.Info("sent: %d, received: %d, maxPktSz: %d\n", sent, received, maxPktSz)
 	return
 }
 
@@ -200,10 +219,14 @@ func rsmiDevEnergyCountGet() {
 }
 
 // rsmiDevPowerCapGet 获取设备功率上限
-func rsmiDevPowerCapGet(dvInd int, senserId int) int64 {
-	var power C.uint64_t
-	C.rsmi_dev_power_cap_get(C.uint32_t(dvInd), C.uint32_t(senserId), &power)
-	return int64(power)
+func rsmiDevPowerCapGet(dvInd int, senserId int) (power int64, err error) {
+	var cpower C.uint64_t
+	ret := C.rsmi_dev_power_cap_get(C.uint32_t(dvInd), C.uint32_t(senserId), &cpower)
+	if err = errorString(ret); err != nil {
+		return power, fmt.Errorf("Error rsmiDevPowerCapGet:%s", err)
+	}
+	power = int64(cpower)
+	return
 }
 
 // rsmiDevPowerCapRangeGet 获取设备功率有效值范围
@@ -222,20 +245,26 @@ func rsmiDevPowerProfileSet(dvInd int, reserved int, profile RSNIPowerProfilePre
 /****************************************** Memory *********************************************/
 
 // rsmiDevMemoryTotalGet 获取设备内存总量 *
-func rsmiDevMemoryTotalGet(dvInd int, memoryType RSMIMemoryType) (total int64) {
+func rsmiDevMemoryTotalGet(dvInd int, memoryType RSMIMemoryType) (total int64, err error) {
 	var ctotal C.uint64_t
-	C.rsmi_dev_memory_total_get(C.uint32_t(dvInd), C.rsmi_memory_type_t(memoryType), &ctotal)
+	ret := C.rsmi_dev_memory_total_get(C.uint32_t(dvInd), C.rsmi_memory_type_t(memoryType), &ctotal)
+	if err = errorString(ret); err != nil {
+		return total, fmt.Errorf("Error rsmiDevMemoryTotalGet:%s", err)
+	}
 	total = int64(ctotal)
-	log.Println("memory_total:", total)
+	glog.Info("memory_total:", total)
 	return
 }
 
 // rsmiDevMemoryUsageGet 获取当前设备内存使用情况 *
-func rsmiDevMemoryUsageGet(dvInd int, memoryType RSMIMemoryType) (used int64) {
+func rsmiDevMemoryUsageGet(dvInd int, memoryType RSMIMemoryType) (used int64, err error) {
 	var cused C.uint64_t
-	C.rsmi_dev_memory_usage_get(C.uint32_t(dvInd), C.rsmi_memory_type_t(memoryType), &cused)
+	ret := C.rsmi_dev_memory_usage_get(C.uint32_t(dvInd), C.rsmi_memory_type_t(memoryType), &cused)
+	if err = errorString(ret); err != nil {
+		return used, fmt.Errorf("Error rsmiDevMemoryUsageGet:%s", err)
+	}
 	used = int64(cused)
-	log.Println("memory_used:", used)
+	glog.Info("memory_used:", used)
 	return
 }
 
@@ -243,7 +272,7 @@ func rsmiDevMemoryUsageGet(dvInd int, memoryType RSMIMemoryType) (used int64) {
 func rsmiDevMemoryBusyPercentGet(dvInd int) int {
 	var busyPercent C.uint32_t
 	C.rsmi_dev_memory_busy_percent_get(C.uint32_t(dvInd), &busyPercent)
-	log.Println("busy_percent:", busyPercent)
+	glog.Info("busy_percent:", busyPercent)
 	return int(busyPercent)
 }
 
@@ -254,8 +283,8 @@ func rsmiDevMemoryReservedPagesGet(dvInd int) (numPages int, records []RSMIRetir
 	if ret != 0 {
 		return 0, nil, fmt.Errorf("failed to get the number of pages, error code: %d", ret)
 	}
-	log.Println("cnumPages:", cnumPages)
-	log.Println("cnumPages:", int(cnumPages))
+	glog.Info("cnumPages:", cnumPages)
+	glog.Info("cnumPages:", int(cnumPages))
 	numPages = int(cnumPages)
 	if numPages == 0 {
 		return 0, nil, nil // No pages to retrieve
@@ -275,33 +304,41 @@ func rsmiDevMemoryReservedPagesGet(dvInd int) (numPages int, records []RSMIRetir
 		}
 	}
 	indent, _ := json.MarshalIndent(records, "", "  ")
-	log.Printf("records:", indent)
+	glog.Info("records:", indent)
 	return
 }
 
-// rsmi_dev_fan_rpms_get 获取设备的风扇速度，实际转速
-func rsmi_dev_fan_rpms_get(dvInd, sensorInd int) int64 {
+// rsmiDevFanRpmsGet 获取设备的风扇速度，实际转速
+func rsmiDevFanRpmsGet(dvInd, sensorInd int) int64 {
 	var speed C.int64_t
 	C.rsmi_dev_fan_rpms_get(C.uint32_t(dvInd), C.uint32_t(sensorInd), &speed)
 	return int64(speed)
 }
 
-// rsmi_dev_fan_speed_get 获取设备的风扇速度，相对速度值
-func rsmi_dev_fan_speed_get(dvInd, sensorInd int) int64 {
-	var speed C.int64_t
-	C.rsmi_dev_fan_speed_get(C.uint32_t(dvInd), C.uint32_t(sensorInd), &speed)
-	return int64(speed)
+// rsmiDevFanSpeedGet 获取设备的风扇速度，相对速度值
+func rsmiDevFanSpeedGet(dvInd, sensorInd int) (speed int64, err error) {
+	var cspeed C.int64_t
+	ret := C.rsmi_dev_fan_speed_get(C.uint32_t(dvInd), C.uint32_t(sensorInd), &cspeed)
+	if err = errorString(ret); err != nil {
+		return speed, fmt.Errorf("Error rsmiDevFanSpeedGet:%s", err)
+	}
+	speed = int64(cspeed)
+	return
 }
 
-// rsmi_dev_fan_speed_max_get 获取设备的风扇速度，最大风速
-func rsmi_dev_fan_speed_max_get(dvInd, sensorInd int) int64 {
-	var maxSpeed C.uint64_t
-	C.rsmi_dev_fan_speed_max_get(C.uint32_t(dvInd), C.uint32_t(sensorInd), &maxSpeed)
-	return int64(maxSpeed)
+// rsmiDevFanSpeedMaxGet 获取设备的风扇速度，最大风速
+func rsmiDevFanSpeedMaxGet(dvInd, sensorInd int) (maxSpeed int64, err error) {
+	var cmaxSpeed C.uint64_t
+	ret := C.rsmi_dev_fan_speed_max_get(C.uint32_t(dvInd), C.uint32_t(sensorInd), &cmaxSpeed)
+	if err = errorString(ret); err != nil {
+		return maxSpeed, fmt.Errorf("Error rsmiDevFanSpeedMaxGet:%s", err)
+	}
+	maxSpeed = int64(cmaxSpeed)
+	return
 }
 
-// rsmi_dev_od_volt_curve_regions_get
-func rsmi_dev_od_volt_curve_regions_get(dvInd int) (numRegions int, buffer RSMIFreqVoltRegion, err error) {
+// rsmiDevOdVoltCurveRegionsGet
+func rsmiDevOdVoltCurveRegionsGet(dvInd int) (numRegions int, buffer RSMIFreqVoltRegion, err error) {
 	var cnumRegions C.uint32_t
 	var cbuffer C.rsmi_freq_volt_region_t
 	ret := C.rsmi_dev_od_volt_curve_regions_get(C.uint32_t(dvInd), &cnumRegions, &cbuffer)
@@ -322,8 +359,8 @@ func rsmi_dev_od_volt_curve_regions_get(dvInd int) (numRegions int, buffer RSMIF
 	return
 }
 
-// rsmi_dev_power_profile_presets_get 获取可用预设电源配置文件列表并指示当前活动的配置文件
-func rsmi_dev_power_profile_presets_get(dvInd, sensorInd int) (powerProfileStatus RSMPowerProfileStatus, err error) {
+// rsmiDevPowerProfilePresetsGet 获取可用预设电源配置文件列表并指示当前活动的配置文件
+func rsmiDevPowerProfilePresetsGet(dvInd, sensorInd int) (powerProfileStatus RSMPowerProfileStatus, err error) {
 	var cpowerProfileStatus C.rsmi_power_profile_status_t
 	ret := C.rsmi_dev_power_profile_presets_get(C.uint32_t(dvInd), C.uint32_t(sensorInd), &cpowerProfileStatus)
 	if err = errorString(ret); err != nil {
@@ -337,8 +374,8 @@ func rsmi_dev_power_profile_presets_get(dvInd, sensorInd int) (powerProfileStatu
 	return
 }
 
-// rsmi_version_get 获取当前运行的RSMI版本
-func rsmi_version_get() (version RSMIVersion, err error) {
+// rsmiVersionGet 获取当前运行的RSMI版本
+func rsmiVersionGet() (version RSMIVersion, err error) {
 
 	var cVersion C.rsmi_version_t
 	ret := C.rsmi_version_get(&cVersion)
@@ -354,10 +391,10 @@ func rsmi_version_get() (version RSMIVersion, err error) {
 	return
 }
 
-// rsmi_version_str_get 获取当前系统的驱动程序版本
-func rsmi_version_str_get(component RSMISwComponent, len int) (varStr string, err error) {
+// rsmiVersionStrGet 获取当前系统的驱动程序版本
+func rsmiVersionStrGet(component RSMISwComponent, len int) (varStr string, err error) {
 	var cvarStr C.char
-	ret := C.rsmi_version_str_get(C.rsmi_sw_component_t(component), &cvarStr)
+	ret := C.rsmi_version_str_get(C.rsmi_sw_component_t(component), &cvarStr, C.uint32_t(len))
 	if err = errorString(ret); err != nil {
 		return "", fmt.Errorf("Error rsmi_version_str_get:%s", err)
 	}
@@ -365,8 +402,8 @@ func rsmi_version_str_get(component RSMISwComponent, len int) (varStr string, er
 	return
 }
 
-// rsmi_dev_vbios_version_get 获取VBIOS版本
-func rsmi_dev_vbios_version_get(dvInd, len int) (vbios string, err error) {
+// rsmiDevVbiosVersionGet 获取VBIOS版本
+func rsmiDevVbiosVersionGet(dvInd, len int) (vbios string, err error) {
 	var cvbios C.char
 	ret := C.rsmi_dev_vbios_version_get(C.uint32_t(dvInd), &cvbios, C.uint32_t(len))
 	if err = errorString(ret); err != nil {
@@ -376,8 +413,8 @@ func rsmi_dev_vbios_version_get(dvInd, len int) (vbios string, err error) {
 	return
 }
 
-// rsmi_dev_firmware_version_get 获取设备的固件版本
-func rsmi_dev_firmware_version_get(dvInd int, fwBlock RSMIFwBlock) (fwVersion int64, err error) {
+// rsmiDevFirmwareVersionGet 获取设备的固件版本
+func rsmiDevFirmwareVersionGet(dvInd int, fwBlock RSMIFwBlock) (fwVersion int64, err error) {
 	var cfwBlock C.uint64_t
 	ret := C.rsmi_dev_firmware_version_get(C.uint32_t(dvInd), C.rsmi_fw_block_t(fwBlock), &cfwBlock)
 	if err = errorString(ret); err != nil {
@@ -387,12 +424,12 @@ func rsmi_dev_firmware_version_get(dvInd int, fwBlock RSMIFwBlock) (fwVersion in
 	return
 }
 
-// rsmi_dev_ecc_count_get 获取GPU块的错误计数
-func rsmi_dev_ecc_count_get(dvInd int, gpuBlock RSMIGpuBlock) (errorCount RSMIErrorCount, err error) {
+// rsmiDevEccCountGet 获取GPU块的错误计数
+func rsmiDevEccCountGet(dvInd int, gpuBlock RSMIGpuBlock) (errorCount RSMIErrorCount, err error) {
 	var cerrorCount C.rsmi_error_count_t
 	ret := C.rsmi_dev_ecc_count_get(C.uint32_t(dvInd), C.rsmi_gpu_block_t(gpuBlock), &cerrorCount)
 	if err = errorString(ret); err != nil {
-		return cerrorCount, fmt.Errorf("Error rsmi_dev_ecc_count_get:%s", err)
+		return errorCount, fmt.Errorf("Error rsmi_dev_ecc_count_get:%s", err)
 	}
 	errorCount = RSMIErrorCount{
 		CorrectableErr:   uint64(cerrorCount.correctable_err),
@@ -401,8 +438,8 @@ func rsmi_dev_ecc_count_get(dvInd int, gpuBlock RSMIGpuBlock) (errorCount RSMIEr
 	return
 }
 
-// rsmi_dev_ecc_enabled_get 获取已启用的ECC位掩码
-func rsmi_dev_ecc_enabled_get(dvInd int) (enabledBlocks int64, err error) {
+// rsmiDevEccEnabledGet 获取已启用的ECC位掩码
+func rsmiDevEccEnabledGet(dvInd int) (enabledBlocks int64, err error) {
 	var cenabledBlocks C.uint64_t
 	ret := C.rsmi_dev_ecc_enabled_get(C.uint32_t(dvInd), &cenabledBlocks)
 	if err = errorString(ret); err != nil {

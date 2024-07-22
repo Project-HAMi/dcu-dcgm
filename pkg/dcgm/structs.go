@@ -1,8 +1,8 @@
 package dcgm
 
 /*
-#cgo CFLAGS: -Wall -I/opt/dtk-24.04/rocm_smi/include/rocm_smi
-#cgo LDFLAGS: -L/opt/dtk-24.04/rocm_smi/lib -lrocm_smi64 -Wl,--unresolved-symbols=ignore-in-object-files
+#cgo CFLAGS: -Wall -I./include
+#cgo LDFLAGS: -L./lib -lrocm_smi64 -Wl,--unresolved-symbols=ignore-in-object-files
 #include <stdint.h>
 #include <kfd_ioctl.h>
 #include <rocm_smi64Config.h>
@@ -213,21 +213,21 @@ const (
 	RSMI_DEV_PERF_LEVEL_UNKNOWN         RSMIDevPerfLevel = C.RSMI_DEV_PERF_LEVEL_UNKNOWN
 )
 
-type RSMIBitField uint64
+type RSMIBitField C.rsmi_bit_field_t
 
-type RSMIPowerProfilePresetMasks uint64
+type RSMIPowerProfilePresetMasks C.rsmi_power_profile_preset_masks_t
 
 // 定义 power profile preset masks 的枚举类型
 const (
-	RSMIPowerProfPrstCustomMask      RSMIPowerProfilePresetMasks = C.RSMI_PWR_PROF_PRST_CUSTOM_MASK   // Custom Power Profile
-	RSMIPowerProfPrstVideoMask       RSMIPowerProfilePresetMasks = C.RSMIPowerProfPrstVideoMask       // Video Power Profile
-	RSMIPowerProfPrstPowerSavingMask RSMIPowerProfilePresetMasks = C.RSMIPowerProfPrstPowerSavingMask // Power Saving Profile
-	RSMIPowerProfPrstComputeMask     RSMIPowerProfilePresetMasks = C.RSMIPowerProfPrstComputeMask     // Compute Saving Profile
-	RSMIPowerProfPrstVRMask          RSMIPowerProfilePresetMasks = C.RSMIPowerProfPrstVRMask          // VR Power Profile
-	RSMIPowerProfPrst3DFullScrMask   RSMIPowerProfilePresetMasks = C.RSMIPowerProfPrst3DFullScrMask   // 3D Full Screen Power Profile
-	RSMIPowerProfPrstBootupDefault   RSMIPowerProfilePresetMasks = C.RSMIPowerProfPrstBootupDefault   // Default Boot Up Profile
-	RSMIPowerProfPrstLast            RSMIPowerProfilePresetMasks = C.RSMIPowerProfPrstLast            // Last Profile (same as Bootup Default)
-	RSMIPowerProfPrstInvalid         RSMIPowerProfilePresetMasks = C.RSMIPowerProfPrstInvalid         // Invalid power profile
+	RSMIPowerProfPrstCustomMask      RSMIPowerProfilePresetMasks = C.RSMI_PWR_PROF_PRST_CUSTOM_MASK       // Custom Power Profile
+	RSMIPowerProfPrstVideoMask       RSMIPowerProfilePresetMasks = C.RSMI_PWR_PROF_PRST_VIDEO_MASK        // Video Power Profile
+	RSMIPowerProfPrstPowerSavingMask RSMIPowerProfilePresetMasks = C.RSMI_PWR_PROF_PRST_POWER_SAVING_MASK // Power Saving Profile
+	RSMIPowerProfPrstComputeMask     RSMIPowerProfilePresetMasks = C.RSMI_PWR_PROF_PRST_COMPUTE_MASK      // Compute Saving Profile
+	RSMIPowerProfPrstVRMask          RSMIPowerProfilePresetMasks = C.RSMI_PWR_PROF_PRST_VR_MASK           // VR Power Profile
+	RSMIPowerProfPrst3DFullScrMask   RSMIPowerProfilePresetMasks = C.RSMI_PWR_PROF_PRST_3D_FULL_SCR_MASK  // 3D Full Screen Power Profile
+	RSMIPowerProfPrstBootupDefault   RSMIPowerProfilePresetMasks = C.RSMI_PWR_PROF_PRST_BOOTUP_DEFAULT    // Default Boot Up Profile
+	RSMIPowerProfPrstLast            RSMIPowerProfilePresetMasks = C.RSMI_PWR_PROF_PRST_LAST              // Last Profile (same as Bootup Default)
+	RSMIPowerProfPrstInvalid         RSMIPowerProfilePresetMasks = C.RSMI_PWR_PROF_PRST_INVALID           // Invalid power profile
 )
 
 // 定义 power profile status 结构体
@@ -247,9 +247,9 @@ type RSMIVersion struct {
 type RSMISwComponent C.rsmi_sw_component_t
 
 const (
-	RSMISwCompFirst  RSMISwComponent = C.RSMISwCompFirst
-	RSMISwCompDriver RSMISwComponent = C.RSMISwCompDriver
-	RSMISwCompLast   RSMISwComponent = C.RSMISwCompLast
+	RSMISwCompFirst  RSMISwComponent = C.RSMI_SW_COMP_FIRST
+	RSMISwCompDriver RSMISwComponent = C.RSMI_SW_COMP_DRIVER
+	RSMISwCompLast   RSMISwComponent = C.RSMI_SW_COMP_LAST
 )
 
 // 用于识别各种固
@@ -366,7 +366,7 @@ const (
 	RSMIEventLast RSMIEventType = C.RSMI_EVNT_LAST
 )
 
-type EventHandle uintptr
+type EventHandle C.rsmi_event_handle_t
 
 type RSMICounterCommand C.rsmi_counter_command_t
 
@@ -493,6 +493,17 @@ type MonitorInfo struct {
 	Clk             float64
 }
 
+type DeviceInfo struct {
+	DvInd        int
+	DeviceId     string
+	DevType      string
+	DevTypeName  string
+	PicBusNumber string
+	MemoryTotal  float64
+	MemoryUsed   float64
+	ComputeUnit  float64
+}
+
 var type2name = map[string]string{
 	"66a1": "WK100",
 	"51b7": "Z100L",
@@ -513,3 +524,12 @@ var type2name = map[string]string{
 	"6211": "K100 AI Liquid",
 	"6212": "K100 AI Liquid",
 }
+
+var computeUnitType = map[string]float64{
+	"K100 AI": 120,
+	"K100":    120,
+	"Z100":    60,
+	"Z100L":   60,
+}
+
+var memoryTypeL = []string{"VRAM", "VIS_VRAM", "GTT"}

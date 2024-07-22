@@ -1,18 +1,8 @@
 package dcgm
 
 /*
-#cgo CFLAGS: -Wall -I/opt/dtk-24.04/rocm_smi/include/rocm_smi
-#cgo LDFLAGS: -L/opt/dtk-24.04/rocm_smi/lib -lrocm_smi64 -Wl,--unresolved-symbols=ignore-in-object-files
-#include <stdint.h>
-#include <kfd_ioctl.h>
-#include <rocm_smi64Config.h>
-#include <rocm_smi.h>
-*/
-import "C"
-
-/*
-#cgo CFLAGS: -Wall -I/opt/dtk-24.04/rocm_smi/include/rocm_smi
-#cgo LDFLAGS: -L/opt/dtk-24.04/rocm_smi/lib -lrocm_smi64 -Wl,--unresolved-symbols=ignore-in-object-files
+#cgo CFLAGS: -Wall -I./include
+#cgo LDFLAGS: -L./lib -lrocm_smi64 -Wl,--unresolved-symbols=ignore-in-object-files
 #include <stdint.h>
 #include <kfd_ioctl.h>
 #include <rocm_smi64Config.h>
@@ -21,12 +11,13 @@ import "C"
 import "C"
 import (
 	"fmt"
-	"log"
+
+	"github.com/golang/glog"
 )
 
 // rsmiDevPerfLevelSet 设置设备PowerPlay性能级别
 func rsmiDevPerfLevelSet(dvInd int, devPerfLevel RSMIDevPerfLevel) (err error) {
-	log.Println("dev_perf_level_set:", devPerfLevel)
+	glog.Info("dev_perf_level_set:", devPerfLevel)
 	ret := C.rsmi_dev_perf_level_set(C.int32_t(dvInd), C.rsmi_dev_perf_level_t(devPerfLevel))
 	if err = errorString(ret); err != nil {
 		return fmt.Errorf("dev_perf_level_set:%s", err)
@@ -36,7 +27,7 @@ func rsmiDevPerfLevelSet(dvInd int, devPerfLevel RSMIDevPerfLevel) (err error) {
 
 // rsmiDevClkRangeSet 设置设备时钟范围信息
 func rsmiDevClkRangeSet(dvInd, minClkValue, maxClkValue uint64, clkType RSMIClkType) (err error) {
-	ret := C.rsmi_dev_clk_range_set(C.int32_t(dvInd), C.int64_t(minClkValue), C.int64_t(maxClkValue), C.rsmi_clk_type_t(clkType))
+	ret := C.rsmi_dev_clk_range_set(C.uint32_t(dvInd), C.uint64_t(minClkValue), C.uint64_t(maxClkValue), C.rsmi_clk_type_t(clkType))
 	if err = errorString(ret); err != nil {
 		return fmt.Errorf("Error rsmi_dev_clk_range_set:%s", err)
 	}
@@ -45,7 +36,7 @@ func rsmiDevClkRangeSet(dvInd, minClkValue, maxClkValue uint64, clkType RSMIClkT
 
 // rsmiDevOdVoltInfoSet 设置设备电压曲线点
 func rsmiDevOdVoltInfoSet(dvInd, vPoint, clkValue, voltValue int) (err error) {
-	ret := C.rsmi_dev_od_volt_info_set(C.int32_t(dvInd), C.int32_t(vPoint), C.uint64_t(clkValue), C.uint64_t(voltValue))
+	ret := C.rsmi_dev_od_volt_info_set(C.uint32_t(dvInd), C.uint32_t(vPoint), C.uint64_t(clkValue), C.uint64_t(voltValue))
 	if err = errorString(ret); err != nil {
 		return fmt.Errorf("Error rsmi_dev_od_volt_info_set:%s", err)
 	}
@@ -63,7 +54,7 @@ func rsmiDevOverdriveLevelSet(dvInd, od int) (err error) {
 
 // rsmiDevGpuClkFreqSet 设置可用于指定时钟的频率集
 func rsmiDevGpuClkFreqSet(dvInd int, clkType RSMIClkType, freqBitmask int64) (err error) {
-	ret := C.rsmi_dev_gpu_clk_freq_set(C.int32_t(dvInd), C.rsmi_clk_type_t(clkType), C.uint64(freqBitmask))
+	ret := C.rsmi_dev_gpu_clk_freq_set(C.uint32_t(dvInd), C.rsmi_clk_type_t(clkType), C.uint64_t(freqBitmask))
 	if err = errorString(ret); err != nil {
 		return fmt.Errorf("Error rsmi_dev_gpu_clk_freq_set:%s", err)
 	}
@@ -117,7 +108,7 @@ func rsmiCounterRead(handle EventHandle) (counterValue RSMICounterValue, err err
 	if err = errorString(ret); err != nil {
 		return counterValue, fmt.Errorf("Error rsmiCounterRead:%s", err)
 	}
-	ccounterValue = RSMICounterValue{
+	counterValue = RSMICounterValue{
 		Value:       uint64(ccounterValue.value),
 		TimeEnabled: uint64(ccounterValue.time_enabled),
 		TimeRunning: uint64(ccounterValue.time_running),

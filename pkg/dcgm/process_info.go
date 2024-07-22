@@ -1,8 +1,8 @@
 package dcgm
 
 /*
-#cgo CFLAGS: -Wall -I/opt/dtk-24.04/rocm_smi/include/rocm_smi
-#cgo LDFLAGS: -L/opt/dtk-24.04/rocm_smi/lib -lrocm_smi64 -Wl,--unresolved-symbols=ignore-in-object-files
+#cgo CFLAGS: -Wall -I./include
+#cgo LDFLAGS: -L./lib -lrocm_smi64 -Wl,--unresolved-symbols=ignore-in-object-files
 #include <stdint.h>
 #include <kfd_ioctl.h>
 #include <rocm_smi64Config.h>
@@ -108,7 +108,7 @@ func rsmiDevXgmiHiveIdGet(dvInd int) (hiveId int64, err error) {
 
 // rsmiTopoGetNumaBodeBumber 获取设备的numa cpu节点号
 func rsmiTopoGetNumaBodeBumber(dvInd int) (numaNode int, err error) {
-	var cnumaNode C.uint64_t
+	var cnumaNode C.uint32_t
 	ret := C.rsmi_topo_get_numa_node_number(C.uint32_t(dvInd), &cnumaNode)
 	if err = errorString(ret); err != nil {
 		return numaNode, fmt.Errorf("Error rsmiTopoGetNumaBodeBumber:%s", err)
@@ -132,7 +132,7 @@ func rsmiTopoGetLinkWeight(dvIndSrc, dvIndDst int) (weight int64, err error) {
 func rsmiTopoGetLinkType(dvIndSrc, dvIndDst int) (hops int64, linkType RSMIIOLinkType, err error) {
 	var chops C.uint64_t
 	var clinkType C.RSMI_IO_LINK_TYPE
-	ret := C.rsmi_topo_get_link_type(C.C.uint32_t(dvIndSrc), C.uint32_t(dvIndDst), &chops, &clinkType)
+	ret := C.rsmi_topo_get_link_type(C.uint32_t(dvIndSrc), C.uint32_t(dvIndDst), &chops, &clinkType)
 	if err = errorString(ret); err != nil {
 		return hops, linkType, fmt.Errorf("Error rsmiTopoGetLinkType:%s", err)
 	}
@@ -183,26 +183,24 @@ func rsmiDevSupportedFuncIteratorClose(handle RSMIFuncIDIterHandle) (err error) 
 }
 
 // rsmiFuncIterValueGet 获取与函数/变量迭代器相关联的值
-func rsmiFuncIterValueGet(handle RSMIFuncIDIterHandle) (value RSMIFuncIDValue, err error) {
-	var cvalue C.rsmi_func_id_value_t
-	// 调用C函数
-	ret := C.rsmi_func_iter_value_get(C.rsmi_func_id_iter_handle_t(handle), &cvalue)
-	if err = errorString(ret); err != nil {
-		return value, fmt.Errorf("Error rsmiFuncIterValueGet:%s", err)
-	}
-	value = RSMIFuncIDValue{
-		ID:         uint64(cvalue.id),
-		Name:       C.GoString(*cvalue.name),
-		MemoryType: RSMIMemoryType(cvalue.memory_type),
-		TempMetric: RSMITemperatureMetric(cvalue.temp_metric),
-		EventType:  RSMIEventType(cvalue.evnt_type),
-		EventGroup: RSMIEventGroup(cvalue.evnt_group),
-		ClkType:    RSMIClkType(cvalue.clk_type),
-		FwBlock:    RSMIFwBlock(cvalue.fw_block),
-		GpuBlock:   RSMIGpuBlock(cvalue.gpu_block_type),
-	}
-	return
-}
+//func rsmiFuncIterValueGet(handle RSMIFuncIDIterHandle) (value RSMIFuncIDValue, err error) {
+//	var cvalue C.rsmi_func_id_value_t
+//	// 调用C函数
+//	ret := C.rsmi_func_iter_value_get(C.rsmi_func_id_iter_handle_t(handle), &cvalue)
+//	if err = errorString(ret); err != nil {
+//		return value, fmt.Errorf("Error rsmiFuncIterValueGet:%s", err)
+//	}
+//	value.ID = uint64(cvalue.id)
+//	value.Name = C.GoString((*C.char)(unsafe.Pointer(cvalue.name)))
+//	value.MemoryType = RSMIMemoryType(*(*C.rsmi_memory_type_t)(unsafe.Pointer(&cvalue)))
+//	value.TempMetric = RSMITemperatureMetric(*(*C.rsmi_temperature_metric_t)(unsafe.Pointer(&cvalue)))
+//	value.EventType = RSMIEventType(*(*C.rsmi_event_type_t)(unsafe.Pointer(&cvalue)))
+//	value.EventGroup = RSMIEventGroup(*(*C.rsmi_event_group_t)(unsafe.Pointer(&cvalue)))
+//	value.ClkType = RSMIClkType(*(*C.rsmi_clk_type_t)(unsafe.Pointer(&cvalue)))
+//	value.FwBlock = RSMIFwBlock(*(*C.rsmi_fw_block_t)(unsafe.Pointer(&cvalue)))
+//	value.GpuBlock = RSMIGpuBlock(*(*C.rsmi_gpu_block_t)(unsafe.Pointer(&cvalue)))
+//	return
+//}
 
 // rsmiEventNotificationInit 准备收集GPU事件通知
 func rsmiEventNotificationInit(deInd int) (err error) {
@@ -231,7 +229,7 @@ func rsmiEventNotificationGet(timeoutMs int) (numElem int, datas []RSMIEEvtNotif
 	}
 	numElem = int(cnumElen)
 	cdatas := make([]C.rsmi_evt_notification_data_t, numElem)
-	ret = C.rsmi_event_notification_get(C.int(timeoutMs), &cnumElen, (unsafe.Pointer(&cdatas[0])))
+	ret = C.rsmi_event_notification_get(C.int(timeoutMs), &cnumElen, (*C.rsmi_evt_notification_data_t)(unsafe.Pointer(&cdatas[0])))
 	if err = errorString(ret); err != nil {
 		return numElem, nil, fmt.Errorf("Error rsmiEventNotificationGet,datas:%s", err)
 	}

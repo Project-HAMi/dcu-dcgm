@@ -1,8 +1,8 @@
 package dcgm
 
 /*
-#cgo CFLAGS: -Wall -I/opt/dtk-24.04/rocm_smi/include/rocm_smi
-#cgo LDFLAGS: -L/opt/dtk-24.04/rocm_smi/lib -lrocm_smi64 -Wl,--unresolved-symbols=ignore-in-object-files
+#cgo CFLAGS: -Wall -I./include
+#cgo LDFLAGS: -L./lib -lrocm_smi64 -Wl,--unresolved-symbols=ignore-in-object-files
 #include <stdint.h>
 #include <kfd_ioctl.h>
 #include <rocm_smi64Config.h>
@@ -44,4 +44,44 @@ func go_rsmi_status_string(status RSMIStatus) (statusStr string, err error) {
 	}
 	statusStr = C.GoString(cstatusStr)
 	return
+}
+func contains(slice []string, item string) bool {
+	for _, s := range slice {
+		if s == item {
+			return true
+		}
+	}
+	return false
+}
+
+func indexOf(slice []string, item string) int {
+	for i, s := range slice {
+		if s == item {
+			return i
+		}
+	}
+	return -1
+}
+
+func perfLevelString(i int) string {
+	switch i {
+	case 0:
+		return "AUTO"
+	case 1:
+		return "LOW"
+	case 2:
+		return "HIGH"
+	case 3:
+		return "MANUAL"
+	case 4:
+		return "STABLE_STD"
+	case 5:
+		return "STABLE_PEAK"
+	case 6:
+		return "STABLE_MIN_MCLK"
+	case 7:
+		return "STABLE_MIN_SCLK"
+	default:
+		return "UNKNOWN"
+	}
 }

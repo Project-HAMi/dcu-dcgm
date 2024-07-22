@@ -1,8 +1,8 @@
 package dcgm
 
 /*
-#cgo CFLAGS: -Wall -I/opt/dtk-24.04/rocm_smi/include/rocm_smi
-#cgo LDFLAGS: -L/opt/dtk-24.04/rocm_smi/lib -lrocm_smi64 -Wl,--unresolved-symbols=ignore-in-object-files
+#cgo CFLAGS: -Wall -I./include
+#cgo LDFLAGS: -L./lib -lrocm_smi64 -Wl,--unresolved-symbols=ignore-in-object-files
 #include <stdint.h>
 #include <kfd_ioctl.h>
 #include <rocm_smi64Config.h>
@@ -11,8 +11,9 @@ package dcgm
 import "C"
 import (
 	"fmt"
-	"log"
 	"unsafe"
+
+	"github.com/golang/glog"
 )
 
 // rsmiDevTempMetricGet 获取设备的温度度量值 *
@@ -32,7 +33,7 @@ func rsmiDevVoltMetricGet(dvInd int, voltageType RSMIVoltageType, metric RSMIVol
 // rsmiDevFanReset 将风扇复位为自动驱动控制
 func rsmiDevFanReset(dvInd, sensorInd int) (err error) {
 	ret := C.rsmi_dev_fan_reset(C.uint32_t(dvInd), C.uint32_t(sensorInd))
-	log.Println("rsmi_dev_fan_reset_ret:", ret)
+	glog.Info("rsmi_dev_fan_reset_ret:", ret)
 	if err = errorString(ret); err != nil {
 		return fmt.Errorf("Error rsmi_dev_fan_reset: %s", err)
 	}
@@ -42,7 +43,7 @@ func rsmiDevFanReset(dvInd, sensorInd int) (err error) {
 // rsmiDevFanSpeedSet 设置设备风扇转速，以rpm为单位
 func rsmiDevFanSpeedSet(dvInd, sensorInd int, speed int64) (err error) {
 	ret := C.rsmi_dev_fan_speed_set(C.uint32_t(dvInd), C.uint32_t(sensorInd), C.uint64_t(speed))
-	log.Println("rsmi_dev_fan_speed_set_ret:", ret)
+	glog.Info("rsmi_dev_fan_speed_set_ret:", ret)
 	if err = errorString(ret); err != nil {
 		return fmt.Errorf("Error rsmi_dev_fan_speed_set: %s", err)
 	}
@@ -53,7 +54,7 @@ func rsmiDevFanSpeedSet(dvInd, sensorInd int, speed int64) (err error) {
 func rsmiDevBusyPercentGet(dvInd int) (busyPercent int, err error) {
 	var cbusyPercent C.uint32_t
 	ret := C.rsmi_dev_busy_percent_get(C.uint32_t(dvInd), &cbusyPercent)
-	log.Println("rsmi_dev_busy_percent_get:", ret)
+	glog.Info("rsmi_dev_busy_percent_get:", ret)
 	if err = errorString(ret); err != nil {
 		return 0, fmt.Errorf("Error rsmi_dev_busy_percent_get:%s", err)
 	}
@@ -100,7 +101,7 @@ func rsmiDevPerfLevelGet(dvInd int) (perf RSMIDevPerfLevel, err error) {
 		return RSMIDevPerfLevel(cPerfLevel), fmt.Errorf("Error rsmi_dev_perf_level_get:%s", err)
 	}
 	perf = RSMIDevPerfLevel(cPerfLevel)
-	log.Println("dev_perf_level:", perf)
+	glog.Info("dev_perf_level:", perf)
 	return perf, nil
 }
 
@@ -224,7 +225,7 @@ func rsmiDevGpuMetricsInfoGet(dvInd int) (gpuMetrics RSMIGPUMetrics, err error) 
 		MemActivityAcc:         uint32(cgpuMetrics.mem_actvity_acc),
 		TemperatureHBM:         *((*[4]uint16)(unsafe.Pointer(&cgpuMetrics.temperature_hbm))),
 	}
-	log.Printf("rsmi_dev_gpu_metrics_info_get:%s", dataToJson(gpuMetrics))
+	glog.Info("rsmi_dev_gpu_metrics_info_get:%s", dataToJson(gpuMetrics))
 	return
 }
 
