@@ -1,4 +1,4 @@
-module go-dcgm
+module dcgm-dcu
 
 go 1.21
 
