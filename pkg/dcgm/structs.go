@@ -486,7 +486,7 @@ type MonitorInfo struct {
 	SubSystemName   string
 	Temperature     float64
 	PowerUsage      float64
-	powerCap        float64
+	PowerCap        float64
 	MemoryCap       float64
 	MemoryUsed      float64
 	UtilizationRate float64

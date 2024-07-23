@@ -120,31 +120,31 @@ func CollectDeviceMetrics() (monitorInfos []MonitorInfo, err error) {
 		//设备平均功耗
 		powerUsage := rsmiDevPowerAveGet(i, 0)
 		pu, _ := strconv.ParseFloat(fmt.Sprintf("%.2f", float64(powerUsage)/1000000.0), 64)
-		glog.Info("🔋 DCU[%v] power cap : %v \n", i, pu)
+		glog.Infof("\U0001FAAB DCU[%v] power usage : %.0f", i, pu)
 		//获取设备功率上限
 		powerCap, _ := rsmiDevPowerCapGet(i, 0)
 		pc, _ := strconv.ParseFloat(fmt.Sprintf("%.2f", float64(powerCap)/1000000.0), 64)
-		glog.Info("\U0001FAAB DCU[%v] power usage : %v \n", i, pc)
+		glog.Infof("🔋 DCU[%v] power cap : %.0f", i, pc)
 		//获取设备内存总量
 		memoryCap, _ := rsmiDevMemoryTotalGet(i, RSMI_MEM_TYPE_FIRST)
 		mc, _ := strconv.ParseFloat(fmt.Sprintf("%f", float64(memoryCap)/1.0), 64)
-		glog.Info(" DCU[%v] memory cap : %v \n", i, mc)
+		glog.Infof("DCU[%v] memory total: %.0f", i, mc)
 		//获取设备内存使用量
 		memoryUsed, _ := rsmiDevMemoryUsageGet(i, RSMI_MEM_TYPE_FIRST)
 		mu, _ := strconv.ParseFloat(fmt.Sprintf("%f", float64(memoryUsed)/1.0), 64)
-		glog.Info(" DCU[%v] memory used : %v \n", i, mu)
+		glog.Infof(" DCU[%v] memory used : %.0f ", i, mu)
 		//获取设备设备忙碌时间百分比
 		utilizationRate, _ := rsmiDevBusyPercentGet(i)
 		ur, _ := strconv.ParseFloat(fmt.Sprintf("%.2f", float64(utilizationRate)/1.0), 64)
-		glog.Info(" DCU[%v] utilization rate : %v \n", i, ur)
+		glog.Infof(" DCU[%v] utilization rate : %.0f", i, ur)
 		//获取pcie流量信息
 		sent, received, maxPktSz := rsmiDevPciThroughputGet(i)
 		pcieBwMb, _ := strconv.ParseFloat(fmt.Sprintf("%.3f", float64(received+sent)*float64(maxPktSz)/1024.0/1024.0), 64)
-		glog.Info(" DCU[%v] PCIE  bandwidth : %v \n", i, pcieBwMb)
+		glog.Infof(" DCU[%v] PCIE  bandwidth : %.0f", i, pcieBwMb)
 		//获取设备系统时钟速度列表
 		clk, _ := rsmiDevGpuClkFreqGet(i, RSMI_CLK_TYPE_SYS)
 		sclk, _ := strconv.ParseFloat(fmt.Sprintf("%.2f", float64(clk.Frequency[clk.Current])/1000000.0), 64)
-		glog.Info(" DCU[%v] SCLK : %v \n", i, sclk)
+		glog.Infof(" DCU[%v] SCLK : %.0f", i, sclk)
 		monitorInfo := MonitorInfo{
 			MinorNumber:     i,
 			PicBusNumber:    pciBusNumber,
@@ -152,7 +152,7 @@ func CollectDeviceMetrics() (monitorInfos []MonitorInfo, err error) {
 			SubSystemName:   devTypeName,
 			Temperature:     t,
 			PowerUsage:      pu,
-			powerCap:        pc,
+			PowerCap:        pc,
 			MemoryCap:       mc,
 			MemoryUsed:      mu,
 			UtilizationRate: ur,
