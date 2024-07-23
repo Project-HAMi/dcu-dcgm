@@ -1,8 +1,8 @@
 package dcgm
 
 /*
-#cgo CFLAGS: -Wall -I/opt/dtk-24.04/rocm_smi/include/rocm_smi
-#cgo LDFLAGS: -L/opt/dtk-24.04/rocm_smi/lib -lrocm_smi64 -Wl,--unresolved-symbols=ignore-in-object-files
+#cgo CFLAGS: -Wall -I./include
+#cgo LDFLAGS: -L./lib -lrocm_smi64 -Wl,--unresolved-symbols=ignore-in-object-files
 #include <stdint.h>
 #include <kfd_ioctl.h>
 #include <rocm_smi64Config.h>
@@ -11,23 +11,24 @@ package dcgm
 import "C"
 import (
 	"fmt"
-	"log"
+
+	"github.com/golang/glog"
 )
 
-// go_rsmi_init 初始化rocm_smi
-func go_rsmi_init() (err error) {
+// rsmiInit 初始化rocm_smi
+func rsmiInit() (err error) {
 	ret := C.rsmi_init(0)
-	log.Println("go_rsmi_init_ret:", ret)
+	glog.Info("go_rsmi_init_ret:", ret)
 	if err = errorString(ret); err != nil {
 		return fmt.Errorf("Error go_rsmi_init: %s", err)
 	}
 	return nil
 }
 
-// go_rsmi_shutdown 关闭rocm_smi
-func go_rsmi_shutdown() (err error) {
+// rsmiShutdown 关闭rocm_smi
+func rsmiShutdown() (err error) {
 	ret := C.rsmi_shut_down()
-	log.Println("go_rsmi_shutdown_ret:", ret)
+	glog.Info("go_rsmi_shutdown_ret:", ret)
 	if err = errorString(ret); err != nil {
 		return fmt.Errorf("Error rsmi_shutdown: %s", err)
 	}
