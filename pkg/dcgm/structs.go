@@ -480,6 +480,7 @@ const (
 )
 
 type MonitorInfo struct {
+	MinorNumber     int
 	PicBusNumber    string
 	DeviceId        string
 	SubSystemName   string

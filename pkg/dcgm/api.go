@@ -146,6 +146,7 @@ func CollectDeviceMetrics() (monitorInfos []MonitorInfo, err error) {
 		sclk, _ := strconv.ParseFloat(fmt.Sprintf("%.2f", float64(clk.Frequency[clk.Current])/1000000.0), 64)
 		glog.Info(" DCU[%v] SCLK : %v \n", i, sclk)
 		monitorInfo := MonitorInfo{
+			MinorNumber:     i,
 			PicBusNumber:    pciBusNumber,
 			DeviceId:        deviceId,
 			SubSystemName:   devTypeName,
