@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"go-dcgm/pkg/dcgm"
+	"dcgm-dcu/pkg/dcgm"
 )
 
 func main() {
