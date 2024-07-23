@@ -1,4 +1,4 @@
-module dcgm-dcu
+module g.sugon.com/das/dcgm-dcu
 
 go 1.21
 

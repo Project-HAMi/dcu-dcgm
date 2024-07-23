@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"dcgm-dcu/pkg/dcgm"
+	"g.sugon.com/das/dcgm-dcu/pkg/dcgm"
 )
 
 func main() {
