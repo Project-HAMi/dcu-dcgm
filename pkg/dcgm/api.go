@@ -274,13 +274,13 @@ func DeviceInfos() (deviceInfos []DeviceInfo, err error) {
 		//获取设备内存总量
 		memoryTotal, _ := rsmiDevMemoryTotalGet(i, RSMI_MEM_TYPE_FIRST)
 		mt, _ := strconv.ParseFloat(fmt.Sprintf("%f", float64(memoryTotal)/1.0), 64)
-		glog.Info(" DCU[%v] memory total : %v \n", i, mt)
+		glog.Info(" DCU[%v] memory total memory total: %.0f", i, mt)
 		//获取设备内存使用量
 		memoryUsed, _ := rsmiDevMemoryUsageGet(i, RSMI_MEM_TYPE_FIRST)
 		mu, _ := strconv.ParseFloat(fmt.Sprintf("%f", float64(memoryUsed)/1.0), 64)
-		glog.Info(" DCU[%v] memory used : %v \n", i, mu)
+		glog.Info(" DCU[%v] memory used :%.0f", i, mu)
 		computeUnit := computeUnitType[devTypeName]
-		glog.Info(" DCU[%v] computeUnit : %v \n", i, computeUnit)
+		glog.Info(" DCU[%v] computeUnit : %.0f", i, computeUnit)
 		deviceInfo := DeviceInfo{
 			DvInd:        i,
 			DeviceId:     deviceId,
