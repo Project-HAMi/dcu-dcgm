@@ -14,7 +14,7 @@ func main() {
 	glog.Info("go-dcgm start ...")
 	dcgm.Init()
 	defer dcgm.ShutDown()
-	dcgm.NumMonitorDevices()
+	//dcgm.NumMonitorDevices()
 	//dcgm.DevName(0)
 	//dcgm.DevPciBandwidth(0)
 	////dcgm.DevPerfLevelSet(0, dcgm.RSMI_DEV_PERF_LEVEL_LOW)
@@ -27,7 +27,7 @@ func main() {
 	//dcgm.DevPciBandwidth(1)
 	//dcgm.MemoryPercent(1)
 	//dcgm.DevGpuMetricsInfo(0)
-	dcgm.CollectDeviceMetrics()
+	//dcgm.CollectDeviceMetrics()
 	////[vram|vis_vram|gtt
 	//dcgm.MemInfo(0, "vram")
 	//dcgm.MemInfo(0, "vis_vram")
