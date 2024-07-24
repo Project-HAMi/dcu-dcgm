@@ -1,6 +1,12 @@
 # DCU DCGM
 
+## 组件信息
 
+为 DCU 管理提供的 Golang 绑定接口。是管理和监控DCU的工具。包括健康状态监控、功率、时钟频率调控等，以及资源使用情况的统计。
+
+## 前置条件条件
+
+所在宿主机上安装DCU驱动
 
 ## 使用流程
 
@@ -20,7 +26,7 @@ replace g.sugon.com/das/dcgm-dcu => /your/path/dcgm-dcu
 go mod tidy
 ```
 
-4.在golang文件中import相关依赖包之后使用即可：
+4.在golang文件中import相关依赖包之后使用即可，其中api.go为封装DCGM的API调用，提供与DCGM库交互的各种API接口，处理具体的功能调用。/pkg/samoles下是简单的test：
 
 ```go
 import (
