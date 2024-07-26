@@ -165,6 +165,78 @@ func CollectDeviceMetrics() (monitorInfos []MonitorInfo, err error) {
 	return
 }
 
+/*func CollectVDeviceMetrics() (devices []PhysicalDeviceInfo, err error) {
+
+
+}*/
+
+// 获取所有物理设备及其虚拟设备的信息列表
+func AllDeviceInfos() ([]PhysicalDeviceInfo, error) {
+	var allDevices []PhysicalDeviceInfo
+
+	// 获取物理设备数量
+	deviceCount, err := rsmiNumMonitorDevices()
+	if err != nil {
+		return nil, err
+	}
+
+	// 用于保存所有物理设备的信息
+	deviceMap := make(map[int]*PhysicalDeviceInfo)
+
+	// 获取所有物理设备信息
+	for i := 0; i < deviceCount; i++ {
+		// 获取物理设备信息
+		deviceInfo, err := dmiGetDeviceInfo(i)
+		if err != nil {
+			return nil, fmt.Errorf("Error getting device info for physical device %d: %s", i, err)
+		}
+		//物理设备支持最大虚拟化设备数量
+		maxVDeviceCount, _ := dmiGetMaxVDeviceCount()
+		deviceInfo.MaxVDeviceCount = maxVDeviceCount
+		//物理设备剩余的CU和内存
+		//cus, memories, _ := dmiGetDeviceRemainingInfo(i)
+		//deviceInfo.ComputeUnitRemainingCount = cus
+		//deviceInfo.MemoryRemaining = memories
+		//物理设备使用百分比
+		devPercent, _ := dmiGetDevBusyPercent(i)
+		deviceInfo.Percent = devPercent
+
+		// 创建PhysicalDeviceInfo并存入map
+		pdi := PhysicalDeviceInfo{
+			DeviceInfo:     deviceInfo,
+			VirtualDevices: []DMIVDeviceInfo{},
+		}
+		deviceMap[deviceInfo.DeviceID] = &pdi
+	}
+
+	// 获取虚拟设备数量
+	vDeviceCount, err := dmiGetVDeviceCount()
+	if err != nil {
+		return nil, err
+	}
+
+	// 获取所有虚拟设备信息并关联到对应的物理设备
+	for j := 0; j < vDeviceCount; j++ {
+		vDeviceInfo, err := dmiGetVDeviceInfo(j)
+		if err != nil {
+			return nil, fmt.Errorf("Error getting virtual device info for virtual device %d: %s", j, err)
+		}
+		vDevPercent, _ := dmiGetVDevBusyPercent(j)
+		vDeviceInfo.Percent = vDevPercent
+		// 找到对应的物理设备并将虚拟设备添加到其VirtualDevices中
+		if pdi, exists := deviceMap[vDeviceInfo.DeviceID]; exists {
+			pdi.VirtualDevices = append(pdi.VirtualDevices, vDeviceInfo)
+		}
+	}
+
+	// 将map中的所有PhysicalDeviceInfo转为slice
+	for _, pdi := range deviceMap {
+		allDevices = append(allDevices, *pdi)
+	}
+	glog.Infof("allDevices:%v", dataToJson(allDevices))
+	return allDevices, nil
+}
+
 // 设备的总线
 func PicBusInfo(dvInd int) (picID string, err error) {
 	bdfid, err := rsmiDevPciIdGet(dvInd)
@@ -352,3 +424,44 @@ func PidByName(name string) (pid string, err error) {
 	glog.Info("pid: %s\n", pid)
 	return
 }
+
+/*************************************VDCU******************************************/
+// 设备数量
+func DeviceCount() (count int, err error) {
+	return dmiGetDeviceCount()
+}
+
+// 虚拟设备信息
+func DeviceSingleInfo(dvInd int) (deviceInfo DMIDeviceInfo, err error) {
+	return dmiGetDeviceInfo(dvInd)
+}
+
+// 虚拟设备数量
+func VDeviceCount() (count int, err error) { return dmiGetVDeviceCount() }
+
+// 指定物理设备剩余的CU和内存
+func DeviceRemainingInfo(dvInd int) (cus, memories uintptr, err error) {
+	return dmiGetDeviceRemainingInfo(dvInd)
+}
+
+// 创建指定数量的虚拟设备
+func CreateVDevices(dvInd int, vDevCount int, vDevCUs []int, vDevMemSize []int) (err error) {
+	return dmiCreateVDevices(dvInd, vDevCount, vDevCUs, vDevMemSize)
+}
+
+// 销毁指定物理设备上的所有虚拟设备
+func DestroyVDevice(dvInd int) (err error) {
+	return dmiDestroyVDevices(dvInd)
+}
+
+// 销毁指定虚拟设备
+func DestroySingleVDevice(vDvInd int) (err error) {
+	return dmiDestroyVDevices(vDvInd)
+}
+
+// 更新指定设备资源大小，vDevCUs和vDevMemSize为-1是不更改
+func UpdateSingleVDevice(vDvInd int, vDevCUs int, vDevMemSize int) (err error) {
+	return dmiUpdateSingleVDevice(vDvInd, vDevCUs, vDevMemSize)
+}
+
+//启动虚拟设备

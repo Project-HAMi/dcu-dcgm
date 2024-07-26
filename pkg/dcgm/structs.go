@@ -2,11 +2,15 @@ package dcgm
 
 /*
 #cgo CFLAGS: -Wall -I./include
-#cgo LDFLAGS: -L./lib -lrocm_smi64 -Wl,--unresolved-symbols=ignore-in-object-files
+#cgo LDFLAGS: -L./lib -lrocm_smi64 -lhydmi -Wl,--unresolved-symbols=ignore-in-object-files
 #include <stdint.h>
 #include <kfd_ioctl.h>
 #include <rocm_smi64Config.h>
 #include <rocm_smi.h>
+#include <dmi_virtual.h>
+#include <dmi_error.h>
+#include <dmi.h>
+#include <dmi_mig.h>
 */
 import "C"
 
@@ -534,3 +538,71 @@ var computeUnitType = map[string]float64{
 }
 
 var memoryTypeL = []string{"VRAM", "VIS_VRAM", "GTT"}
+
+const DMI_NAME_SIZE = 256
+
+type DMIDeviceInfo struct {
+	Name                      string
+	ComputeUnitCount          int
+	ComputeUnitRemainingCount uintptr
+	MemoryRemaining           uintptr
+	GlobalMemSize             uintptr
+	UsageMemSize              uintptr
+	DeviceID                  int
+	Percent                   int
+	MaxVDeviceCount           int
+}
+
+type DMIVDeviceInfo struct {
+	Name             string
+	ComputeUnitCount int
+	GlobalMemSize    uintptr
+	UsageMemSize     uintptr
+	ContainerID      uint64
+	DeviceID         int
+	Percent          int
+}
+
+type DMIStatus C.dmiStatus
+
+const (
+	DMI_STATUS_SUCCESS                DMIStatus = C.DMI_STATUS_SUCCESS
+	DMI_STATUS_ERROR                  DMIStatus = C.DMI_STATUS_ERROR
+	DMI_STATUS_NO_MEMORY              DMIStatus = C.DMI_STATUS_NO_MEMORY
+	DMI_STATUS_OPEN_MKFD_FAILED       DMIStatus = C.DMI_STATUS_OPEN_MKFD_FAILED
+	DMI_STATUS_MKFD_ALREADY_OPENED    DMIStatus = C.DMI_STATUS_MKFD_ALREADY_OPENED
+	DMI_STATUS_SYS_NODE_NOT_EXIST     DMIStatus = C.DMI_STATUS_SYS_NODE_NOT_EXIST
+	DMI_STATUS_NOT_SUPPORTED          DMIStatus = C.DMI_STATUS_NOT_SUPPORTED
+	DMI_STATUS_MKFD_NOT_OPENED        DMIStatus = C.DMI_STATUS_MKFD_NOT_OPENED
+	DMI_STATUS_CREATE_VDEV_FAILED     DMIStatus = C.DMI_STATUS_CREATE_VDEV_FAILED
+	DMI_STATUS_DESTROY_VDEV_FAILED    DMIStatus = C.DMI_STATUS_DESTROY_VDEV_FAILED
+	DMI_STATUS_INVALID_ARGUMENTS      DMIStatus = C.DMI_STATUS_INVALID_ARGUMENTS
+	DMI_STATUS_OUT_OF_RESOURCES       DMIStatus = C.DMI_STATUS_OUT_OF_RESOURCES
+	DMI_STATUS_QUERY_VDEV_INFO_FAILED DMIStatus = C.DMI_STATUS_QUERY_VDEV_INFO_FAILED
+	DMI_STATUS_ERROR_NOT_INITIALIZED  DMIStatus = C.DMI_STATUS_ERROR_NOT_INITIALIZED
+	DMI_STATUS_DEVICE_NOT_SUPPORT     DMIStatus = C.DMI_STATUS_DEVICE_NOT_SUPPORT
+	DMI_STATUS_VDEV_NOT_EXIST         DMIStatus = C.DMI_STATUS_VDEV_NOT_EXIST
+	DMI_STATUS_INIT_DEVICE_FAILED     DMIStatus = C.DMI_STATUS_INIT_DEVICE_FAILED
+	DMI_STATUS_DEVICE_BUSY            DMIStatus = C.DMI_STATUS_DEVICE_BUSY
+	DMI_STATUS_FILE_ERROR             DMIStatus = C.DMI_STATUS_FILE_ERROR
+	DMI_STATUS_PERMISSION             DMIStatus = C.DMI_STATUS_PERMISSION
+	DMI_STATUS_INTERNAL_EXCEPTION     DMIStatus = C.DMI_STATUS_INTERNAL_EXCEPTION
+	DMI_STATUS_INPUT_OUT_OF_BOUNDS    DMIStatus = C.DMI_STATUS_INPUT_OUT_OF_BOUNDS
+	DMI_STATUS_SMI_INIT_ERROR         DMIStatus = C.DMI_STATUS_SMI_INIT_ERROR
+	DMI_STATUS_NOT_FOUND              DMIStatus = C.DMI_STATUS_NOT_FOUND
+	DMI_STATUS_INSUFFICIENT_SIZE      DMIStatus = C.DMI_STATUS_INSUFFICIENT_SIZE
+	DMI_STATUS_INTERRUPT              DMIStatus = C.DMI_STATUS_INTERRUPT
+	DMI_STATUS_UNEXPECTED_SIZE        DMIStatus = C.DMI_STATUS_UNEXPECTED_SIZE
+	DMI_STATUS_NO_DATA                DMIStatus = C.DMI_STATUS_NO_DATA
+	DMI_STATUS_UNEXPECTED_DATA        DMIStatus = C.DMI_STATUS_UNEXPECTED_DATA
+	DMI_STATUS_SMI_BUSY               DMIStatus = C.DMI_STATUS_SMI_BUSY
+	DMI_STATUS_REFCOUNT_OVERFLOW      DMIStatus = C.DMI_STATUS_REFCOUNT_OVERFLOW
+	DMI_STATUS_NOT_YET_IMPLEMENTED    DMIStatus = C.DMI_STATUS_NOT_YET_IMPLEMENTED
+	DMI_STATUS_UNKNOWN_ERROR          DMIStatus = C.DMI_STATUS_UNKNOWN_ERROR
+)
+
+// 定义 PhysicalDeviceInfo 结构体
+type PhysicalDeviceInfo struct {
+	DeviceInfo     DMIDeviceInfo
+	VirtualDevices []DMIVDeviceInfo
+}
