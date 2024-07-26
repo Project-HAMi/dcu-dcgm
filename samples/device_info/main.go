@@ -14,7 +14,7 @@ func main() {
 	glog.Info("go-dcgm start ...")
 	dcgm.Init()
 	defer dcgm.ShutDown()
-	//dcgm.NumMonitorDevices()
+	dcgm.NumMonitorDevices()
 	//dcgm.DevName(0)
 	//dcgm.DevPciBandwidth(0)
 	////dcgm.DevPerfLevelSet(0, dcgm.RSMI_DEV_PERF_LEVEL_LOW)
@@ -39,5 +39,10 @@ func main() {
 	//dcgm.PerfLevel(1)
 	//dcgm.PidByName("mm_percpu_wq")
 	//dcgm.PidByName("ksoftirqd/14")
-	dcgm.DeviceInfos()
+	//dcgm.DeviceInfos()
+	//dcgm.DeviceCount()
+	//dcgm.DeviceSingleInfo(0)
+	//dcgm.DeviceSingleInfo(1)
+	//dcgm.DeviceSingleInfo(2)
+
 }

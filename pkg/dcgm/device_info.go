@@ -2,11 +2,15 @@ package dcgm
 
 /*
 #cgo CFLAGS: -Wall -I./include
-#cgo LDFLAGS: -L./lib -lrocm_smi64 -Wl,--unresolved-symbols=ignore-in-object-files
+#cgo LDFLAGS: -L./lib -L/opt/hyhal/lib -lrocm_smi64 -lhydmi -Wl,--unresolved-symbols=ignore-in-object-files
 #include <stdint.h>
 #include <kfd_ioctl.h>
 #include <rocm_smi64Config.h>
 #include <rocm_smi.h>
+#include <dmi_virtual.h>
+#include <dmi_error.h>
+#include <dmi.h>
+#include <dmi_mig.h>
 */
 import "C"
 import (
@@ -446,5 +450,222 @@ func rsmiDevEccEnabledGet(dvInd int) (enabledBlocks int64, err error) {
 		return enabledBlocks, fmt.Errorf("Error rsmi_dev_ecc_enabled_get:%s", err)
 	}
 	enabledBlocks = int64(cenabledBlocks)
+	return
+}
+
+/*************************************VDCU******************************************/
+// 设备数量
+func dmiGetDeviceCount() (count int, err error) {
+	var ccount C.int
+	ret := C.dmiGetDeviceCount(&ccount)
+	glog.Infof("dmiGetDeviceCount:%v", ret)
+	if err = dmiErrorString(ret); err != nil {
+		return 0, fmt.Errorf("Error vDeviceCount:%s", err)
+	}
+	count = int(ccount)
+	glog.Infof("dmiDeviceCount:%v", count)
+	return
+}
+
+// 设备信息
+func dmiGetDeviceInfo(dvInd int) (deviceInfo DMIDeviceInfo, err error) {
+	var cdeviceInfo C.dmiDeviceInfo
+	ret := C.dmiGetDeviceInfo(C.int(dvInd), &cdeviceInfo)
+	glog.Infof("dmiDeviceInfo ret:%v", ret)
+	if err = dmiErrorString(ret); err != nil {
+		return deviceInfo, fmt.Errorf("Error dmiGetDeviceInfo:%s", err)
+	}
+	// 创建一个新的变量来存储 name 字段
+	var deviceName [DMI_NAME_SIZE]byte
+	for i := 0; i < DMI_NAME_SIZE; i++ {
+		deviceName[i] = byte(cdeviceInfo.name[i])
+	}
+	glog.Infof("deviceName:%v", deviceName)
+	deviceInfo = DMIDeviceInfo{
+		ComputeUnitCount: int(cdeviceInfo.compute_unit_count),
+		GlobalMemSize:    uintptr(cdeviceInfo.global_mem_size),
+		UsageMemSize:     uintptr(cdeviceInfo.usage_mem_size),
+		DeviceID:         int(cdeviceInfo.device_id),
+		Name:             ConvertASCIIToString(deviceName[:]),
+	}
+
+	glog.Infof("DeviceInfo: %v", dataToJson(deviceInfo))
+	return
+}
+
+// 物理设备支持最大虚拟化设备数量
+func dmiGetMaxVDeviceCount() (count int, err error) {
+	var ccount C.int
+	ret := C.dmiGetMaxVDeviceCount(&ccount)
+	if err = dmiErrorString(ret); err != nil {
+		return 0, fmt.Errorf("Error dmiGetMaxVDeviceCount:%s", err)
+	}
+	count = int(ccount)
+	return
+}
+
+// 虚拟设备数量
+func dmiGetVDeviceCount() (count int, err error) {
+	var ccount C.int
+	ret := C.dmiGetVDeviceCount(&ccount)
+	if err = dmiErrorString(ret); err != nil {
+		return 0, fmt.Errorf("Error dmiGetVDeviceCount:%s", err)
+	}
+	count = int(ccount)
+	glog.Infof("dmiGetVDeviceCount:%v", count)
+	return
+}
+
+// 虚拟设备信息
+func dmiGetVDeviceInfo(vDvInd int) (vDeviceInfo DMIVDeviceInfo, err error) {
+	var cvDeviceInfo C.dmiDeviceInfo
+	ret := C.dmiGetVDeviceInfo(C.int(vDvInd), &cvDeviceInfo)
+	if err = dmiErrorString(ret); err != nil {
+		return vDeviceInfo, fmt.Errorf("Error dmiGetVDeviceInfo:%s", err)
+	}
+	// 创建一个新的变量来存储 name 字段
+	var deviceName [DMI_NAME_SIZE]byte
+	for i := 0; i < DMI_NAME_SIZE; i++ {
+		deviceName[i] = byte(cvDeviceInfo.name[i])
+	}
+	vDeviceInfo = DMIVDeviceInfo{
+		ComputeUnitCount: int(cvDeviceInfo.compute_unit_count),
+		GlobalMemSize:    uintptr(cvDeviceInfo.global_mem_size),
+		UsageMemSize:     uintptr(cvDeviceInfo.usage_mem_size),
+		ContainerID:      uint64(cvDeviceInfo.container_id),
+		DeviceID:         int(cvDeviceInfo.device_id),
+		Name:             ConvertASCIIToString(deviceName[:]),
+	}
+	glog.Infof("vDeviceInfo: %v", dataToJson(vDeviceInfo))
+	return
+}
+
+// 指定物理设备剩余的CU和内存
+func dmiGetDeviceRemainingInfo(dvInd int) (cus, memories uintptr, err error) {
+	var ccus, cmemories C.size_t
+	ret := C.dmiGetDeviceRemainingInfo(C.int(dvInd), &ccus, &cmemories)
+	glog.Infof("dmiGetDeviceRemainingInfo ret:%v", ret)
+	if err = dmiErrorString(ret); err != nil {
+		return cus, memories, fmt.Errorf("Error dmiGetDeviceRemainingInfo:%s", err)
+	}
+	cus = uintptr(ccus)
+	memories = uintptr(cmemories)
+	return
+}
+
+// 创建指定数量的虚拟设备
+//
+//	deviceID := 0
+//	vdevCount := 2
+//	vdevCUs := []int{4, 4}
+//	vdevMemSize := []int{1024, 2048}
+//
+// 物理设备 ID: 0
+//
+//	├── 虚拟设备 1
+//	│    ├── 计算单元: 4
+//	│    └── 内存大小: 1024 字节
+//	└── 虚拟设备 2
+//	     ├── 计算单元: 4
+//	     └── 内存大小: 2048 字节
+func dmiCreateVDevices(dvInd int, vDevCount int, vDevCUs []int, vDevMemSize []int) (err error) {
+	if len(vDevCUs) != vDevCount || len(vDevMemSize) != vDevCount {
+		return fmt.Errorf("Invalid args")
+	}
+	cVdevCus := (*C.int)(unsafe.Pointer(&vDevCUs[0]))
+	cVdevMemSize := (*C.int)(unsafe.Pointer(&vDevMemSize[0]))
+
+	ret := C.dmiCreateVDevices(C.int(dvInd), C.int(vDevCount),
+		cVdevCus, cVdevMemSize)
+	if err = dmiErrorString(ret); err != nil {
+		return fmt.Errorf("Error dmiCreateVDevices:%s", err)
+	}
+	return
+}
+
+// 销毁指定物理设备上的所有虚拟设备
+func dmiDestroyVDevices(dvInd int) (err error) {
+	ret := C.dmiDestroyVDevices(C.int(dvInd))
+	if err = dmiErrorString(ret); err != nil {
+		return fmt.Errorf("Error dmiDestroyVDevices:%s", err)
+	}
+	return
+}
+
+// 销毁指定虚拟设备
+func dmiDestroySingleVDevice(vDvInd int) (err error) {
+	ret := C.dmiDestroySingleVDevice(C.int(vDvInd))
+	if err = dmiErrorString(ret); err != nil {
+		return fmt.Errorf("Error dmiDestroySingleVDevice:%s", err)
+	}
+	return
+}
+
+// 更新指定设备资源大小，vDevCUs和vDevMemSize为-1是不更改
+func dmiUpdateSingleVDevice(vDvInd int, vDevCUs int, vDevMemSize int) (err error) {
+	ret := C.dmiUpdateSingleVDevice(C.int(vDvInd), C.int(vDevCUs), C.int(vDevMemSize))
+	if err = dmiErrorString(ret); err != nil {
+		return fmt.Errorf("Error dmiUpdateSingleVDevice:%s", err)
+	}
+	return
+}
+
+// 启动虚拟设备
+func dmiStartVDevice(vDvInd int) (err error) {
+	ret := C.dmiStartVDevice(C.int(vDvInd))
+	if err = dmiErrorString(ret); err != nil {
+		return fmt.Errorf("Error dmiStartVDevice:%s", err)
+	}
+	return
+}
+
+// 停止虚拟设备
+func dmiStopVDevice(vDvInd int) (err error) {
+	ret := C.dmiStopVDevice(C.int(vDvInd))
+	if err = dmiErrorString(ret); err != nil {
+		return fmt.Errorf("Error dmiStopVDevice:%s", err)
+	}
+	return
+}
+
+// 返回物理设备使用百分比
+func dmiGetDevBusyPercent(dvInd int) (percent int, err error) {
+	var cpercent C.int
+	ret := C.dmiGetDevBusyPercent(C.int(dvInd), &cpercent)
+	if err = dmiErrorString(ret); err != nil {
+		return percent, fmt.Errorf("Error dmiGetDevBusyPercent:%s", err)
+	}
+	percent = int(cpercent)
+	return
+}
+
+// 返回虚拟设备使用百分比
+func dmiGetVDevBusyPercent(vDvInd int) (percent int, err error) {
+	var cpercent C.int
+	ret := C.dmiGetVDevBusyPercent(C.int(vDvInd), &cpercent)
+	if err = dmiErrorString(ret); err != nil {
+		return percent, fmt.Errorf("Error dmiGetVDevBusyPercent:%s", err)
+	}
+	percent = int(cpercent)
+	return
+}
+
+// 设置虚拟机加密状态 status为true，则开启加密虚拟机，否则关闭
+func dmiSetEncryptionVMStatus(status bool) (err error) {
+	ret := C.dmiSetEncryptionVMStatus(C.bool(status))
+	if err = dmiErrorString(ret); err != nil {
+		return fmt.Errorf("Error dmiSetEncryptionVMStatus:%s", err)
+	}
+	return
+}
+
+// 获取加密虚拟机状态
+func dmiGetEncryptionVMStatus() (status bool, err error) {
+	var cstatus C.bool
+	ret := C.dmiGetEncryptionVMStatus(&cstatus)
+	if err = dmiErrorString(ret); err != nil {
+		return false, fmt.Errorf("Error dmiGetEncryptionVMStatus:%s", err)
+	}
+	status = bool(cstatus)
 	return
 }

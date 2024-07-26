@@ -53,7 +53,7 @@ extern "C" {
 #include <stddef.h>
 #include <stdbool.h>
 
-#include "rocm_smi/kfd_ioctl.h"
+#include "kfd_ioctl.h"
 
 /** \file rocm_smi.h
  *  Main header file for the ROCm SMI library.
