@@ -601,8 +601,27 @@ const (
 	DMI_STATUS_UNKNOWN_ERROR          DMIStatus = C.DMI_STATUS_UNKNOWN_ERROR
 )
 
+type Device struct {
+	MinorNumber               int
+	PicBusNumber              string
+	DeviceId                  string
+	SubSystemName             string
+	Temperature               float64
+	PowerUsage                float64
+	PowerCap                  float64
+	MemoryCap                 float64
+	MemoryUsed                float64
+	UtilizationRate           float64
+	PcieBwMb                  float64
+	Clk                       float64
+	ComputeUnitCount          float64
+	ComputeUnitRemainingCount uintptr
+	MemoryRemaining           uintptr
+	MaxVDeviceCount           int
+}
+
 // 定义 PhysicalDeviceInfo 结构体
 type PhysicalDeviceInfo struct {
-	DeviceInfo     DMIDeviceInfo
+	Device         Device
 	VirtualDevices []DMIVDeviceInfo
 }
