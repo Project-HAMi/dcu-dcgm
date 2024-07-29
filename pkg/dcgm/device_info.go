@@ -2,7 +2,9 @@ package dcgm
 
 /*
 #cgo CFLAGS: -Wall -I./include
-#cgo LDFLAGS: -L./lib -L/opt/hyhal/lib -lrocm_smi64 -lhydmi -Wl,--unresolved-symbols=ignore-in-object-files
+#cgo LDFLAGS: -L./lib -lrocm_smi64 -lhydmi -Wl,--unresolved-symbols=ignore-in-object-files
+#include <stdio.h>
+#include <stdlib.h>
 #include <stdint.h>
 #include <kfd_ioctl.h>
 #include <rocm_smi64Config.h>
@@ -572,11 +574,34 @@ func dmiCreateVDevices(dvInd int, vDevCount int, vDevCUs []int, vDevMemSize []in
 	if len(vDevCUs) != vDevCount || len(vDevMemSize) != vDevCount {
 		return fmt.Errorf("Invalid args")
 	}
-	cVdevCus := (*C.int)(unsafe.Pointer(&vDevCUs[0]))
-	cVdevMemSize := (*C.int)(unsafe.Pointer(&vDevMemSize[0]))
+
+	fmt.Printf("deviceID: %d, vDevCount: %d, vDevCUs: %v, vDevMemSize: %v\n", dvInd, vDevCount, vDevCUs, vDevMemSize)
+	// Allocate C arrays from Go slices
+	cVdevCus := (*C.int)(C.malloc(C.size_t(len(vDevCUs)) * C.sizeof_int))
+	cVdevMemSize := (*C.int)(C.malloc(C.size_t(len(vDevMemSize)) * C.sizeof_int))
+
+	if cVdevCus == nil || cVdevMemSize == nil {
+		return fmt.Errorf("Memory allocation failed")
+	}
+	defer C.free(unsafe.Pointer(cVdevCus))
+	defer C.free(unsafe.Pointer(cVdevMemSize))
+
+	// Copy values from Go slices to C arrays
+	for i := 0; i < len(vDevCUs); i++ {
+		*((*C.int)(unsafe.Pointer(uintptr(unsafe.Pointer(cVdevCus)) + uintptr(i)*unsafe.Sizeof(*cVdevCus)))) = C.int(vDevCUs[i])
+		*((*C.int)(unsafe.Pointer(uintptr(unsafe.Pointer(cVdevMemSize)) + uintptr(i)*unsafe.Sizeof(*cVdevMemSize)))) = C.int(vDevMemSize[i])
+	}
+	// Print first elements for verification
+	fmt.Printf("cVdevCus[0]: %d, cVdevCus[1]: %d, cVdevMemSize[0]: %d, cVdevMemSize[1]: %d\n",
+		*((*C.int)(unsafe.Pointer(cVdevCus))),
+		*((*C.int)(unsafe.Pointer(uintptr(unsafe.Pointer(cVdevCus)) + uintptr(1)*unsafe.Sizeof(*cVdevCus)))),
+		*((*C.int)(unsafe.Pointer(cVdevMemSize))),
+		*((*C.int)(unsafe.Pointer(uintptr(unsafe.Pointer(cVdevMemSize)) + uintptr(1)*unsafe.Sizeof(*cVdevMemSize)))),
+	)
 
 	ret := C.dmiCreateVDevices(C.int(dvInd), C.int(vDevCount),
 		cVdevCus, cVdevMemSize)
+	glog.Infof("dmiCreateVDevices ret:%v ,err:%v", ret, dmiErrorString(ret))
 	if err = dmiErrorString(ret); err != nil {
 		return fmt.Errorf("Error dmiCreateVDevices:%s", err)
 	}
@@ -586,6 +611,7 @@ func dmiCreateVDevices(dvInd int, vDevCount int, vDevCUs []int, vDevMemSize []in
 // 销毁指定物理设备上的所有虚拟设备
 func dmiDestroyVDevices(dvInd int) (err error) {
 	ret := C.dmiDestroyVDevices(C.int(dvInd))
+	glog.Infof("dmiDestroyVDevices ret:%v", ret)
 	if err = dmiErrorString(ret); err != nil {
 		return fmt.Errorf("Error dmiDestroyVDevices:%s", err)
 	}
@@ -595,6 +621,7 @@ func dmiDestroyVDevices(dvInd int) (err error) {
 // 销毁指定虚拟设备
 func dmiDestroySingleVDevice(vDvInd int) (err error) {
 	ret := C.dmiDestroySingleVDevice(C.int(vDvInd))
+	glog.Infof("dmiDestroySingleVDevice ret:%v", ret)
 	if err = dmiErrorString(ret); err != nil {
 		return fmt.Errorf("Error dmiDestroySingleVDevice:%s", err)
 	}
@@ -613,6 +640,7 @@ func dmiUpdateSingleVDevice(vDvInd int, vDevCUs int, vDevMemSize int) (err error
 // 启动虚拟设备
 func dmiStartVDevice(vDvInd int) (err error) {
 	ret := C.dmiStartVDevice(C.int(vDvInd))
+	glog.Infof("StartVDevice ret:%v", ret)
 	if err = dmiErrorString(ret); err != nil {
 		return fmt.Errorf("Error dmiStartVDevice:%s", err)
 	}
@@ -622,6 +650,7 @@ func dmiStartVDevice(vDvInd int) (err error) {
 // 停止虚拟设备
 func dmiStopVDevice(vDvInd int) (err error) {
 	ret := C.dmiStopVDevice(C.int(vDvInd))
+	glog.Infof("dmiStopVDevice ret:%v", dmiErrorString(ret))
 	if err = dmiErrorString(ret); err != nil {
 		return fmt.Errorf("Error dmiStopVDevice:%s", err)
 	}
