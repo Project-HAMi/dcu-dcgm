@@ -543,17 +543,17 @@ func dmiGetVDeviceInfo(vDvInd int) (vDeviceInfo DMIVDeviceInfo, err error) {
 }
 
 // 指定物理设备剩余的CU和内存
-func dmiGetDeviceRemainingInfo(dvInd int) (cus, memories uintptr, err error) {
-	var ccus, cmemories C.size_t
-	ret := C.dmiGetDeviceRemainingInfo(C.int(dvInd), &ccus, &cmemories)
-	glog.Infof("dmiGetDeviceRemainingInfo ret:%v", ret)
-	if err = dmiErrorString(ret); err != nil {
-		return cus, memories, fmt.Errorf("Error dmiGetDeviceRemainingInfo:%s", err)
-	}
-	cus = uintptr(ccus)
-	memories = uintptr(cmemories)
-	return
-}
+//func dmiGetDeviceRemainingInfo(dvInd int) (cus, memories uintptr, err error) {
+//	var ccus, cmemories C.size_t
+//	ret := C.dmiGetDeviceRemainingInfo(C.int(dvInd), &ccus, &cmemories)
+//	glog.Infof("dmiGetDeviceRemainingInfo ret:%v", ret)
+//	if err = dmiErrorString(ret); err != nil {
+//		return cus, memories, fmt.Errorf("Error dmiGetDeviceRemainingInfo:%s", err)
+//	}
+//	cus = uintptr(ccus)
+//	memories = uintptr(cmemories)
+//	return
+//}
 
 // 创建指定数量的虚拟设备
 //
@@ -619,23 +619,23 @@ func dmiDestroyVDevices(dvInd int) (err error) {
 }
 
 // 销毁指定虚拟设备
-func dmiDestroySingleVDevice(vDvInd int) (err error) {
-	ret := C.dmiDestroySingleVDevice(C.int(vDvInd))
-	glog.Infof("dmiDestroySingleVDevice ret:%v", ret)
-	if err = dmiErrorString(ret); err != nil {
-		return fmt.Errorf("Error dmiDestroySingleVDevice:%s", err)
-	}
-	return
-}
+//func dmiDestroySingleVDevice(vDvInd int) (err error) {
+//	ret := C.dmiDestroySingleVDevice(C.int(vDvInd))
+//	glog.Infof("dmiDestroySingleVDevice ret:%v", ret)
+//	if err = dmiErrorString(ret); err != nil {
+//		return fmt.Errorf("Error dmiDestroySingleVDevice:%s", err)
+//	}
+//	return
+//}
 
 // 更新指定设备资源大小，vDevCUs和vDevMemSize为-1是不更改
-func dmiUpdateSingleVDevice(vDvInd int, vDevCUs int, vDevMemSize int) (err error) {
-	ret := C.dmiUpdateSingleVDevice(C.int(vDvInd), C.int(vDevCUs), C.int(vDevMemSize))
-	if err = dmiErrorString(ret); err != nil {
-		return fmt.Errorf("Error dmiUpdateSingleVDevice:%s", err)
-	}
-	return
-}
+//func dmiUpdateSingleVDevice(vDvInd int, vDevCUs int, vDevMemSize int) (err error) {
+//	ret := C.dmiUpdateSingleVDevice(C.int(vDvInd), C.int(vDevCUs), C.int(vDevMemSize))
+//	if err = dmiErrorString(ret); err != nil {
+//		return fmt.Errorf("Error dmiUpdateSingleVDevice:%s", err)
+//	}
+//	return
+//}
 
 // 启动虚拟设备
 func dmiStartVDevice(vDvInd int) (err error) {
@@ -650,7 +650,7 @@ func dmiStartVDevice(vDvInd int) (err error) {
 // 停止虚拟设备
 func dmiStopVDevice(vDvInd int) (err error) {
 	ret := C.dmiStopVDevice(C.int(vDvInd))
-	glog.Infof("dmiStopVDevice ret:%v", dmiErrorString(ret))
+	glog.Infof("dmiStopVDevice ret:%v,retmessage:%v", ret, dmiErrorString(ret))
 	if err = dmiErrorString(ret); err != nil {
 		return fmt.Errorf("Error dmiStopVDevice:%s", err)
 	}
@@ -696,5 +696,6 @@ func dmiGetEncryptionVMStatus() (status bool, err error) {
 		return false, fmt.Errorf("Error dmiGetEncryptionVMStatus:%s", err)
 	}
 	status = bool(cstatus)
+	glog.Infof("DmiGetEncryptionVMStatus: %v", status)
 	return
 }
