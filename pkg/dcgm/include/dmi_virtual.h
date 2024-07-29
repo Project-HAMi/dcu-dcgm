@@ -88,21 +88,6 @@ dmiStatus dmiGetMaxVDeviceCount(int *count);
 dmiStatus dmiGetVDeviceCount(int *count);
 
 /**
- * @brief Return remaining cus and memory size on the specified device for
- *        virtual device's further use.
- *
- * @param [in]  device_id which device to query for information.
- * @param [out] cus remaining compute unit counts.
- * @param [out] memories remaining memory size (in bytes).
- *
- * @return #DMI_STATUS_SUCCESS, #DMI_STATUS_OPEN_MKFD_FAILED
- *         #DMI_STATUS_MKFD_ALREADY_OPENED, #DMI_STATUS_SYS_NODE_NOT_EXIST
- *         #DMI_STATUS_INVALID_ARGUMENTS
- */
-dmiStatus dmiGetDeviceRemainingInfo(int device_id, size_t *cus,
-                                    size_t *memories);
-
-/**
  * @brief Return virtual device information about the specified device.
  *
  * @param [in] vdevice_id which virtual device to query for information.
@@ -144,7 +129,7 @@ dmiStatus dmiCreateVDevices(int device_id, int vdev_count, int *vdev_cus,
                             int *vdev_mem_size);
 
 /**
- * @brief 销毁指定物理设备上的所有虚拟设备
+ * @brief Destroy all virtual devices on the specified physical device.
  *
  * @param [in] deviceId physical device id
  *
@@ -155,33 +140,7 @@ dmiStatus dmiCreateVDevices(int device_id, int vdev_count, int *vdev_cus,
 dmiStatus dmiDestroyVDevices(int deviceId);
 
 /**
- * @brief Destroy single virtual device.
- *
- * @param [in] vDeviceId virtual device id to be destroyed
- *
- * @return #DMI_STATUS_SUCCESS, #DMI_STATUS_OPEN_MKFD_FAILED,
- *         #DMI_STATUS_DEVICE_BUSY, #DMI_STATUS_MKFD_ALREADY_OPENED,
- *         #DMI_STATUS_SYS_NODE_NOT_EXIST, #DMI_STATUS_NOT_SUPPORTED,
- *         #DMI_STATUS_VDEV_NOT_EXIST
- */
-dmiStatus dmiDestroySingleVDevice(int vDeviceId);
-
-/**
- * @brief Destroy single virtual device.
- *
- * @param [in] vdeviceId virtual device id to be destroyed
- * @param [in] vdev_cus vdev compute units, -1 means not change
- * @param [in] vdev_mem_size vdev memory size (in MiBytes), -1 means not change
- *
- * @return #DMI_STATUS_SUCCESS, #DMI_STATUS_OPEN_MKFD_FAILED,
- *         #DMI_STATUS_DEVICE_BUSY, #DMI_STATUS_MKFD_ALREADY_OPENED,
- *         #DMI_STATUS_SYS_NODE_NOT_EXIST, #DMI_STATUS_NOT_SUPPORTED,
- *         #DMI_STATUS_VDEV_NOT_EXIST
- */
-dmiStatus dmiUpdateSingleVDevice(int vdeviceId, int vdev_cus, int vdev_mem_size);
-
-/**
- * @brief S启动虚拟设备.
+ * @brief Start a virtual devices.
  *
  * @param [in] deviceId virtual device id
  *
@@ -189,16 +148,6 @@ dmiStatus dmiUpdateSingleVDevice(int vdeviceId, int vdev_cus, int vdev_mem_size)
  *         #DMI_STATUS_MKFD_ALREADY_OPENED, #DMI_STATUS_SYS_NODE_NOT_EXIST
  *         #DMI_STATUS_INVALID_ARGUMENTS, #DMI_STATUS_NOT_SUPPORTED
  *         #DMI_STATUS_ERROR, #DMI_STATUS_VDEV_NOT_EXIST
- *
- * @warning while a virtual device has been started, it cannot be destroyed or
- *          updated until @c dmiStopVDevice has been invoked and returned
- *          successfully with the id of same virtual device.
- *
- * @note The @c dmiStartVDevice and @c dmiStopVDevice must be invoked in pairs
- *       within a single user process. If not, started virtual devices will be
- *       stopped automatically as a limited safeguard measure when user process
- *       has been normally exited. In extreme cases, like process has been
- *       killed unexpectedly, the behavior is undefined.
  */
 dmiStatus dmiStartVDevice(int deviceId);
 
@@ -211,12 +160,6 @@ dmiStatus dmiStartVDevice(int deviceId);
  *         #DMI_STATUS_MKFD_ALREADY_OPENED, #DMI_STATUS_SYS_NODE_NOT_EXIST
  *         #DMI_STATUS_INVALID_ARGUMENTS, #DMI_STATUS_NOT_SUPPORTED
  *         #DMI_STATUS_ERROR, #DMI_STATUS_VDEV_NOT_EXIST
- *
- * @note The @c dmiStartVDevice and @c dmiStopVDevice must be invoked in pairs
- *       within a single user process. If not, started virtual devices will be
- *       stopped automatically as a limited safeguard measure when user process
- *       has been normally exited. In extreme cases, like process has been
- *       killed unexpectedly, the behavior is undefined.
  */
 dmiStatus dmiStopVDevice(int deviceId);
 

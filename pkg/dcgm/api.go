@@ -501,9 +501,9 @@ func DeviceSingleInfo(dvInd int) (deviceInfo DMIDeviceInfo, err error) {
 func VDeviceCount() (count int, err error) { return dmiGetVDeviceCount() }
 
 // 指定物理设备剩余的CU和内存
-func DeviceRemainingInfo(dvInd int) (cus, memories uintptr, err error) {
-	return dmiGetDeviceRemainingInfo(dvInd)
-}
+//func DeviceRemainingInfo(dvInd int) (cus, memories uintptr, err error) {
+//	return dmiGetDeviceRemainingInfo(dvInd)
+//}
 
 // 创建指定数量的虚拟设备
 func CreateVDevices(dvInd int, vDevCount int, vDevCUs []int, vDevMemSize []int) (err error) {
@@ -516,14 +516,14 @@ func DestroyVDevice(dvInd int) (err error) {
 }
 
 // 销毁指定虚拟设备
-func DestroySingleVDevice(vDvInd int) (err error) {
-	return dmiDestroySingleVDevice(vDvInd)
-}
+//func DestroySingleVDevice(vDvInd int) (err error) {
+//	return dmiDestroySingleVDevice(vDvInd)
+//}
 
 // 更新指定设备资源大小，vDevCUs和vDevMemSize为-1是不更改
-func UpdateSingleVDevice(vDvInd int, vDevCUs int, vDevMemSize int) (err error) {
-	return dmiUpdateSingleVDevice(vDvInd, vDevCUs, vDevMemSize)
-}
+//func UpdateSingleVDevice(vDvInd int, vDevCUs int, vDevMemSize int) (err error) {
+//	return dmiUpdateSingleVDevice(vDvInd, vDevCUs, vDevMemSize)
+//}
 
 // 启动虚拟设备
 func StartVDevice(vDvInd int) (err error) {
