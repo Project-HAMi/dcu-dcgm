@@ -14,8 +14,12 @@ package dcgm
 */
 import "C"
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
+	"os"
+	"strconv"
+	"strings"
 	"unsafe"
 )
 
@@ -118,4 +122,52 @@ func ConvertASCIIToString(asciiCodes []byte) string {
 		result = append(result, rune(code))
 	}
 	return string(result)
+}
+
+// parseConfig 解析配置文件内容为DMIVDeviceInfo结构体
+func parseConfig(filePath string) (*DMIVDeviceInfo, error) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	config := &DMIVDeviceInfo{}
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		parts := strings.SplitN(line, ": ", 2)
+		if len(parts) < 2 {
+			continue
+		}
+		key := parts[0]
+		value := parts[1]
+
+		switch key {
+		case "cu_count":
+			config.ComputeUnitCount, _ = strconv.Atoi(value)
+		case "mem":
+			// 解析内存大小，例如 "4096 MiB"
+			memParts := strings.Fields(value)
+			if len(memParts) == 2 {
+				memSize, err := strconv.Atoi(memParts[0])
+				if err == nil {
+					// 转换为字节数（假设单位是 MiB）
+					config.GlobalMemSize = uintptr(memSize * 1024 * 1024)
+				}
+			}
+		case "device_id":
+			config.DeviceID, _ = strconv.Atoi(value)
+		case "vdev_id":
+			config.VMinorNumber, _ = strconv.Atoi(value)
+		case "PciBusId":
+			config.PicBusNumber = value
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+
+	return config, nil
 }

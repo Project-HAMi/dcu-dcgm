@@ -194,7 +194,7 @@ func rsmiDevPciThroughputGet(dvInd int) (sent int64, received int64, maxPktSz in
 	sent = int64(cmaxpktsz)
 	received = int64(csent)
 	maxPktSz = int64(creceived)
-	glog.Info("sent: %d, received: %d, maxPktSz: %d\n", sent, received, maxPktSz)
+	glog.Infof("sent: %v, received: %v, maxPktSz: %v", sent, received, maxPktSz)
 	return
 }
 
@@ -522,6 +522,8 @@ func dmiGetVDeviceCount() (count int, err error) {
 func dmiGetVDeviceInfo(vDvInd int) (vDeviceInfo DMIVDeviceInfo, err error) {
 	var cvDeviceInfo C.dmiDeviceInfo
 	ret := C.dmiGetVDeviceInfo(C.int(vDvInd), &cvDeviceInfo)
+	glog.Infof("dmiGetVDeviceInfo ret:%v", ret)
+	glog.Infof("cgo cvDeviceInfo:%v", dataToJson(cvDeviceInfo))
 	if err = dmiErrorString(ret); err != nil {
 		return vDeviceInfo, fmt.Errorf("Error dmiGetVDeviceInfo:%s", err)
 	}
@@ -619,14 +621,14 @@ func dmiDestroyVDevices(dvInd int) (err error) {
 }
 
 // 销毁指定虚拟设备
-//func dmiDestroySingleVDevice(vDvInd int) (err error) {
-//	ret := C.dmiDestroySingleVDevice(C.int(vDvInd))
-//	glog.Infof("dmiDestroySingleVDevice ret:%v", ret)
-//	if err = dmiErrorString(ret); err != nil {
-//		return fmt.Errorf("Error dmiDestroySingleVDevice:%s", err)
-//	}
-//	return
-//}
+func dmiDestroySingleVDevice(vDvInd int) (err error) {
+	ret := C.dmiDestroySingleVDevice(C.int(vDvInd))
+	glog.Infof("dmiDestroySingleVDevice ret:%v", ret)
+	if err = dmiErrorString(ret); err != nil {
+		return fmt.Errorf("Error dmiDestroySingleVDevice:%s", err)
+	}
+	return
+}
 
 // 更新指定设备资源大小，vDevCUs和vDevMemSize为-1是不更改
 //func dmiUpdateSingleVDevice(vDvInd int, vDevCUs int, vDevMemSize int) (err error) {
