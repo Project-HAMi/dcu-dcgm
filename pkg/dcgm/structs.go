@@ -561,6 +561,8 @@ type DMIVDeviceInfo struct {
 	ContainerID      uint64
 	DeviceID         int
 	Percent          int
+	VMinorNumber     int
+	PicBusNumber     string
 }
 
 type DMIStatus C.dmiStatus
