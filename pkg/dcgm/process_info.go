@@ -11,25 +11,37 @@ package dcgm
 import "C"
 import (
 	"fmt"
+	"os"
+	"os/signal"
+	"strings"
+	"syscall"
+	"time"
 	"unsafe"
+
+	"github.com/golang/glog"
 )
 
 // rsmiComputeProcessInfoGet 获取当前使用GPU的所有进程信息
 func rsmiComputeProcessInfoGet() (processInfo []RSMIProcessInfo, numItems int, err error) {
-	var cprocessInfo C.rsmi_process_info_t
 	var cnumItems C.uint32_t
-	ret := C.rsmi_compute_process_info_get(&cprocessInfo, &cnumItems)
+	// 第一次调用获取进程数量
+	ret := C.rsmi_compute_process_info_get(nil, &cnumItems)
 	if err := errorString(ret); err != nil {
-		return processInfo, numItems, fmt.Errorf("Error rsmiComputeProcessInfoGet: %s", err)
+		return nil, 0, fmt.Errorf("Error rsmiComputeProcessInfoGet (initial call): %s", err)
 	}
-	// 创建一个大小为numItems的切片
+	// 如果数量为零，返回空
+	if cnumItems == 0 {
+		return nil, 0, nil
+	}
+	// 创建一个大小为cnumItems的切片
 	processInfo = make([]RSMIProcessInfo, int(cnumItems))
 	// 第二次调用以获取实际的数据
 	ret = C.rsmi_compute_process_info_get((*C.rsmi_process_info_t)(unsafe.Pointer(&processInfo[0])), &cnumItems)
 	if err := errorString(ret); err != nil {
-		return processInfo, numItems, fmt.Errorf("Error in go_rsmi_compute_process_info_get: %s", err)
+		return nil, 0, fmt.Errorf("Error rsmiComputeProcessInfoGet: %s", err)
 	}
 	numItems = int(cnumItems)
+	glog.Infof("numItems:%v,processInfo:%v", numItems, dataToJson(processInfo))
 	return
 }
 
@@ -71,73 +83,6 @@ func rsmiComputeProcessGpusGet(pid int) (dvIndices []int, err error) {
 	for i := 0; i < int(cnumDevices); i++ {
 		dvIndices[i] = int(dvIndicesC[i])
 	}
-	return
-}
-
-// rsmiDevXGMIErrorStatus 获取设备的XGMI错误状态
-func rsmiDevXGMIErrorStatus(dvInd int) (status RSMIXGMIStatus, err error) {
-	var cStatus C.rsmi_xgmi_status_t
-
-	ret := C.rsmi_dev_xgmi_error_status(C.uint32_t(dvInd), &cStatus)
-	if err := errorString(ret); err != nil {
-		return status, fmt.Errorf("Error RSMIDevXGMIErrorStatus: %s", err)
-	}
-	status = RSMIXGMIStatus(cStatus)
-	return
-}
-
-// rsmiDevXgmiErrorReset 重置设备的XGMI错误状态
-func rsmiDevXgmiErrorReset(dvInd int) (err error) {
-	ret := C.rsmi_dev_xgmi_error_reset(C.uint32_t(dvInd))
-	if err = errorString(ret); err != nil {
-		return fmt.Errorf("Error rsmiDevXgmiErrorReset:%s", err)
-	}
-	return
-}
-
-// rsmiDevXgmiHiveIdGet 获取设备的XGMI hive id
-func rsmiDevXgmiHiveIdGet(dvInd int) (hiveId int64, err error) {
-	var chiveId C.uint64_t
-	ret := C.rsmi_dev_xgmi_hive_id_get(C.uint32_t(dvInd), &chiveId)
-	if err = errorString(ret); err != nil {
-		return hiveId, fmt.Errorf("Error rsmiDevXgmiHiveIdGet:%s", err)
-	}
-	hiveId = int64(chiveId)
-	return
-}
-
-// rsmiTopoGetNumaBodeBumber 获取设备的numa cpu节点号
-func rsmiTopoGetNumaBodeBumber(dvInd int) (numaNode int, err error) {
-	var cnumaNode C.uint32_t
-	ret := C.rsmi_topo_get_numa_node_number(C.uint32_t(dvInd), &cnumaNode)
-	if err = errorString(ret); err != nil {
-		return numaNode, fmt.Errorf("Error rsmiTopoGetNumaBodeBumber:%s", err)
-	}
-	numaNode = int(cnumaNode)
-	return
-}
-
-// rsmiTopoGetLinkWeight 获取2个gpu之间连接的权重
-func rsmiTopoGetLinkWeight(dvIndSrc, dvIndDst int) (weight int64, err error) {
-	var cweight C.uint64_t
-	ret := C.rsmi_topo_get_link_weight(C.uint32_t(dvIndSrc), C.uint32_t(dvIndDst), &cweight)
-	if err = errorString(ret); err != nil {
-		return weight, fmt.Errorf("Error rsmiTopoGetLinkWeight:%S", err)
-	}
-	weight = int64(cweight)
-	return
-}
-
-// rsmiTopoGetLinkType 获取2个gpu之间的hops和连接类型
-func rsmiTopoGetLinkType(dvIndSrc, dvIndDst int) (hops int64, linkType RSMIIOLinkType, err error) {
-	var chops C.uint64_t
-	var clinkType C.RSMI_IO_LINK_TYPE
-	ret := C.rsmi_topo_get_link_type(C.uint32_t(dvIndSrc), C.uint32_t(dvIndDst), &chops, &clinkType)
-	if err = errorString(ret); err != nil {
-		return hops, linkType, fmt.Errorf("Error rsmiTopoGetLinkType:%s", err)
-	}
-	hops = int64(chops)
-	linkType = RSMIIOLinkType(clinkType)
 	return
 }
 
@@ -201,8 +146,8 @@ func rsmiDevSupportedFuncIteratorClose(handle RSMIFuncIDIterHandle) (err error) 
 //	value.GpuBlock = RSMIGpuBlock(*(*C.rsmi_gpu_block_t)(unsafe.Pointer(&cvalue)))
 //	return
 //}
-
-// rsmiEventNotificationInit 准备收集GPU事件通知
+/*************事件************/
+// rsmiEventNotificationInit 准备收集GPU事件通知 初始化事件通知
 func rsmiEventNotificationInit(deInd int) (err error) {
 	ret := C.rsmi_event_notification_init(C.uint32_t(deInd))
 	if err = errorString(ret); err != nil {
@@ -211,7 +156,7 @@ func rsmiEventNotificationInit(deInd int) (err error) {
 	return
 }
 
-// rsmiEventNotificationMaskSet 设置设备指定要收集的事件。
+// rsmiEventNotificationMaskSet 设置设备指定要收集的事件。设置事件通知掩码
 func rsmiEventNotificationMaskSet(dvInd int, mask int64) (err error) {
 	ret := C.rsmi_event_notification_mask_set(C.uint32_t(dvInd), C.uint64_t(mask))
 	if err = errorString(ret); err != nil {
@@ -251,4 +196,56 @@ func rsmiEventNotificationStop(dvInd int) (err error) {
 		return fmt.Errorf("Error rsmiEventNotificationStop:%s", err)
 	}
 	return
+}
+
+// 打印事件列表方法
+func printEventList(device int, delay int, eventList []string) {
+	print2DArray([][]string{{"DEVICE", "TIME", "TYPE", "DESCRIPTION"}})
+	mask := int64(0)
+
+	if err := rsmiEventNotificationInit(device); err != nil {
+		glog.Error(device, "Unable to initialize event notifications.")
+		return
+	}
+
+	for _, eventType := range eventList {
+		for i, name := range notificationTypeNames {
+			if strings.ToUpper(eventType) == name {
+				mask |= 1 << uint(i)
+			}
+		}
+	}
+
+	if err := rsmiEventNotificationMaskSet(device, mask); err != nil {
+		glog.Error(device, "Unable to set event notification mask.")
+		return
+	}
+
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		for {
+			select {
+			case <-stop:
+				return
+			default:
+				_, datas, err := rsmiEventNotificationGet(delay)
+				if err != nil {
+					continue
+				}
+				for _, data := range datas {
+					if len(data.Message) > 0 {
+						print2DArray([][]string{
+							{fmt.Sprintf("GPU[%d]", data.DvInd), time.Now().Format("2006-01-02 15:04:05"), notificationTypeNames[data.Event-1], string(data.Message[:])},
+						})
+					}
+				}
+				time.Sleep(time.Millisecond * time.Duration(delay))
+			}
+		}
+	}()
+
+	<-stop
+	fmt.Println("Exiting...")
 }

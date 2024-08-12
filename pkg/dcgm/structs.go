@@ -539,6 +539,18 @@ var computeUnitType = map[string]float64{
 
 var memoryTypeL = []string{"VRAM", "VIS_VRAM", "GTT"}
 
+var memoryTypeMap = map[string]RSMIMemoryType{
+	"VRAM":     RSMI_MEM_TYPE_VRAM,
+	"VIS_VRAM": RSMI_MEM_TYPE_VIS_VRAM,
+	"GTT":      RSMI_MEM_TYPE_GTT,
+}
+
+var memTypeMapReverse = map[RSMIMemoryType]string{
+	RSMI_MEM_TYPE_VRAM:     "VRAM",
+	RSMI_MEM_TYPE_VIS_VRAM: "VIS_VRAM",
+	RSMI_MEM_TYPE_GTT:      "GTT",
+}
+
 const DMI_NAME_SIZE = 256
 
 type DMIDeviceInfo struct {
@@ -627,3 +639,171 @@ type PhysicalDeviceInfo struct {
 	Device         Device
 	VirtualDevices []DMIVDeviceInfo
 }
+
+// 定义事件通知类型名称
+var notificationTypeNames = []string{"VM_FAULT", "THERMAL_THROTTLE", "GPU_RESET"}
+
+// 设备结构体
+type DeviceId struct {
+	id uint32
+}
+
+// 重置clock错误信息
+type FailedMessage struct {
+	ID       int
+	ErrorMsg string
+}
+
+// 时钟类型映射
+var rsmiClkNamesDict = map[string]RSMIClkType{
+	"sclk":    RSMI_CLK_TYPE_SYS,
+	"fclk":    RSMI_CLK_TYPE_DF,
+	"dcefclk": RSMI_CLK_TYPE_DCEF,
+	"socclk":  RSMI_CLK_TYPE_SOC,
+	"mclk":    RSMI_CLK_TYPE_MEM,
+}
+
+var validLevels = map[string]RSMIDevPerfLevel{
+	"auto":   RSMI_DEV_PERF_LEVEL_AUTO,
+	"low":    RSMI_DEV_PERF_LEVEL_LOW,
+	"high":   RSMI_DEV_PERF_LEVEL_HIGH,
+	"manual": RSMI_DEV_PERF_LEVEL_MANUAL,
+}
+
+// 定义RAS错误状态字符串映射
+var rasErrStaleMachine = []string{
+	"NONE", "DISABLED", "UNKNOWN ERROR",
+	"SING", "MULT", "POSITION", "ENABLED",
+}
+
+// RSMI 温度传感器类型常量
+const (
+	SENSOR_EDGE     = 0
+	SENSOR_JUNCTION = 1
+	SENSOR_MEMORY   = 2
+	SENSOR_HBM0     = 3
+	SENSOR_HBM1     = 4
+	SENSOR_HBM2     = 5
+	SENSOR_HBM3     = 6
+)
+
+// RSMI 温度传感器类型名称列表
+var tempTypeList = []struct {
+	Name string
+	Type int
+}{
+	{"edge", SENSOR_EDGE},
+	{"junction", SENSOR_JUNCTION},
+	{"memory", SENSOR_MEMORY},
+	{"HBM 0", SENSOR_HBM0},
+	{"HBM 1", SENSOR_HBM1},
+	{"HBM 2", SENSOR_HBM2},
+	{"HBM 3", SENSOR_HBM3},
+}
+
+// TemperatureInfo 结构体表示一个设备的温度信息
+type TemperatureInfo struct {
+	DeviceID    int
+	SensorTemps map[string]float64 // 传感器名称到温度的映射
+}
+
+// 固件块名称列表
+var fwBlockNames = []string{
+	"ASD", "CE", "DMCU", "MC", "ME", "MEC", "MEC2", "PFP",
+	"RLC", "RLC SRLC", "RLC SRLG", "RLC SRLS", "SDMA", "SDMA2",
+	"SMC", "SOS", "TA RAS", "TA XGMI", "UVD", "VCE", "VCN",
+}
+
+// FirmwareInfo 结构体表示一个设备的固件信息
+type FirmwareInfo struct {
+	DeviceID    int
+	FirmwareVer map[string]string // 固件块名称到版本信息的映射
+}
+
+var utilizationCounterName = []string{"GFX Activity", "Memory Activity"}
+
+type DeviceUseInfo struct {
+	DeviceID      int
+	GPUUsePercent int
+	Utilization   map[string]uint64
+}
+
+// 设备信息结构体
+type DeviceMemVendorInfo struct {
+	DeviceID int
+	Vendor   string
+}
+
+// 设备PCIe带宽信息结构体
+type PcieBandwidthInfo struct {
+	DeviceID int
+	Sent     int64
+	Received int64
+	MaxPktSz int64
+	Bw       float64
+}
+
+// 设备PCIe重放计数信息结构体
+type PcieReplayCountInfo struct {
+	DeviceID int
+	Count    int64
+}
+
+type DevicePowerInfo struct {
+	DeviceID int
+	Power    int64
+}
+type DevicePowerPlayInfo struct {
+	DeviceID      int
+	OD_SCLK       []string
+	OD_MCLK       string
+	OD_VDDC_CURVE []string
+	OD_RANGE      []string
+}
+
+type DeviceproductInfo struct {
+	DeviceID   int
+	CardSeries string
+	CardModel  string
+	CardVendor string
+	CardSKU    string
+}
+
+type DeviceProfile struct {
+	DeviceID int
+	Profiles []string
+}
+
+var MemoryPageStatus = map[RSMIMemoryPageStatus]string{
+	RSMI_MEM_PAGE_STATUS_RESERVED:     "reserved",
+	RSMI_MEM_PAGE_STATUS_PENDING:      "pending",
+	RSMI_MEM_PAGE_STATUS_UNRESERVABLE: "unreservable",
+}
+
+type DeviceSerialInfo struct {
+	DeviceID     int
+	SerialNumber string
+}
+
+type DeviceUIdInfo struct {
+	DeviceID int
+	UId      string
+}
+
+type DeviceVBIOSInfo struct {
+	DeviceID int
+	VBIOS    string
+}
+
+// 设备电压信息
+type DeviceVoltageInfo struct {
+	DeviceID int
+	Voltage  int64 // 电压以毫伏为单位
+}
+
+// 定义常量表示链接类型
+const (
+	LinkTypePCIE    = "PCIE"
+	LinkTypeXGMI    = "XGMI"
+	LinkTypeUnknown = "XXXX"
+)
