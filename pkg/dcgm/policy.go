@@ -19,6 +19,7 @@ import (
 func rsmiDevPerfLevelSet(dvInd int, devPerfLevel RSMIDevPerfLevel) (err error) {
 	glog.Info("dev_perf_level_set:", devPerfLevel)
 	ret := C.rsmi_dev_perf_level_set(C.int32_t(dvInd), C.rsmi_dev_perf_level_t(devPerfLevel))
+	glog.Infof("dev_perf_level_set ret:%v,retstr:%v", ret, errorString(ret))
 	if err = errorString(ret); err != nil {
 		return fmt.Errorf("dev_perf_level_set:%s", err)
 	}
@@ -26,9 +27,11 @@ func rsmiDevPerfLevelSet(dvInd int, devPerfLevel RSMIDevPerfLevel) (err error) {
 }
 
 // rsmiDevClkRangeSet 设置设备时钟范围信息
-func rsmiDevClkRangeSet(dvInd, minClkValue, maxClkValue uint64, clkType RSMIClkType) (err error) {
+func rsmiDevClkRangeSet(dvInd int, minClkValue, maxClkValue int64, clkType RSMIClkType) (err error) {
 	ret := C.rsmi_dev_clk_range_set(C.uint32_t(dvInd), C.uint64_t(minClkValue), C.uint64_t(maxClkValue), C.rsmi_clk_type_t(clkType))
+	glog.Infof("rsmi_dev_clk_range_set ret:%v, retstr:%v", ret, errorString(ret))
 	if err = errorString(ret); err != nil {
+		glog.Errorf("Error rsmi_dev_clk_range_set:%s", err)
 		return fmt.Errorf("Error rsmi_dev_clk_range_set:%s", err)
 	}
 	return
@@ -37,6 +40,7 @@ func rsmiDevClkRangeSet(dvInd, minClkValue, maxClkValue uint64, clkType RSMIClkT
 // rsmiDevOdVoltInfoSet 设置设备电压曲线点
 func rsmiDevOdVoltInfoSet(dvInd, vPoint, clkValue, voltValue int) (err error) {
 	ret := C.rsmi_dev_od_volt_info_set(C.uint32_t(dvInd), C.uint32_t(vPoint), C.uint64_t(clkValue), C.uint64_t(voltValue))
+	glog.Infof("rsmi_dev_od_volt_info_set ret:%v", ret)
 	if err = errorString(ret); err != nil {
 		return fmt.Errorf("Error rsmi_dev_od_volt_info_set:%s", err)
 	}
@@ -46,6 +50,7 @@ func rsmiDevOdVoltInfoSet(dvInd, vPoint, clkValue, voltValue int) (err error) {
 // rsmiDevOverdriveLevelSet 设置设备超速百分比
 func rsmiDevOverdriveLevelSet(dvInd, od int) (err error) {
 	ret := C.rsmi_dev_overdrive_level_set(C.int32_t(dvInd), C.uint32_t(od))
+	glog.Infof("rsmi_dev_overdrive_level_set ret:%v, retStr:%v", ret, errorString(ret))
 	if err = errorString(ret); err != nil {
 		return fmt.Errorf("Error rsmi_dev_overdrive_level_set:%s", err)
 	}
@@ -123,5 +128,62 @@ func rsmiCounterAvailableCountersGet(dvInd int, group RSMIEventGroup) (availAble
 		return availAble, fmt.Errorf("Error rsmiCounterAvailableCountersGet:%s", err)
 	}
 	availAble = int(cavailAble)
+	return
+}
+
+// rsmiDevFanReset 将风扇复位为自动驱动控制
+func rsmiDevFanReset(dvInd, sensorInd int) (err error) {
+	ret := C.rsmi_dev_fan_reset(C.uint32_t(dvInd), C.uint32_t(sensorInd))
+	glog.Info("rsmi_dev_fan_reset_ret:", ret)
+	if err = errorString(ret); err != nil {
+		return fmt.Errorf("Error rsmi_dev_fan_reset: %s", err)
+	}
+	return nil
+}
+
+// rsmiDevPowerProfileSet 设置设备功率配置文件
+func rsmiDevPowerProfileSet(dvInd int, reserved int, profile RSNIPowerProfilePresetMasks) (err error) {
+	ret := C.rsmi_dev_power_profile_set(C.uint32_t(dvInd), C.uint32_t(reserved), C.rsmi_power_profile_preset_masks_t(profile))
+	glog.Info("rsmi_dev_power_profile_set ret:%v, retstr:%v", ret, errorString(ret))
+	if err = errorString(ret); err != nil {
+		glog.Errorf("Error rsmi_dev_power_profile_set:%v", err)
+		return fmt.Errorf("Error rsmi_dev_power_profile_set:%s", err)
+	}
+	return
+}
+
+// rsmiDevXgmiErrorReset 重置设备的XGMI错误状态
+func rsmiDevXgmiErrorReset(dvInd int) (err error) {
+	ret := C.rsmi_dev_xgmi_error_reset(C.uint32_t(dvInd))
+	glog.Infof(" rsmi_dev_xgmi_error_reset ret:%v,retStr:%v", ret, errorString(ret))
+	if err = errorString(ret); err != nil {
+		return fmt.Errorf("Error rsmiDevXgmiErrorReset:%s", err)
+	}
+	return
+}
+
+// rsmiDevXGMIErrorStatus 获取设备的XGMI错误状态
+func rsmiDevXGMIErrorStatus(dvInd int) (status RSMIXGMIStatus, err error) {
+	var cStatus C.rsmi_xgmi_status_t
+	ret := C.rsmi_dev_xgmi_error_status(C.uint32_t(dvInd), &cStatus)
+	glog.Infof(" rsmi_dev_xgmi_error_status ret:%v,retstr:%v", ret, errorString(ret))
+	if err := errorString(ret); err != nil {
+		return status, fmt.Errorf("Error RSMIDevXGMIErrorStatus: %s", err)
+	}
+	status = RSMIXGMIStatus(cStatus)
+	glog.Infof("RSMIDevXGMIErrorStatus:%v", status)
+	return
+}
+
+// rsmiDevXgmiHiveIdGet 获取设备的XGMI hive id
+func rsmiDevXgmiHiveIdGet(dvInd int) (hiveId int64, err error) {
+	var chiveId C.uint64_t
+	ret := C.rsmi_dev_xgmi_hive_id_get(C.uint32_t(dvInd), &chiveId)
+	glog.Infof("rsmi_dev_xgmi_hive_id_get ret:%v", ret)
+	if err = errorString(ret); err != nil {
+		return hiveId, fmt.Errorf("Error rsmiDevXgmiHiveIdGet:%s", err)
+	}
+	hiveId = int64(chiveId)
+	glog.Infof("rsmi_dev_xgmi_hive_id_get hiveId:%v", hiveId)
 	return
 }
