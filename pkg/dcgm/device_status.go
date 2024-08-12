@@ -17,10 +17,14 @@ import (
 )
 
 // rsmiDevTempMetricGet 获取设备的温度度量值 *
-func rsmiDevTempMetricGet(dvInd int, sensorType int, metric RSMITemperatureMetric) int64 {
+func rsmiDevTempMetricGet(dvInd int, sensorType int, metric RSMITemperatureMetric) (temp int64, err error) {
 	var temperature C.int64_t
-	C.rsmi_dev_temp_metric_get(C.uint32_t(dvInd), C.uint32_t(sensorType), C.rsmi_temperature_metric_t(metric), &temperature)
-	return int64(temperature)
+	ret := C.rsmi_dev_temp_metric_get(C.uint32_t(dvInd), C.uint32_t(sensorType), C.rsmi_temperature_metric_t(metric), &temperature)
+	if err = errorString(ret); err != nil {
+		return 0, fmt.Errorf("rsmiDevTempMetricGet:%s", err)
+	}
+	temp = int64(temperature)
+	return
 }
 
 // rsmiDevVoltMetricGet 获取设备的电压度量值
@@ -30,20 +34,10 @@ func rsmiDevVoltMetricGet(dvInd int, voltageType RSMIVoltageType, metric RSMIVol
 	return int64(voltage)
 }
 
-// rsmiDevFanReset 将风扇复位为自动驱动控制
-func rsmiDevFanReset(dvInd, sensorInd int) (err error) {
-	ret := C.rsmi_dev_fan_reset(C.uint32_t(dvInd), C.uint32_t(sensorInd))
-	glog.Info("rsmi_dev_fan_reset_ret:", ret)
-	if err = errorString(ret); err != nil {
-		return fmt.Errorf("Error rsmi_dev_fan_reset: %s", err)
-	}
-	return nil
-}
-
 // rsmiDevFanSpeedSet 设置设备风扇转速，以rpm为单位
 func rsmiDevFanSpeedSet(dvInd, sensorInd int, speed int64) (err error) {
 	ret := C.rsmi_dev_fan_speed_set(C.uint32_t(dvInd), C.uint32_t(sensorInd), C.uint64_t(speed))
-	glog.Info("rsmi_dev_fan_speed_set_ret:", ret)
+	glog.Infof("rsmi_dev_fan_speed_set_ret:%v, retstr:%v", ret, errorString(ret))
 	if err = errorString(ret); err != nil {
 		return fmt.Errorf("Error rsmi_dev_fan_speed_set: %s", err)
 	}
@@ -54,7 +48,7 @@ func rsmiDevFanSpeedSet(dvInd, sensorInd int, speed int64) (err error) {
 func rsmiDevBusyPercentGet(dvInd int) (busyPercent int, err error) {
 	var cbusyPercent C.uint32_t
 	ret := C.rsmi_dev_busy_percent_get(C.uint32_t(dvInd), &cbusyPercent)
-	glog.Info("rsmi_dev_busy_percent_get:", ret)
+	//glog.Info("rsmi_dev_busy_percent_get:", ret)
 	if err = errorString(ret); err != nil {
 		return 0, fmt.Errorf("Error rsmi_dev_busy_percent_get:%s", err)
 	}
@@ -81,14 +75,15 @@ func rsmiUtilizationCountGet(dvInd int, utilizationCounters []RSMIUtilizationCou
 		C.uint32_t(count),
 		&ctimestamp,
 	)
-
+	//glog.Infof("rsmi_utilization_count_get ret:%v ,retstr:%v ", ret, errorString(ret))
 	if err = errorString(ret); err != nil {
-		return 0, fmt.Errorf("Error rsmi_dev_busy_percent_get:%s", err)
+		return 0, fmt.Errorf("Error rsmi_utilization_count_get:%s", err)
 	}
 	// 更新 Go 结构体数组中的值
 	for i := range utilizationCounters {
 		utilizationCounters[i].Value = uint64(cUtilizationCounters[i].value)
 	}
+	//glog.Infof("utilizationCounters:%v,timestamp:%v", utilizationCounters, int64(ctimestamp))
 
 	return int64(ctimestamp), nil
 }
@@ -107,8 +102,8 @@ func rsmiDevPerfLevelGet(dvInd int) (perf RSMIDevPerfLevel, err error) {
 
 // rsmiPerfDeterminismModeSet 设置设备的性能确定性模式
 func rsmiPerfDeterminismModeSet(dvInd int, clkValue int64) (err error) {
-
 	ret := C.rsmi_perf_determinism_mode_set(C.uint32_t(dvInd), C.uint64_t(clkValue))
+	glog.Infof("dev_perf_determinism_mode ret:%v, retstr:%v", ret, errorString(ret))
 	if err = errorString(ret); err != nil {
 		return fmt.Errorf("Error rsmi_perf_determinism_mode_set:%s", err)
 	}
@@ -145,6 +140,7 @@ func rsmiDevGpuClkFreqGet(dvInd int, clkType RSMIClkType) (frequencies RSMIFrequ
 func rsmiDevOdVoltInfoGet(dvInd int) (odv RSMIOdVoltFreqData, err error) {
 	var codv C.rsmi_od_volt_freq_data_t
 	ret := C.rsmi_dev_od_volt_info_get(C.uint32_t(dvInd), &codv)
+	glog.Infof("rsmi_dev_od_volt_info_get ret:%v, retstr:%v", ret, errorString(ret))
 	if err = errorString(ret); err != nil {
 		return odv, fmt.Errorf("Error rsmi_dev_od_volt_info_get:%s", err)
 	}
@@ -231,11 +227,14 @@ func rsmiDevGpuMetricsInfoGet(dvInd int) (gpuMetrics RSMIGPUMetrics, err error) 
 
 // rsmiDevEccStatusGet 获取GPU块的ECC状态
 func rsmiDevEccStatusGet(dvInd int, block RSMIGpuBlock) (state RSMIRasErrState, err error) {
+	glog.Infof("rsmiDevEccStatusGet: %d,%d", dvInd, block)
 	var sstate C.rsmi_ras_err_state_t
 	ret := C.rsmi_dev_ecc_status_get(C.uint32_t(dvInd), C.rsmi_gpu_block_t(block), &sstate)
+	glog.Infof("rsmi_dev_ecc_status_get ret:%v", ret)
 	if err = errorString(ret); err != nil {
 		return state, fmt.Errorf("Error rsmi_dev_ecc_status_get:%s", err)
 	}
 	state = RSMIRasErrState(sstate)
+	glog.Infof("rsmiDevEccStatusGet:%v", sstate)
 	return
 }
