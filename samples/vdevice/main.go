@@ -28,5 +28,7 @@ func main() {
 	dcgm.DestroySingleVDevice(1)
 	//销毁指定物理设备上的所有虚拟设备
 	dcgm.DestroyVDevice(1)
+	//更新虚拟设备资源
+	dcgm.UpdateSingleVDevice(2, 10, 2048)
 
 }
