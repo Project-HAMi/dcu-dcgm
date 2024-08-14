@@ -14,15 +14,29 @@ package dcgm
 */
 import "C"
 
+// RSMIPcieBandwidth 表示设备的 PCIe 带宽信息
+// swagger:model RSMIPcieBandwidth
 type RSMIPcieBandwidth struct {
+
+	// TransferRate 表示传输速率的频率信息
 	TransferRate RSMIFrequencies
-	lanes        [32]uint32
+
+	// lanes 表示 PCIe 通道的配置
+	lanes [32]uint32
 }
 
+// RSMIFrequencies 表示设备支持的频率信息
+// swagger:model RSMIFrequencies
 type RSMIFrequencies struct {
+
+	// NumSupported 表示设备支持的频率数量
 	NumSupported uint32
-	Current      uint32
-	Frequency    [32]uint64
+
+	// Current 表示当前使用的频率
+	Current uint32
+
+	// Frequency 表示设备支持的频率列表
+	Frequency [32]uint64
 }
 
 type RSNIPowerProfilePresetMasks C.rsmi_power_profile_preset_masks_t
@@ -116,8 +130,13 @@ const (
 	RSMI_UTILIZATION_COUNTER_LAST  RSMIUtilizationCounterType = C.RSMI_UTILIZATION_COUNTER_LAST
 )
 
+// @swagignore
 type RSMIUtilizationCounter struct {
-	Type  RSMIUtilizationCounterType
+
+	// Type 表示利用率计数器的类型
+	Type RSMIUtilizationCounterType
+
+	// Value 表示计数器的值
 	Value uint64
 }
 
@@ -162,6 +181,8 @@ type MetricsTableHeader struct {
 	ContentRevision uint8
 }
 
+// RSMIGPUMetrics 表示设备的度量信息
+// swagger:model RSMIGPUMetrics
 type RSMIGPUMetrics struct {
 	CommonHeader           MetricsTableHeader
 	TemperatureEdge        uint16
@@ -483,30 +504,53 @@ const (
 	RSMI_STATUS_UNKNOWN_ERROR       RSMIStatus = C.RSMI_STATUS_UNKNOWN_ERROR
 )
 
+// MonitorInfo 设备监控信息
+// swagger:model MonitorInfo
 type MonitorInfo struct {
-	MinorNumber     int
-	PicBusNumber    string
-	DeviceId        string
-	SubSystemName   string
-	Temperature     float64
-	PowerUsage      float64
-	PowerCap        float64
-	MemoryCap       float64
-	MemoryUsed      float64
+	//  MinorNumber 设备索引号
+	MinorNumber int
+	//  PciBusNumber PCI ID
+	PciBusNumber string
+	//  DeviceId 设备序列号
+	DeviceId string
+	//  SubSystemName 型号名称
+	SubSystemName string
+	// Temperature 设备温度
+	Temperature float64
+	//  PowerUsage 设备平均功耗
+	PowerUsage float64
+	//  PowerCap 设备功率上限
+	PowerCap float64
+	//  MemoryCap 设备内存总量
+	MemoryCap float64
+	//  MemoryUsed 设备内存使用量
+	MemoryUsed float64
+	//  UtilizationRate 设备忙碌时间百分比
 	UtilizationRate float64
-	PcieBwMb        float64
-	Clk             float64
+	//  PcieBwMb pcie流量信息
+	PcieBwMb float64
+	// Clk 备系统时钟速度列表
+	Clk float64
 }
 
+// DeviceInfo 设备信息结构体
 type DeviceInfo struct {
-	DvInd        int
-	DeviceId     string
-	DevType      string
-	DevTypeName  string
-	PicBusNumber string
-	MemoryTotal  float64
-	MemoryUsed   float64
-	ComputeUnit  float64
+	// DvInd 设备索引
+	DvInd int
+	// DeviceId 设备ID
+	DeviceId string
+	// DevType 设备类型
+	DevType string
+	// DevTypeName 设备类型名称
+	DevTypeName string
+	// PciBusNumber 设备的总线号
+	PciBusNumber string
+	// MemoryTotal 设备的内存总量
+	MemoryTotal float64
+	// MemoryUsed 设备的已使用内存量
+	MemoryUsed float64
+	// ComputeUnit 设备的计算单元数量
+	ComputeUnit float64
 }
 
 var type2name = map[string]string{
@@ -553,28 +597,53 @@ var memTypeMapReverse = map[RSMIMemoryType]string{
 
 const DMI_NAME_SIZE = 256
 
+// @swagignore
 type DMIDeviceInfo struct {
-	Name                      string
-	ComputeUnitCount          int
-	ComputeUnitRemainingCount uintptr
-	MemoryRemaining           uintptr
-	GlobalMemSize             uintptr
-	UsageMemSize              uintptr
-	DeviceID                  int
-	Percent                   int
-	MaxVDeviceCount           int
-}
-
-type DMIVDeviceInfo struct {
 	Name             string
 	ComputeUnitCount int
-	GlobalMemSize    uintptr
-	UsageMemSize     uintptr
-	ContainerID      uint64
-	DeviceID         int
-	Percent          int
-	VMinorNumber     int
-	PicBusNumber     string
+	// @swagignore
+	ComputeUnitRemainingCount uintptr
+	// @swagignore
+	MemoryRemaining uintptr
+	// @swagignore
+	GlobalMemSize uintptr
+	// @swagignore
+	UsageMemSize    uintptr
+	DeviceID        int
+	Percent         int
+	MaxVDeviceCount int
+}
+
+// DMIVDeviceInfo 虚拟设备信息
+type DMIVDeviceInfo struct {
+	// Name 虚拟设备的名称
+	Name string
+
+	// ComputeUnitCount 虚拟设备的计算单元数量
+	ComputeUnitCount int
+
+	// GlobalMemSize 虚拟设备的全局内存大小
+	// @swagignore
+	GlobalMemSize uintptr
+
+	// UsageMemSize 虚拟设备的已使用内存大小
+	// @swagignore
+	UsageMemSize uintptr
+
+	// ContainerID 虚拟设备的容器ID
+	ContainerID uint64
+
+	// DeviceID 虚拟设备的设备ID
+	DeviceID int
+
+	// Percent 虚拟设备的使用百分比
+	Percent int
+
+	// VMinorNumber 虚拟设备的索引号
+	VMinorNumber int
+
+	// PciBusNumber 虚拟设备的总线编号
+	PciBusNumber string
 }
 
 type DMIStatus C.dmiStatus
@@ -615,28 +684,64 @@ const (
 	DMI_STATUS_UNKNOWN_ERROR          DMIStatus = C.DMI_STATUS_UNKNOWN_ERROR
 )
 
+// Device 物理设备的详细信息
 type Device struct {
-	MinorNumber               int
-	PicBusNumber              string
-	DeviceId                  string
-	SubSystemName             string
-	Temperature               float64
-	PowerUsage                float64
-	PowerCap                  float64
-	MemoryCap                 float64
-	MemoryUsed                float64
-	UtilizationRate           float64
-	PcieBwMb                  float64
-	Clk                       float64
-	ComputeUnitCount          float64
+	// MinorNumber 设备的索引号
+	MinorNumber int
+
+	// PciBusNumber 设备的总线编号
+	PciBusNumber string
+
+	// DeviceId 设备的唯一标识符
+	DeviceId string
+
+	// SubSystemName 设备的子系统名称
+	SubSystemName string
+
+	// Temperature 设备当前的温度
+	Temperature float64
+
+	// PowerUsage 设备当前的功耗
+	PowerUsage float64
+
+	// PowerCap 设备的功耗上限
+	PowerCap float64
+
+	// MemoryCap 设备的内存容量
+	MemoryCap float64
+
+	// MemoryUsed 设备已使用的内存
+	MemoryUsed float64
+
+	// UtilizationRate 设备的利用率
+	UtilizationRate float64
+
+	// PcieBwMb 设备的PCIe带宽 (MB/s)
+	PcieBwMb float64
+
+	// Clk 设备的当前时钟频率
+	Clk float64
+
+	// ComputeUnitCount 设备的计算单元总数
+	ComputeUnitCount float64
+
+	// ComputeUnitRemainingCount 设备剩余可用的计算单元数量
+	// @swagignore
 	ComputeUnitRemainingCount uintptr
-	MemoryRemaining           uintptr
-	MaxVDeviceCount           int
+
+	// MemoryRemaining 设备剩余可用的内存量
+	// @swagignore
+	MemoryRemaining uintptr
+
+	// MaxVDeviceCount 物理设备上支持的最大虚拟设备数量
+	MaxVDeviceCount int
 }
 
-// 定义 PhysicalDeviceInfo 结构体
+// PhysicalDeviceInfo 物理设备信息
 type PhysicalDeviceInfo struct {
-	Device         Device
+	// Device 物理设备的详细信息
+	Device Device
+	// VirtualDevices 该物理设备上关联的虚拟设备信息列表
 	VirtualDevices []DMIVDeviceInfo
 }
 
@@ -648,9 +753,12 @@ type DeviceId struct {
 	id uint32
 }
 
-// 重置clock错误信息
+// FailedMessage 重置clock错误信息
+// @Description 包含重置clock操作失败时的设备ID和错误信息
 type FailedMessage struct {
-	ID       int
+	// ID 设备ID
+	ID int
+	// ErrorMsg 错误信息
 	ErrorMsg string
 }
 

@@ -693,13 +693,14 @@ func dmiDestroySingleVDevice(vDvInd int) (err error) {
 }
 
 // 更新指定设备资源大小，vDevCUs和vDevMemSize为-1是不更改
-//func dmiUpdateSingleVDevice(vDvInd int, vDevCUs int, vDevMemSize int) (err error) {
-//	ret := C.dmiUpdateSingleVDevice(C.int(vDvInd), C.int(vDevCUs), C.int(vDevMemSize))
-//	if err = dmiErrorString(ret); err != nil {
-//		return fmt.Errorf("Error dmiUpdateSingleVDevice:%s", err)
-//	}
-//	return
-//}
+func dmiUpdateSingleVDevice(vDvInd int, vDevCUs int, vDevMemSize int) (err error) {
+	ret := C.dmiUpdateSingleVDevice(C.int(vDvInd), C.int(vDevCUs), C.int(vDevMemSize))
+	glog.Infof("dmiUpdateSingleVDevice ret:%v, retstr:%v", ret, dmiErrorString(ret))
+	if err = dmiErrorString(ret); err != nil {
+		return fmt.Errorf("Error dmiUpdateSingleVDevice:%s", err)
+	}
+	return
+}
 
 // 启动虚拟设备
 func dmiStartVDevice(vDvInd int) (err error) {

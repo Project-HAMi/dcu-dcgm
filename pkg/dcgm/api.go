@@ -16,58 +16,126 @@ import (
 	"github.com/golang/glog"
 )
 
-// 初始化rocm_smi
+// @Summary 初始化 DCGM
+// @Description 初始化 (DCGM) 库。
+// @Produce json
+// @Success 200 {object} string "成功初始化"
+// @Failure 500 {object} error "初始化失败"
+// @Router /Init [post]
 func Init() error {
 	return rsmiInit()
 }
 
-// 关闭rocm_smi
+// @Summary 关闭 DCGM
+// @Description 关闭 Data Center GPU Manager (DCGM) 库。
+// @Produce json
+// @Success 200 {object} string "成功关闭"
+// @Failure 500 {object} error "关闭失败"
+// @Router /ShutDown [post]
 func ShutDown() error {
 	return rsmiShutdown()
 }
 
-// 获取GPU数量
+// @Summary 获取 GPU 数量
+// @Description 获取监视的 GPU 数量。
+// @Produce json
+// @Success 200 {int} int "GPU 数量"
+// @Failure 500 {object} error "获取 GPU 数量失败"
+// @Router /NumMonitorDevices [get]
 func NumMonitorDevices() (int, error) {
 	return rsmiNumMonitorDevices()
 }
 
 // 获取设备利用率计数器
+// @Summary 获取设备利用率计数器
+// @Description 根据设备索引获取利用率计数器
+// @Param dvInd query int true "设备索引"
+// @Param utilizationCounters body []RSMIUtilizationCounter true "利用率计数器对象列表"
+// @Param count query int true "计数器的数量"
+// @Success 200 {object} int64 "返回的时间戳"
+// @Failure 400 {object} error "请求失败"
+// @Router /utilizationcount [post]
 func UtilizationCount(dvInd int, utilizationCounters []RSMIUtilizationCounter, count int) (timestamp int64, err error) {
 	return rsmiUtilizationCountGet(dvInd, utilizationCounters, count)
 }
 
-// 获取设备名称
+// @Summary 获取设备名称
+// @Description 根据设备 ID 获取设备名称。
+// @Produce json
+// @Param dvInd path int true "设备 ID"
+// @Success 200 {string} name "设备名称"
+// @Failure 400 {object} error "请求错误"
+// @Failure 404 {object} error "设备未找到"
+// @Router /DevName [get]
 func DevName(dvInd int) (name string, err error) {
 	return rsmiDevNameGet(dvInd)
 }
 
-// 获取设备sku
+// 获取设备SKU
+// @Summary 获取设备SKU
+// @Description 根据设备索引获取SKU
+// @Param dvInd query int true "设备索引"
+// @Success 200 {int} sku "返回设备SKU"
+// @Failure 400 {object} error "请求失败"
+// @Router /DevSku [get]
 func DevSku(dvInd int) (sku int, err error) {
 	return rsmiDevSkuGet(dvInd)
 }
 
 // 获取设备品牌名称
+// @Summary 获取设备品牌名称
+// @Description 根据设备索引获取品牌名称
+// @Param dvInd query int true "设备索引"
+// @Success 200 {string} brand "返回设备品牌名称"
+// @Failure 400 {object} error "请求失败"
+// @Router /DevBrand [get]
 func DevBrand(dvInd int) (brand string, err error) {
 	return rsmiDevBrandGet(dvInd)
 }
 
 // 获取设备供应商名称
+// @Summary 获取设备供应商名称
+// @Description 根据设备索引获取供应商名称
+// @Param dvInd query int true "设备索引"
+// @Success 200 {string} bname "返回设备供应商名称"
+// @Failure 400 {object} error "请求失败"
+// @Router /DevVendorName [get]
 func DevVendorName(dvInd int) (bname string, err error) {
 	return rsmiDevVendorNameGet(dvInd)
 }
 
 // 获取设备显存供应商名称
-func DevVramVendor(dvInd int) (result string, err error) {
+// @Summary 获取设备显存供应商名称
+// @Description 根据设备索引获取显存供应商名称
+// @Param dvInd query int true "设备索引"
+// @Success 200 {string} name "返回显存供应商名称"
+// @Failure 400 {object} error "请求失败"
+// @Router /DevVramVendor [get]
+func DevVramVendor(dvInd int) (name string, err error) {
 	return rsmiDevVramVendorGet(dvInd)
 }
 
-// 获取可用的pcie带宽列表
+// @Summary 获取可用的 PCIe 带宽列表
+// @Description 根据设备 ID 获取设备的可用 PCIe 带宽列表。
+// @Produce json
+// @Param dvInd path int true "设备 ID"
+// @Success 200 {RSMIPcieBandwidth} rsmiPcieBandwidth "PCIe 带宽列表"
+// @Failure 400 {object} error "请求错误"
+// @Failure 404 {object} error "设备未找到"
+// @Router /DevPciBandwidth [get]
 func DevPciBandwidth(dvInd int) (rsmiPcieBandwidth RSMIPcieBandwidth, err error) {
 	return rsmiDevPciBandwidthGet(dvInd)
 
 }
 
-// 内存使用百分比
+// @Summary 获取内存使用百分比
+// @Description 根据设备 ID 获取设备内存的使用百分比。
+// @Produce json
+// @Param dvInd path int true "设备 ID"
+// @Success 200 {int} busyPercent "内存使用百分比"
+// @Failure 400 {object} error "请求错误"
+// @Failure 404 {object} error "设备未找到"
+// @Router /MemoryPercent [get]
 func MemoryPercent(dvInd int) (busyPercent int, err error) {
 	return rsmiDevMemoryBusyPercentGet(dvInd)
 }
@@ -77,17 +145,38 @@ func MemoryPercent(dvInd int) (busyPercent int, err error) {
 //	return go_rsmi_dev_temp_metric_get(dvInd)
 //}
 
-// 设置设备PowerPlay性能级别
+// @Summary 设置设备 PowerPlay 性能级别
+// @Description 根据设备 ID 设置 PowerPlay 性能级别。
+// @Produce json
+// @Param dvInd path int true "设备 ID"
+// @Param level query string true "要设置的性能级别"
+// @Success 200 {string} string "操作成功"
+// @Failure 400 {object} error "请求错误"
+// @Failure 404 {object} error "设备未找到"
+// @Router /DevPerfLevelSet [post]
 func DevPerfLevelSet(dvInd int, level RSMIDevPerfLevel) error {
 	return rsmiDevPerfLevelSet(dvInd, level)
 }
 
-// 获取gpu度量信息
+// @Summary 获取 GPU 度量信息
+// @Description 根据设备 ID 获取 GPU 的度量信息。
+// @Produce json
+// @Param dvInd query int true "设备 ID"
+// @Success 200 {object} RSMIGPUMetrics "GPU 度量信息"
+// @Failure 400 {object} error "请求错误"
+// @Failure 404 {object} error "设备未找到"
+// @Router /DevGpuMetricsInfo [get]
 func DevGpuMetricsInfo(dvInd int) (gpuMetrics RSMIGPUMetrics, err error) {
 	return rsmiDevGpuMetricsInfoGet(dvInd)
 }
 
-// 获取设备监控中的指标
+// @Summary 获取设备监控中的指标
+// @Description 收集所有设备的监控指标信息。
+// @Produce json
+// @Success 200 {array} MonitorInfo "设备监控指标信息列表"
+// @Failure 400 {object} error "请求错误"
+// @Failure 404 {object} error "设备未找到"
+// @Router /CollectDeviceMetrics [get]
 func CollectDeviceMetrics() (monitorInfos []MonitorInfo, err error) {
 	numMonitorDevices, err := rsmiNumMonitorDevices()
 	if err != nil {
@@ -133,7 +222,7 @@ func CollectDeviceMetrics() (monitorInfos []MonitorInfo, err error) {
 		memoryUsed, _ := rsmiDevMemoryUsageGet(i, RSMI_MEM_TYPE_FIRST)
 		mu, _ := strconv.ParseFloat(fmt.Sprintf("%f", float64(memoryUsed)/1.0), 64)
 		glog.Infof(" DCU[%v] memory used : %.0f ", i, mu)
-		//获取设备设备忙碌时间百分比
+		//获取设备忙碌时间百分比
 		utilizationRate, _ := rsmiDevBusyPercentGet(i)
 		ur, _ := strconv.ParseFloat(fmt.Sprintf("%.2f", float64(utilizationRate)/1.0), 64)
 		glog.Infof(" DCU[%v] utilization rate : %.0f", i, ur)
@@ -147,7 +236,7 @@ func CollectDeviceMetrics() (monitorInfos []MonitorInfo, err error) {
 		glog.Infof(" DCU[%v] SCLK : %.0f", i, sclk)
 		monitorInfo := MonitorInfo{
 			MinorNumber:     i,
-			PicBusNumber:    pciBusNumber,
+			PciBusNumber:    pciBusNumber,
 			DeviceId:        deviceId,
 			SubSystemName:   devTypeName,
 			Temperature:     t,
@@ -170,7 +259,13 @@ func CollectDeviceMetrics() (monitorInfos []MonitorInfo, err error) {
 
 }*/
 
-// 获取所有物理设备及其虚拟设备的信息列表
+// AllDeviceInfos 获取所有物理设备及其虚拟设备的信息列表
+// @Summary 获取所有物理设备及其虚拟设备的信息列表
+// @Description 返回所有物理设备及其虚拟设备的信息
+// @Produce json
+// @Success 200 {array} PhysicalDeviceInfo "物理设备及其虚拟设备信息列表"
+// @Failure 500 {object} error "服务器内部错误"
+// @Router /AllDeviceInfos [get]
 func AllDeviceInfos() ([]PhysicalDeviceInfo, error) {
 	var allDevices []PhysicalDeviceInfo
 
@@ -246,7 +341,7 @@ func AllDeviceInfos() ([]PhysicalDeviceInfo, error) {
 		computeUnit := computeUnitType[devTypeName]
 		device := Device{
 			MinorNumber:      i,
-			PicBusNumber:     pciBusNumber,
+			PciBusNumber:     pciBusNumber,
 			DeviceId:         deviceId,
 			SubSystemName:    devTypeName,
 			Temperature:      t,
@@ -324,7 +419,15 @@ func AllDeviceInfos() ([]PhysicalDeviceInfo, error) {
 	return allDevices, nil
 }
 
-// 设备的总线
+// PicBusInfo 获取设备的总线信息
+// @Summary 获取设备的总线信息
+// @Description 根据设备索引返回对应的总线信息（BDF格式）
+// @Produce json
+// @Param dvInd query int true "设备索引"
+// @Success 200 {string} string "返回设备的总线信息"
+// @Failure 400 {object} error "请求参数错误"
+// @Failure 500 {object} error "服务器内部错误"
+// @Router /PicBusInfo [get]
 func PicBusInfo(dvInd int) (picID string, err error) {
 	bdfid, err := rsmiDevPciIdGet(dvInd)
 	if err != nil {
@@ -340,7 +443,16 @@ func PicBusInfo(dvInd int) (picID string, err error) {
 	return
 }
 
-// 获取风扇转速信息
+// FanSpeedInfo 获取风扇转速信息
+// @Summary 获取风扇转速信息
+// @Description 根据设备索引返回当前风扇转速及其占最大转速的百分比
+// @Produce json
+// @Param dvInd query int true "设备索引"
+// @Success 200 {int64} fanLevel "返回当前风扇转速"
+// @Success 200 {float64} fanPercentage "返回风扇转速百分比"
+// @Failure 400 {object} error "请求参数错误"
+// @Failure 500 {object} error "服务器内部错误"
+// @Router /FanSpeedInfo [get]
 func FanSpeedInfo(dvInd int) (fanLevel int64, fanPercentage float64, err error) {
 	// 当前转速
 	fanLevel, err = rsmiDevFanSpeedGet(dvInd, 0)
@@ -357,7 +469,15 @@ func FanSpeedInfo(dvInd int) (fanLevel int64, fanPercentage float64, err error) 
 	return
 }
 
-// 当前GPU使用的百分比
+// GPUUse 当前GPU使用的百分比
+// @Summary 获取当前GPU使用的百分比
+// @Description 根据设备索引返回当前GPU的使用百分比
+// @Produce json
+// @Param dvInd query int true "设备索引"
+// @Success 200 {int} percent "返回GPU使用的百分比"
+// @Failure 400 {object} error "请求参数错误"
+// @Failure 500 {object} error "服务器内部错误"
+// @Router /GPUUse [get]
 func GPUUse(dvInd int) (percent int, err error) {
 	percent, err = rsmiDevBusyPercentGet(dvInd)
 	if err != nil {
@@ -366,7 +486,15 @@ func GPUUse(dvInd int) (percent int, err error) {
 	return
 }
 
-// 设备ID的十六进制值
+// DevID 设备ID的十六进制值
+// @Summary 获取设备ID的十六进制值
+// @Description 根据设备索引返回设备ID的十六进制值
+// @Produce json
+// @Param dvInd query int true "设备索引"
+// @Success 200 {int} id "返回设备ID的十六进制值"
+// @Failure 400 {object} error "请求参数错误"
+// @Failure 500 {object} error "服务器内部错误"
+// @Router /DevID [get]
 func DevID(dvInd int) (id int, err error) {
 	id, err = rsmiDevIdGet(dvInd)
 	if err != nil {
@@ -375,7 +503,15 @@ func DevID(dvInd int) (id int, err error) {
 	return
 }
 
-// 设备的最大功率
+// MaxPower 设备的最大功率
+// @Summary 获取设备的最大功率
+// @Description 根据设备索引返回设备的最大功率（以瓦特为单位）
+// @Produce json
+// @Param dvInd query int true "设备索引"
+// @Success 200 {int64} power "返回设备的最大功率"
+// @Failure 400 {object} error "请求参数错误"
+// @Failure 500 {object} error "服务器内部错误"
+// @Router /MaxPower [get]
 func MaxPower(dvInd int) (power int64, err error) {
 	power, err = rsmiDevPowerCapGet(dvInd, 0)
 	if err != nil {
@@ -385,7 +521,17 @@ func MaxPower(dvInd int) (power int64, err error) {
 	return (power / 1000000), nil
 }
 
-// 设备的指定内存使用情况 memType:[vram|vis_vram|gtt]
+// MemInfo 获取设备的指定内存使用情况
+// @Summary 获取设备的指定内存使用情况
+// @Description 根据设备索引和内存类型返回内存的使用量和总量
+// @Produce json
+// @Param dvInd query int true "设备索引"
+// @Param memType query string true "内存类型（可选值: vram, vis_vram, gtt）"
+// @Success 200 {int64} memUsed "返回指定内存类型的使用量"
+// @Success 200 {int64} memTotal "返回指定内存类型的总量"
+// @Failure 400 {object} error "请求参数错误"
+// @Failure 500 {object} error "服务器内部错误"
+// @Router /MemInfo [get]
 func MemInfo(dvInd int, memType string) (memUsed int64, memTotal int64, err error) {
 	memType = strings.ToUpper(memType)
 	if !contains(memoryTypeL, memType) {
@@ -406,7 +552,13 @@ func MemInfo(dvInd int, memType string) (memUsed int64, memTotal int64, err erro
 	return
 }
 
-// 获取设备信息列表
+// DeviceInfos 获取设备信息列表
+// @Summary 获取设备信息列表
+// @Description 返回所有设备的详细信息列表
+// @Produce json
+// @Success 200 {array} DeviceInfo "返回设备信息列表"
+// @Failure 500 {object} error "服务器内部错误"
+// @Router /DeviceInfos [get]
 func DeviceInfos() (deviceInfos []DeviceInfo, err error) {
 	numDevices, err := rsmiNumMonitorDevices()
 	if err != nil {
@@ -446,7 +598,7 @@ func DeviceInfos() (deviceInfos []DeviceInfo, err error) {
 			DeviceId:     deviceId,
 			DevType:      devType,
 			DevTypeName:  devTypeName,
-			PicBusNumber: pciBusNumber,
+			PciBusNumber: pciBusNumber,
 			MemoryTotal:  mt,
 			MemoryUsed:   mu,
 			ComputeUnit:  computeUnit,
@@ -457,7 +609,15 @@ func DeviceInfos() (deviceInfos []DeviceInfo, err error) {
 	return
 }
 
-// pid的进程名
+// ProcessName 获取指定PID的进程名
+// @Summary 获取指定PID的进程名
+// @Description 根据进程ID（PID）返回对应的进程名称
+// @Produce json
+// @Param pid query int true "进程ID"
+// @Success 200 {string} string "返回进程名称"
+// @Failure 400 {object} error "请求参数错误"
+// @Failure 500 {object} error "服务器内部错误"
+// @Router /ProcessName [get]
 func ProcessName(pid int) string {
 	if pid < 1 {
 		glog.Info("PID must be greater than 0")
@@ -482,7 +642,15 @@ func ProcessName(pid int) string {
 	return strings.TrimSpace(pName)
 }
 
-// 设备的当前性能水平
+// PerfLevel 获取设备的当前性能水平
+// @Summary 获取设备的当前性能水平
+// @Description 返回指定设备的当前性能等级
+// @Produce json
+// @Param dvInd query int true "设备索引"
+// @Success 200 {string} string "返回当前性能水平"
+// @Failure 400 {object} error "请求参数错误"
+// @Failure 500 {object} error "服务器内部错误"
+// @Router /PerfLevel [get]
 func PerfLevel(dvInd int) (perf string, err error) {
 	level, err := rsmiDevPerfLevelGet(dvInd)
 	if err != nil {
@@ -499,9 +667,6 @@ func PidByName(name string) (pid string, err error) {
 	cmd := exec.Command("pidof", name)
 	output, err := cmd.Output()
 	glog.Info("output:", output)
-	//if err != nil {
-	//	return "", fmt.Errorf("error getting pid: %v", err)
-	//}
 	if err != nil {
 		glog.Info("Error: %v\nOutput: %s", err, string(output))
 	} else {
@@ -513,7 +678,15 @@ func PidByName(name string) (pid string, err error) {
 	return
 }
 
-// 获取设备平均功耗
+// Power 获取设备的平均功耗
+// @Summary 获取设备的平均功耗
+// @Description 返回指定设备的平均功耗
+// @Produce json
+// @Param dvInd query int true "设备索引"
+// @Success 200 {int64} int64 "返回平均功耗（瓦特）"
+// @Failure 400 {object} error "请求参数错误"
+// @Failure 500 {object} error "服务器内部错误"
+// @Router /Power [get]
 func Power(dvInd int) (power int64, err error) {
 	powerAve, err := rsmiDevPowerAveGet(dvInd, 0)
 	power = powerAve / 1000000
@@ -524,14 +697,32 @@ func Power(dvInd int) (power int64, err error) {
 	return
 }
 
-// 获取GPU块的ECC状态
+// EccStatus 获取GPU块的ECC状态
+// @Summary 获取GPU块的ECC状态
+// @Description 返回指定GPU块的ECC状态
+// @Produce json
+// @Param dvInd query int true "设备索引"
+// @Param block query string true "GPU块"
+// @Success 200 {string} string "返回ECC状态"
+// @Failure 400 {object} error "请求参数错误"
+// @Failure 500 {object} error "服务器内部错误"
+// @Router /EccStatus [get]
 func EccStatus(dvInd int, block RSMIGpuBlock) (state string, err error) {
 	eccStatus, err := rsmiDevEccStatusGet(dvInd, block)
 	state = rasErrStaleMachine[eccStatus]
 	return
 }
 
-// 获取温度
+// Temperature 获取设备温度
+// @Summary 获取设备温度
+// @Description 返回指定设备的当前温度
+// @Produce json
+// @Param dvInd query int true "设备索引"
+// @Param sensorType query int true "传感器类型"
+// @Success 200 {float64} float64 "返回温度（摄氏度）"
+// @Failure 400 {object} error "请求参数错误"
+// @Failure 500 {object} error "服务器内部错误"
+// @Router /Temperature [get]
 func Temperature(dvInd int, sensorType int) (temp float64, err error) {
 	deviceTemp, err := rsmiDevTempMetricGet(dvInd, sensorType, RSMI_TEMP_CURRENT)
 	temp, _ = strconv.ParseFloat(fmt.Sprintf("%.2f", float64(deviceTemp)/1000.0), 64)
@@ -539,21 +730,45 @@ func Temperature(dvInd int, sensorType int) (temp float64, err error) {
 	return
 }
 
-// 获取VBIOS版本
+// VbiosVersion 获取设备的VBIOS版本
+// @Summary 获取设备的VBIOS版本
+// @Description 返回指定设备的VBIOS版本
+// @Produce json
+// @Param dvInd query int true "设备索引"
+// @Success 200 {string} string "返回VBIOS版本"
+// @Failure 400 {object} error "请求参数错误"
+// @Failure 500 {object} error "服务器内部错误"
+// @Router /VbiosVersion [get]
 func VbiosVersion(dvInd int) (vbios string, err error) {
 	vbios, err = rsmiDevVbiosVersionGet(dvInd, 256)
 	glog.Infof("VbiosVersion:%v", vbios)
 	return
 }
 
-// 获取当前系统的驱动程序版本
+// Version 获取当前系统的驱动程序版本
+// @Summary 获取当前系统的驱动程序版本
+// @Description 返回指定组件的驱动程序版本
+// @Produce json
+// @Param component query string true "驱动组件"
+// @Success 200 {string} string "返回驱动程序版本"
+// @Failure 400 {object} error "请求参数错误"
+// @Failure 500 {object} error "服务器内部错误"
+// @Router /Version [get]
 func Version(component RSMISwComponent) (varStr string, err error) {
 	varStr, err = rsmiVersionStrGet(component, 256)
 	glog.Infof("component; Version:%v,%v", component, varStr)
 	return
 }
 
-// 将时钟重置为默认值
+// ResetClocks 将设备的时钟重置为默认值
+// @Summary 重置设备时钟
+// @Description 重置指定设备的时钟和性能等级为默认值
+// @Produce json
+// @Param dvIdList body []int true "设备ID列表"
+// @Success 200 {array} FailedMessage "返回失败消息列表"
+// @Failure 400 {object} error "请求参数错误"
+// @Failure 500 {object} error "服务器内部错误"
+// @Router /ResetClocks [post]
 func ResetClocks(dvIdList []int) (failedMessage []FailedMessage) {
 	errorMap := make(map[int][]string)
 	glog.Info(" Reset Clocks ")
@@ -584,7 +799,15 @@ func ResetClocks(dvIdList []int) (failedMessage []FailedMessage) {
 	return
 }
 
-// 复位风扇驱动控制
+// ResetFans 复位风扇驱动控制
+// @Summary 复位风扇控制
+// @Description 重置指定设备的风扇控制为默认值
+// @Produce json
+// @Param dvIdList body []int true "设备ID列表"
+// @Success 200 {string} string "复位成功"
+// @Failure 400 {object} error "请求参数错误"
+// @Failure 500 {object} error "服务器内部错误"
+// @Router /ResetFans [post]
 func ResetFans(dvIdList []int) (err error) {
 	for _, id := range dvIdList {
 		err := rsmiDevFanReset(id, 0)
@@ -596,7 +819,12 @@ func ResetFans(dvIdList []int) (err error) {
 	return
 }
 
-// 重置设备的配置文件
+// ResetProfile 重置设备的配置文件
+// @Summary 重置指定设备的电源配置文件和性能级别
+// @Produce json
+// @Param dvIdList body []int true "设备ID列表"
+// @Success 200 {array} FailedMessage "返回失败的设备及其错误信息"
+// @Router /ResetProfile [post]
 func ResetProfile(dvIdList []int) (failedMessage []FailedMessage) {
 	errorMap := make(map[int][]string)
 	for _, id := range dvIdList {
@@ -618,7 +846,12 @@ func ResetProfile(dvIdList []int) (failedMessage []FailedMessage) {
 	return
 }
 
-// 重置设备的XGMI错误状态
+// ResetXGMIErr 重置设备的XGMI错误状态
+// @Summary 重置指定设备的XGMI错误状态
+// @Produce json
+// @Param dvIdList body []int true "设备ID列表"
+// @Success 200 {array} FailedMessage "返回失败的设备及其错误信息"
+// @Router /ResetXGMIErr [post]
 func ResetXGMIErr(dvIdList []int) (failedMessage []FailedMessage) {
 	errorMap := make(map[int][]string)
 	for _, id := range dvIdList {
@@ -634,17 +867,32 @@ func ResetXGMIErr(dvIdList []int) (failedMessage []FailedMessage) {
 	return
 }
 
-// 获取XGMI错误状态
+// XGMIErrorStatus 获取XGMI错误状态
+// @Summary 获取指定设备的XGMI错误状态
+// @Produce json
+// @Param dvInd query int true "设备索引"
+// @Success 200 {object} RSMIXGMIStatus "返回设备的XGMI错误状态"
+// @Router /XGMIErrorStatus [get]
 func XGMIErrorStatus(dvInd int) (status RSMIXGMIStatus, err error) {
 	return rsmiDevXGMIErrorStatus(dvInd)
 }
 
-// 获取设备的XGMI hive id
+// XGMIHiveIdGet 获取设备的XGMI hive id
+// @Summary 获取指定设备的XGMI hive id
+// @Produce json
+// @Param dvInd query int true "设备索引"
+// @Success 200 {int64} int64 "返回设备的XGMI hive id"
+// @Router /XGMIHiveIdGet [get]
 func XGMIHiveIdGet(dvInd int) (hiveId int64, err error) {
 	return rsmiDevXgmiHiveIdGet(dvInd)
 }
 
-// 重置Performance Determinism
+// ResetPerfDeterminism 重置Performance Determinism
+// @Summary 重置指定设备的性能决定性设置
+// @Produce json
+// @Param dvIdList body []int true "设备ID列表"
+// @Success 200 {array} FailedMessage "返回失败的设备及其错误信息"
+// @Router /ResetPerfDeterminism [post]
 func ResetPerfDeterminism(dvIdList []int) (failedMessage []FailedMessage) {
 	errorMap := make(map[int][]string)
 	for _, device := range dvIdList {
@@ -688,7 +936,19 @@ func SetClockRange(dvIdList []int, clkType string, minvalue string, maxvalue str
 
 //设置电压曲线
 
-// 设置 PowerPlay 级别
+// SetPowerPlayTableLevel 设置 PowerPlay 级别
+// @Summary Set PowerPlay table level for devices
+// @Description This function sets the PowerPlay table level for a list of devices. It checks the validity of the input values and adjusts the voltage settings accordingly.
+// @Tags Device
+// @Param dvIdList body []int true "List of device IDs"
+// @Param clkType query string true "Clock type (sclk or mclk)"
+// @Param point query string true "Voltage point"
+// @Param clk query string true "Clock value in MHz"
+// @Param volt query string true "Voltage value in mV"
+// @Param autoRespond query bool false "Automatically respond to out-of-spec warnings"
+// @Success 200 {string} string "PowerPlay table level set successfully"
+// @Failure 400 {string} string "Invalid input or unable to set PowerPlay table level"
+// @Router /SetPowerPlayTableLevel [post]
 func SetPowerPlayTableLevel(dvIdList []int, clkType string, point string, clk string, volt string, autoRespond bool) {
 	value := fmt.Sprintf("%s %s %s", point, clk, volt)
 	_, errPoint := strconv.Atoi(point)
@@ -699,9 +959,7 @@ func SetPowerPlayTableLevel(dvIdList []int, clkType string, point string, clk st
 		glog.Infof("Non-integer characters are present in %s", value)
 		return
 	}
-
 	confirmOutOfSpecWarning(autoRespond)
-
 	for _, device := range dvIdList {
 		pointVal, _ := strconv.Atoi(point)
 		clkVal, _ := strconv.Atoi(clk)
@@ -721,7 +979,17 @@ func SetPowerPlayTableLevel(dvIdList []int, clkType string, point string, clk st
 	}
 }
 
-// 设置时钟速度为OverDrive
+// SetClockOverDrive 设置时钟速度为 OverDrive
+// @Summary Set Clock OverDrive for devices
+// @Description This function sets the Clock OverDrive level for a list of devices. It adjusts the clock speed and ensures the performance level is set to manual if needed.
+// @Tags Device
+// @Param dvIdList body []int true "List of device IDs"
+// @Param clktype query string true "Clock type (sclk or mclk)"
+// @Param value query string true "OverDrive value as a percentage (0-20%)"
+// @Param autoRespond query bool false "Automatically respond to out-of-spec warnings"
+// @Success 200 {string} string "Clock OverDrive set successfully"
+// @Failure 400 {string} string "Invalid input or unable to set Clock OverDrive"
+// @Router /SetClockOverDrive [post]
 func SetClockOverDrive(dvIdList []int, clktype string, value string, autoRespond bool) {
 	glog.Infof("Set Clock OverDrive Range: 0 to 20%")
 	intValue, err := strconv.Atoi(value)
@@ -2048,25 +2316,58 @@ func VDeviceCount() (count int, err error) { return dmiGetVDeviceCount() }
 //	return dmiGetDeviceRemainingInfo(dvInd)
 //}
 
-// 创建指定数量的虚拟设备
+// CreateVDevices 创建指定数量的虚拟设备
+// @Summary 创建虚拟设备
+// @Description 在指定的物理设备上创建指定数量的虚拟设备。
+// @Tags 虚拟设备
+// @Param dvInd query int true "物理设备的索引"
+// @Param vDevCount query int true "要创建的虚拟设备数量"
+// @Param vDevCUs query []int true "每个虚拟设备的计算单元数量"
+// @Param vDevMemSize query []int true "每个虚拟设备的内存大小"
+// @Success 200 {string} string "虚拟设备创建成功"
+// @Failure 400 {string} string "创建虚拟设备失败"
+// @Router /CreateVDevices [post]
 func CreateVDevices(dvInd int, vDevCount int, vDevCUs []int, vDevMemSize []int) (err error) {
 	return dmiCreateVDevices(dvInd, vDevCount, vDevCUs, vDevMemSize)
 }
 
-// 销毁指定物理设备上的所有虚拟设备
+// DestroyVDevice 销毁指定物理设备上的所有虚拟设备
+// @Summary 销毁所有虚拟设备
+// @Description 销毁指定物理设备上的所有虚拟设备。
+// @Tags 虚拟设备
+// @Param dvInd query int true "物理设备的索引"
+// @Success 200 {string} string "虚拟设备销毁成功"
+// @Failure 400 {string} string "虚拟设备销毁失败"
+// @Router /DestroyVDevice [delete]
 func DestroyVDevice(dvInd int) (err error) {
 	return dmiDestroyVDevices(dvInd)
 }
 
-// 销毁指定虚拟设备
+// DestroySingleVDevice 销毁指定虚拟设备
+// @Summary 销毁单个虚拟设备
+// @Description 销毁指定索引的虚拟设备。
+// @Tags 虚拟设备
+// @Param vDvInd query int true "虚拟设备的索引"
+// @Success 200 {string} string "虚拟设备销毁成功"
+// @Failure 400 {string} string "虚拟设备销毁失败"
+// @Router /DestroySingleVDevice [delete]
 func DestroySingleVDevice(vDvInd int) (err error) {
 	return dmiDestroySingleVDevice(vDvInd)
 }
 
-// 更新指定设备资源大小，vDevCUs和vDevMemSize为-1是不更改
-//func UpdateSingleVDevice(vDvInd int, vDevCUs int, vDevMemSize int) (err error) {
-//	return dmiUpdateSingleVDevice(vDvInd, vDevCUs, vDevMemSize)
-//}
+// UpdateSingleVDevice 更新指定设备资源大小
+// @Summary 更新虚拟设备资源
+// @Description 更新指定虚拟设备的计算单元和内存大小。如果 vDevCUs 或 vDevMemSize 为 -1，则对应的资源不更改。
+// @Tags 虚拟设备
+// @Param vDvInd query int true "虚拟设备的索引"
+// @Param vDevCUs query int true "更新后的计算单元数量"
+// @Param vDevMemSize query int true "更新后的内存大小"
+// @Success 200 {string} string "虚拟设备更新成功"
+// @Failure 400 {string} string "虚拟设备更新失败"
+// @Router /UpdateSingleVDevice [put]
+func UpdateSingleVDevice(vDvInd int, vDevCUs int, vDevMemSize int) (err error) {
+	return dmiUpdateSingleVDevice(vDvInd, vDevCUs, vDevMemSize)
+}
 
 // 启动虚拟设备
 func StartVDevice(vDvInd int) (err error) {
