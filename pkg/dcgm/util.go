@@ -161,7 +161,7 @@ func parseConfig(filePath string) (*DMIVDeviceInfo, error) {
 		case "vdev_id":
 			config.VMinorNumber, _ = strconv.Atoi(value)
 		case "PciBusId":
-			config.PicBusNumber = value
+			config.PciBusNumber = value
 		}
 	}
 

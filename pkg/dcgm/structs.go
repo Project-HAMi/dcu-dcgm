@@ -175,50 +175,90 @@ type RSMIOdVddcPoint struct {
 	Voltage   uint64
 }
 
+// MetricsTableHeader  度量表头信息
+// swagger:model MetricsTableHeader
 type MetricsTableHeader struct {
-	StructureSize   uint16
-	FormatRevision  uint8
+	// StructureSize   结构体大小
+	StructureSize uint16
+	// FormatRevision   格式版本
+	FormatRevision uint8
+	// ContentRevision   内容版本
 	ContentRevision uint8
 }
 
-// RSMIGPUMetrics 表示设备的度量信息
+// RSMIGPUMetrics  表示设备的度量信息
 // swagger:model RSMIGPUMetrics
 type RSMIGPUMetrics struct {
-	CommonHeader           MetricsTableHeader
-	TemperatureEdge        uint16
-	TemperatureHotspot     uint16
-	TemperatureMem         uint16
-	TemperatureVRGfx       uint16
-	TemperatureVRSoc       uint16
-	TemperatureVRMem       uint16
-	AverageGfxActivity     uint16
-	AverageUmcActivity     uint16
-	AverageMmActivity      uint16
-	AverageSocketPower     uint16
-	EnergyAccumulator      uint64
-	SystemClockCounter     uint64
+	// CommonHeader   公共表头
+	CommonHeader MetricsTableHeader
+	// TemperatureEdge   边缘温度
+	TemperatureEdge uint16
+	// TemperatureHotspot   热点温度
+	TemperatureHotspot uint16
+	// TemperatureMem   内存温度
+	TemperatureMem uint16
+	// TemperatureVRGfx   VR图形温度
+	TemperatureVRGfx uint16
+	// TemperatureVRSoc   VRSoC温度
+	TemperatureVRSoc uint16
+	// TemperatureVRMem   VR内存温度
+	TemperatureVRMem uint16
+	// AverageGfxActivity   平均图形活动
+	AverageGfxActivity uint16
+	// AverageUmcActivity   平均内存控制器活动
+	AverageUmcActivity uint16
+	// AverageMmActivity   平均多媒体活动
+	AverageMmActivity uint16
+	// AverageSocketPower   平均插座功率
+	AverageSocketPower uint16
+	// EnergyAccumulator   能量累加器
+	EnergyAccumulator uint64
+	// SystemClockCounter   系统时钟计数器
+	SystemClockCounter uint64
+	// AverageGfxclkFrequency   平均图形时钟频率
 	AverageGfxclkFrequency uint16
+	// AverageSocclkFrequency   平均SoC时钟频率
 	AverageSocclkFrequency uint16
-	AverageUclkFrequency   uint16
-	AverageVclk0Frequency  uint16
-	AverageDclk0Frequency  uint16
-	AverageVclk1Frequency  uint16
-	AverageDclk1Frequency  uint16
-	CurrentGfxclk          uint16
-	CurrentSocclk          uint16
-	CurrentUclk            uint16
-	CurrentVclk0           uint16
-	CurrentDclk0           uint16
-	CurrentVclk1           uint16
-	CurrentDclk1           uint16
-	ThrottleStatus         uint32
-	CurrentFanSpeed        uint16
-	PcieLinkWidth          uint16
-	PcieLinkSpeed          uint16
-	Padding                uint16
-	GfxActivityAcc         uint32
-	MemActivityAcc         uint32
-	TemperatureHBM         [4]uint16
+	// AverageUclkFrequency   平均内存时钟频率
+	AverageUclkFrequency uint16
+	// AverageVclk0Frequency   平均视频时钟0频率
+	AverageVclk0Frequency uint16
+	// AverageDclk0Frequency   平均显示时钟0频率
+	AverageDclk0Frequency uint16
+	// AverageVclk1Frequency   平均视频时钟1频率
+	AverageVclk1Frequency uint16
+	// AverageDclk1Frequency   平均显示时钟1频率
+	AverageDclk1Frequency uint16
+	// CurrentGfxclk   当前图形时钟
+	CurrentGfxclk uint16
+	// CurrentSocclk   当前SoC时钟
+	CurrentSocclk uint16
+	// CurrentUclk   当前内存时钟
+	CurrentUclk uint16
+	// CurrentVclk0   当前视频时钟0
+	CurrentVclk0 uint16
+	// CurrentDclk0   当前显示时钟0
+	CurrentDclk0 uint16
+	// CurrentVclk1   当前视频时钟1
+	CurrentVclk1 uint16
+	// CurrentDclk1   当前显示时钟1
+	CurrentDclk1 uint16
+	// ThrottleStatus   节流状态
+	ThrottleStatus uint32
+	// CurrentFanSpeed   当前风扇速度
+	CurrentFanSpeed uint16
+	// PcieLinkWidth   PCIe链路宽度
+	PcieLinkWidth uint16
+	// PcieLinkSpeed   PCIe链路速度（0.1 GT/s）
+	PcieLinkSpeed uint16
+	// Padding   填充
+	Padding uint16
+	// GfxActivityAcc   图形活动累加器
+	GfxActivityAcc uint32
+	// MemActivityAcc   内存活动累加器
+	MemActivityAcc uint32
+	// TempetureHBM   高带宽内存温度
+	TempetureHBM [4]uint16
 }
 
 type RSMIDevPerfLevel C.rsmi_dev_perf_level_t
@@ -255,11 +295,14 @@ const (
 	RSMIPowerProfPrstInvalid         RSMIPowerProfilePresetMasks = C.RSMI_PWR_PROF_PRST_INVALID           // Invalid power profile
 )
 
-// 定义 power profile status 结构体
+// RSMPowerProfileStatus  电源配置文件状态信息
 type RSMPowerProfileStatus struct {
-	AvailableProfiles RSMIBitField                // 哪些配置文件被系统支持
-	Current           RSMIPowerProfilePresetMasks // 当前激活的电源配置文件
-	NumProfiles       uint32                      // 可用的电源配置文件数量
+	// AvailableProfiles  哪些配置文件被系统支持
+	AvailableProfiles RSMIBitField
+	// Current 当前激活的电源配置文件
+	Current RSMIPowerProfilePresetMasks
+	//  NumProfiles 可用的电源配置文件数量
+	NumProfiles uint32
 }
 
 type RSMIVersion struct {
@@ -811,8 +854,10 @@ var tempTypeList = []struct {
 
 // TemperatureInfo 结构体表示一个设备的温度信息
 type TemperatureInfo struct {
-	DeviceID    int
-	SensorTemps map[string]float64 // 传感器名称到温度的映射
+	//  DeviceID 设备索引号
+	DeviceID int
+	//  SensorTemps 传感器名称到温度的映射
+	SensorTemps map[string]float64
 }
 
 // 固件块名称列表
@@ -822,63 +867,97 @@ var fwBlockNames = []string{
 	"SMC", "SOS", "TA RAS", "TA XGMI", "UVD", "VCE", "VCN",
 }
 
-// FirmwareInfo 结构体表示一个设备的固件信息
+// FirmwareInfo 设备的固件信息
 type FirmwareInfo struct {
-	DeviceID    int
-	FirmwareVer map[string]string // 固件块名称到版本信息的映射
+	//  DeviceID 设备索引号
+	DeviceID int
+	//  FirmwareVer 固件块名称到版本信息的映射
+	FirmwareVer map[string]string
 }
 
 var utilizationCounterName = []string{"GFX Activity", "Memory Activity"}
 
+// DeviceUseInfo 设备使用信息列表
 type DeviceUseInfo struct {
-	DeviceID      int
+	//  DeviceID 设备索引号
+	DeviceID int
+	//  GPUUsePercent 设备使用率
 	GPUUsePercent int
-	Utilization   map[string]uint64
+	//  利用率
+	Utilization map[string]uint64
 }
 
-// 设备信息结构体
+// DeviceMemVendorInfo 设备供应商信息
 type DeviceMemVendorInfo struct {
+	//  DeviceID 设备索引号
 	DeviceID int
-	Vendor   string
+	//  Vendor 供应商信息
+	Vendor string
 }
 
-// 设备PCIe带宽信息结构体
+// PcieBandwidthInfo 设备PCIe带宽信息
 type PcieBandwidthInfo struct {
+	//  DeviceID 设备索引号
 	DeviceID int
-	Sent     int64
+	//  Sent 发送
+	Sent int64
+	//  Received 接收
 	Received int64
+	//  MaxPktSz 最大PktSz
 	MaxPktSz int64
-	Bw       float64
+	//  Bw bw
+	Bw float64
 }
 
-// 设备PCIe重放计数信息结构体
+// PcieReplayCountInfo 设备的PCIe重放计数信息
 type PcieReplayCountInfo struct {
+	//  DeviceID 设备索引号
 	DeviceID int
-	Count    int64
+	// 重放总数
+	Count int64
 }
 
+// DevicePowerInfo 设备的功率信息
 type DevicePowerInfo struct {
+	//  DeviceID 设备索引号
 	DeviceID int
-	Power    int64
+	//  Power 设备功率
+	Power int64
 }
+
+// DevicePowerPlayInfo 设备的GPU时钟频率和电压信息
 type DevicePowerPlayInfo struct {
-	DeviceID      int
-	OD_SCLK       []string
-	OD_MCLK       string
-	OD_VDDC_CURVE []string
-	OD_RANGE      []string
-}
-
-type DeviceproductInfo struct {
-	DeviceID   int
-	CardSeries string
-	CardModel  string
-	CardVendor string
-	CardSKU    string
-}
-
-type DeviceProfile struct {
+	//  DeviceID 设备索引号
 	DeviceID int
+	//  OD_SCLK SCLK
+	OD_SCLK []string
+	//  OD_MCLK MCLK
+	OD_MCLK string
+	//  OD_VDDC_CURVE DDC_CURVE
+	OD_VDDC_CURVE []string
+	//  OD_RANGE RANGE
+	OD_RANGE []string
+}
+
+// DeviceproductInfo 设备的产品信息列表
+type DeviceproductInfo struct {
+	//  DeviceID 设备索引号
+	DeviceID int
+	//  CardSeries 设备名称
+	CardSeries string
+	//  CardModel 设备子系统名称
+	CardModel string
+	//  CardVendor 设备供应商名称
+	CardVendor string
+	//  CardSKU SKU
+	CardSKU string
+}
+
+// DeviceProfile 设备的电源配置文件信息
+type DeviceProfile struct {
+	//  DeviceID 设备索引号
+	DeviceID int
+	// Profiles 文件信息
 	Profiles []string
 }
 
@@ -888,25 +967,36 @@ var MemoryPageStatus = map[RSMIMemoryPageStatus]string{
 	RSMI_MEM_PAGE_STATUS_UNRESERVABLE: "unreservable",
 }
 
+// DeviceSerialInfo 设备的序列号信息
 type DeviceSerialInfo struct {
-	DeviceID     int
+	//  DeviceID 设备索引号
+	DeviceID int
+	//  SerialNumber 设备序列号
 	SerialNumber string
 }
 
+// DeviceUIdInfo 设备的唯一ID信息
 type DeviceUIdInfo struct {
+	//  DeviceID 设备索引号
 	DeviceID int
-	UId      string
+	//  UId 设备唯一id
+	UId string
 }
 
+// DeviceVBIOSInfo 设备的VBIOS版本信息
 type DeviceVBIOSInfo struct {
+	//  DeviceID 设备索引号
 	DeviceID int
-	VBIOS    string
+	//  VBIOS 版本信息
+	VBIOS string
 }
 
-// 设备电压信息
+// DeviceVoltageInfo 设备电压信息
 type DeviceVoltageInfo struct {
+	//  DeviceID 设备索引号
 	DeviceID int
-	Voltage  int64 // 电压以毫伏为单位
+	//  Voltage 电压信息
+	Voltage int64 // 电压以毫伏为单位
 }
 
 // 定义常量表示链接类型

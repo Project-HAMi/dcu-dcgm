@@ -607,17 +607,18 @@ func dmiGetVDeviceInfo(vDvInd int) (vDeviceInfo DMIVDeviceInfo, err error) {
 }
 
 // 指定物理设备剩余的CU和内存
-//func dmiGetDeviceRemainingInfo(dvInd int) (cus, memories uintptr, err error) {
-//	var ccus, cmemories C.size_t
-//	ret := C.dmiGetDeviceRemainingInfo(C.int(dvInd), &ccus, &cmemories)
-//	glog.Infof("dmiGetDeviceRemainingInfo ret:%v", ret)
-//	if err = dmiErrorString(ret); err != nil {
-//		return cus, memories, fmt.Errorf("Error dmiGetDeviceRemainingInfo:%s", err)
-//	}
-//	cus = uintptr(ccus)
-//	memories = uintptr(cmemories)
-//	return
-//}
+func dmiGetDeviceRemainingInfo(dvInd int) (cus, memories uint64, err error) {
+	var ccus, cmemories C.size_t
+	ret := C.dmiGetDeviceRemainingInfo(C.int(dvInd), &ccus, &cmemories)
+	glog.Infof("dmiGetDeviceRemainingInfo ret:%v", ret)
+	if err = dmiErrorString(ret); err != nil {
+		return cus, memories, fmt.Errorf("Error dmiGetDeviceRemainingInfo:%s", err)
+	}
+	cus = uint64(ccus)
+	memories = uint64(cmemories)
+	glog.Infof("cus:%v,memories:%v", cus, memories)
+	return
+}
 
 // 创建指定数量的虚拟设备
 //
