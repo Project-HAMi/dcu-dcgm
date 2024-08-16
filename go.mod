@@ -1,4 +1,4 @@
-module github.com/Project-HAMi/dcgm-dcu
+module github.com/Project-HAMi/dcu-dcgm
 
 go 1.21
 
