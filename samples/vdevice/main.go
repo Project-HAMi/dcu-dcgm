@@ -30,5 +30,6 @@ func main() {
 	dcgm.DestroyVDevice(1)
 	//更新虚拟设备资源
 	dcgm.UpdateSingleVDevice(2, 10, 2048)
-
+	//获取物理设备剩余资源
+	dcgm.DeviceRemainingInfo(1)
 }
