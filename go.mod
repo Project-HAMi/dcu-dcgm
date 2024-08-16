@@ -1,4 +1,4 @@
-module g.sugon.com/das/dcgm-dcu
+module github.com/Project-HAMi/dcu-exporter/dcgm-dcu
 
 go 1.21
 
