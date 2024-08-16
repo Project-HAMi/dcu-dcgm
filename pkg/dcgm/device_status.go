@@ -219,7 +219,7 @@ func rsmiDevGpuMetricsInfoGet(dvInd int) (gpuMetrics RSMIGPUMetrics, err error) 
 		Padding:                uint16(cgpuMetrics.padding),
 		GfxActivityAcc:         uint32(cgpuMetrics.gfx_activity_acc),
 		MemActivityAcc:         uint32(cgpuMetrics.mem_actvity_acc),
-		TemperatureHBM:         *((*[4]uint16)(unsafe.Pointer(&cgpuMetrics.temperature_hbm))),
+		TempetureHBM:           *((*[4]uint16)(unsafe.Pointer(&cgpuMetrics.temperature_hbm))),
 	}
 	glog.Info("rsmi_dev_gpu_metrics_info_get:%s", dataToJson(gpuMetrics))
 	return
