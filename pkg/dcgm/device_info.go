@@ -18,6 +18,7 @@ import "C"
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"unsafe"
 
 	"github.com/golang/glog"
@@ -635,28 +636,39 @@ func dmiGetDeviceRemainingInfo(dvInd int) (cus, memories uint64, err error) {
 //	└── 虚拟设备 2
 //	     ├── 计算单元: 4
 //	     └── 内存大小: 2048 字节
-func dmiCreateVDevices(dvInd int, vDevCount int, vDevCUs []int, vDevMemSize []int) (err error) {
+func dmiCreateVDevices(dvInd int, vDevCount int, vDevCUs []int, vDevMemSize []int) (vdevIDs []int, err error) {
 	if len(vDevCUs) != vDevCount || len(vDevMemSize) != vDevCount {
-		return fmt.Errorf("Invalid args")
+		return vdevIDs, fmt.Errorf("Invalid args")
 	}
 
 	fmt.Printf("deviceID: %d, vDevCount: %d, vDevCUs: %v, vDevMemSize: %v\n", dvInd, vDevCount, vDevCUs, vDevMemSize)
-	// Allocate C arrays from Go slices
+
+	// 获取调用前的配置文件列表
+	beforeFiles, err := getConfigFiles("/etc/vdev")
+	if err != nil {
+		return vdevIDs, fmt.Errorf("Failed to get config files: %v", err)
+	}
+	fmt.Println("Before processing, the files in /etc/vdev are:")
+	for _, file := range beforeFiles {
+		fmt.Println(" -", file.Name())
+	}
+
+	// 分配C数组内存
 	cVdevCus := (*C.int)(C.malloc(C.size_t(len(vDevCUs)) * C.sizeof_int))
 	cVdevMemSize := (*C.int)(C.malloc(C.size_t(len(vDevMemSize)) * C.sizeof_int))
 
 	if cVdevCus == nil || cVdevMemSize == nil {
-		return fmt.Errorf("Memory allocation failed")
+		return vdevIDs, fmt.Errorf("Memory allocation failed")
 	}
 	defer C.free(unsafe.Pointer(cVdevCus))
 	defer C.free(unsafe.Pointer(cVdevMemSize))
 
-	// Copy values from Go slices to C arrays
+	// 将Go切片的值复制到C数组
 	for i := 0; i < len(vDevCUs); i++ {
 		*((*C.int)(unsafe.Pointer(uintptr(unsafe.Pointer(cVdevCus)) + uintptr(i)*unsafe.Sizeof(*cVdevCus)))) = C.int(vDevCUs[i])
 		*((*C.int)(unsafe.Pointer(uintptr(unsafe.Pointer(cVdevMemSize)) + uintptr(i)*unsafe.Sizeof(*cVdevMemSize)))) = C.int(vDevMemSize[i])
 	}
-	// Print first elements for verification
+
 	fmt.Printf("cVdevCus[0]: %d, cVdevCus[1]: %d, cVdevMemSize[0]: %d, cVdevMemSize[1]: %d\n",
 		*((*C.int)(unsafe.Pointer(cVdevCus))),
 		*((*C.int)(unsafe.Pointer(uintptr(unsafe.Pointer(cVdevCus)) + uintptr(1)*unsafe.Sizeof(*cVdevCus)))),
@@ -668,8 +680,48 @@ func dmiCreateVDevices(dvInd int, vDevCount int, vDevCUs []int, vDevMemSize []in
 		cVdevCus, cVdevMemSize)
 	glog.Infof("dmiCreateVDevices ret:%v ,err:%v", ret, dmiErrorString(ret))
 	if err = dmiErrorString(ret); err != nil {
-		return fmt.Errorf("Error dmiCreateVDevices:%s", err)
+		return vdevIDs, fmt.Errorf("Error dmiCreateVDevices:%s", err)
 	}
+
+	// 获取调用后的配置文件列表
+	afterFiles, err := getConfigFiles("/etc/vdev")
+	if err != nil {
+		return vdevIDs, fmt.Errorf("Failed to get config files: %v", err)
+	}
+	fmt.Println("After processing, the files in /etc/vdev are:")
+	for _, file := range afterFiles {
+		fmt.Println(" -", file.Name())
+	}
+	// 找出新增的配置文件
+	newFiles := map[string]os.DirEntry{}
+	for _, af := range afterFiles {
+		found := false
+		for _, bf := range beforeFiles {
+			if af.Name() == bf.Name() {
+				found = true
+				break
+			}
+		}
+		if !found {
+			newFiles[af.Name()] = af
+		}
+	}
+	// 处理新增的配置文件，提取vdev_id并返回
+	for fileName := range newFiles {
+		filePath := "/etc/vdev/" + fileName
+		config, err := parseConfigFile(filePath)
+		if err != nil {
+			return vdevIDs, fmt.Errorf("Failed to parse config file %s: %v", filePath, err)
+		}
+		fmt.Printf("New config file: %s, content: %v\n", fileName, config)
+
+		if vdevIDStr, ok := config["vdev_id"]; ok {
+			var vdevID int
+			fmt.Sscanf(vdevIDStr, "%d", &vdevID)
+			vdevIDs = append(vdevIDs, vdevID)
+		}
+	}
+	glog.Infof("vdevIDs:%v", dataToJson(vdevIDs))
 	return
 }
 
