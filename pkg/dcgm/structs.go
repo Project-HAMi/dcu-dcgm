@@ -257,6 +257,7 @@ type RSMIGPUMetrics struct {
 	GfxActivityAcc uint32
 	// MemActivityAcc   内存活动累加器
 	MemActivityAcc uint32
+
 	// TempetureHBM   高带宽内存温度
 	TempetureHBM [4]uint16
 }

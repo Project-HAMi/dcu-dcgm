@@ -1422,7 +1422,7 @@ func ShowCurrentFans(dvIdList []int, printJSON bool) {
 // @Summary 显示设备温度传感器数据
 // @Tags Temperature
 // @Param dvIdList query []int true "设备 ID 列表"
-// @Success 200 {object} []TemperatureInfo "温度信息列表"
+// @Success 200 {object} TemperatureInfo "温度信息列表"
 // @Failure 400 {object} error "错误信息"
 // @Router /ShowCurrentTemps [get]
 func ShowCurrentTemps(dvIdList []int) (temperatureInfos []TemperatureInfo, err error) {
@@ -2629,16 +2629,16 @@ func DeviceRemainingInfo(dvInd int) (cus, memories uint64, err error) {
 
 // CreateVDevices 创建指定数量的虚拟设备
 // @Summary 创建虚拟设备
-// @Description 在指定的物理设备上创建指定数量的虚拟设备。
+// @Description 在指定的物理设备上创建指定数量的虚拟设备，返回创建的虚拟设备ID集合。
 // @Tags 虚拟设备
 // @Param dvInd query int true "物理设备的索引"
 // @Param vDevCount query int true "要创建的虚拟设备数量"
 // @Param vDevCUs query []int true "每个虚拟设备的计算单元数量"
 // @Param vDevMemSize query []int true "每个虚拟设备的内存大小"
-// @Success 200 {string} string "虚拟设备创建成功"
+// @Success 200 {array} int "虚拟设备创建成功，返回虚拟设备ID集合"
 // @Failure 400 {string} string "创建虚拟设备失败"
 // @Router /CreateVDevices [post]
-func CreateVDevices(dvInd int, vDevCount int, vDevCUs []int, vDevMemSize []int) (err error) {
+func CreateVDevices(dvInd int, vDevCount int, vDevCUs []int, vDevMemSize []int) (vdevIDs []int, err error) {
 	return dmiCreateVDevices(dvInd, vDevCount, vDevCUs, vDevMemSize)
 }
 

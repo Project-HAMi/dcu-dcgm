@@ -300,3 +300,33 @@ func printTableRow(format string, displayString interface{}) {
 	}
 	fmt.Print(" ")
 }
+
+// 获取指定目录下的文件列表，如果目录不存在或为空，返回空切片
+func getConfigFiles(dir string) ([]os.DirEntry, error) {
+	files, err := os.ReadDir(dir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			// 如果目录不存在，返回空切片
+			return []os.DirEntry{}, nil
+		}
+		return nil, err
+	}
+	return files, nil
+}
+
+// 解析配置文件内容
+func parseConfigFile(filePath string) (map[string]string, error) {
+	content, err := os.ReadFile(filePath)
+	if err != nil {
+		return nil, err
+	}
+	lines := strings.Split(string(content), "\n")
+	config := make(map[string]string)
+	for _, line := range lines {
+		parts := strings.Split(line, ":")
+		if len(parts) == 2 {
+			config[strings.TrimSpace(parts[0])] = strings.TrimSpace(parts[1])
+		}
+	}
+	return config, nil
+}
