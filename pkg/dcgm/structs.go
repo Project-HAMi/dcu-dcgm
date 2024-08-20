@@ -279,8 +279,10 @@ const (
 	RSMI_DEV_PERF_LEVEL_UNKNOWN         RSMIDevPerfLevel = C.RSMI_DEV_PERF_LEVEL_UNKNOWN
 )
 
+// 系统支持的配置文件
 type RSMIBitField C.rsmi_bit_field_t
 
+// 当前激活的电源配置文件
 type RSMIPowerProfilePresetMasks C.rsmi_power_profile_preset_masks_t
 
 // 定义 power profile preset masks 的枚举类型
@@ -460,12 +462,15 @@ type RSMIProcessInfo struct {
 	CuOccupancy uint32
 }
 
-// XGMI状态
+// RSMIXGMIStatus XGMI状态
 type RSMIXGMIStatus C.rsmi_xgmi_status_t
 
 const (
-	RSMIXGMIStatusNoErrors       RSMIXGMIStatus = C.RSMI_XGMI_STATUS_NO_ERRORS
-	RSMIXGMIStatusError          RSMIXGMIStatus = C.RSMI_XGMI_STATUS_ERROR
+	// RSMIXGMIStatus 0
+	RSMIXGMIStatusNoErrors RSMIXGMIStatus = C.RSMI_XGMI_STATUS_NO_ERRORS
+	// RSMIXGMIStatusError 1
+	RSMIXGMIStatusError RSMIXGMIStatus = C.RSMI_XGMI_STATUS_ERROR
+	// RSMIXGMIStatusMultipleErrors 2
 	RSMIXGMIStatusMultipleErrors RSMIXGMIStatus = C.RSMI_XGMI_STATUS_MULTIPLE_ERRORS
 )
 
@@ -770,15 +775,15 @@ type Device struct {
 	ComputeUnitCount float64
 
 	// ComputeUnitRemainingCount 设备剩余可用的计算单元数量
-	// @swagignore
 	ComputeUnitRemainingCount uintptr
 
 	// MemoryRemaining 设备剩余可用的内存量
-	// @swagignore
 	MemoryRemaining uintptr
 
 	// MaxVDeviceCount 物理设备上支持的最大虚拟设备数量
 	MaxVDeviceCount int
+	// VDeviceCount 虚拟设备数量
+	VDeviceCount int
 }
 
 // PhysicalDeviceInfo 物理设备信息

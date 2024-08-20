@@ -33,4 +33,7 @@ func main() {
 	//获取物理设备剩余资源
 	dcgm.DeviceRemainingInfo(1)
 	dcgm.CreateVDevices(0, 2, []int{10, 10}, []int{1024, 1024})
+	dcgm.GetDeviceInfo(0)
+	dcgm.GetDeviceByDvInd(0)
+	dcgm.GetDeviceByDvInd(1)
 }
