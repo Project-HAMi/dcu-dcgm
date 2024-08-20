@@ -536,7 +536,7 @@ func dmiGetDeviceCount() (count int, err error) {
 func dmiGetDeviceInfo(dvInd int) (deviceInfo DMIDeviceInfo, err error) {
 	var cdeviceInfo C.dmiDeviceInfo
 	ret := C.dmiGetDeviceInfo(C.int(dvInd), &cdeviceInfo)
-	glog.Infof("dmiDeviceInfo ret:%v", ret)
+	glog.Infof("dmiDeviceInfo ret:%v,cdeviceInfo:%v", ret, cdeviceInfo)
 	if err = dmiErrorString(ret); err != nil {
 		return deviceInfo, fmt.Errorf("Error dmiGetDeviceInfo:%s", err)
 	}

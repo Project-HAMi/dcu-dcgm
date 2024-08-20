@@ -260,6 +260,29 @@ func CollectDeviceMetrics() (monitorInfos []MonitorInfo, err error) {
 
 }*/
 
+// GetDeviceByDvInd 根据设备的 dvInd 获取物理设备信息
+// @Summary 获取物理设备信息
+// @Description 根据设备的 dvInd 获取物理设备信息
+// @Tags Device
+// @Param dvInd path int true "设备的 MinorNumber"
+// @Success 200 {object} PhysicalDeviceInfo "返回物理设备信息"
+// @Failure 404 {string} string "设备未找到"
+// @Failure 500 {string} string "内部服务器错误"
+// @Router /get-device-by-dvind/{dvInd} [get]
+func GetDeviceByDvInd(dvInd int) (physicalDeviceInfo PhysicalDeviceInfo, err error) {
+	devices, err := AllDeviceInfos()
+	if err != nil {
+		return physicalDeviceInfo, err
+	}
+	for _, physicalDevice := range devices {
+		if physicalDevice.Device.MinorNumber == dvInd {
+			glog.Infof("physicalDevice:%v", dataToJson(physicalDevice))
+			return physicalDevice, nil
+		}
+	}
+	return physicalDeviceInfo, fmt.Errorf("device with MinorNumber %d not found", dvInd)
+}
+
 func AllDeviceInfos() ([]PhysicalDeviceInfo, error) {
 	var allDevices []PhysicalDeviceInfo
 
@@ -348,6 +371,7 @@ func AllDeviceInfos() ([]PhysicalDeviceInfo, error) {
 			Clk:              sclk,
 			ComputeUnitCount: computeUnit,
 			MaxVDeviceCount:  maxVDeviceCount,
+			VDeviceCount:     0,
 		} // 创建PhysicalDeviceInfo并存入map
 		pdi := PhysicalDeviceInfo{
 			Device:         device,
@@ -402,6 +426,7 @@ func AllDeviceInfos() ([]PhysicalDeviceInfo, error) {
 			// 找到对应的物理设备并将虚拟设备添加到其VirtualDevices中
 			if pdi, exists := deviceMap[config.DeviceID]; exists {
 				pdi.VirtualDevices = append(pdi.VirtualDevices, *config)
+				pdi.Device.VDeviceCount = len(pdi.VirtualDevices) // 更新 VDeviceCount
 			}
 		}
 	}
@@ -861,6 +886,14 @@ func ResetXGMIErr(dvIdList []int) (failedMessage []FailedMessage) {
 	return
 }
 
+// XGMIErrorStatus 获取XGMI错误状态
+// @Summary 获取XGMI错误状态
+// @Description 获取指定物理设备的XGMI（高速互连链路）错误状态。
+// @Tags XGMI状态
+// @Param dvInd query int true "物理设备的索引"
+// @Success 200 {integer} int "返回XGMI错误状态码"
+// @Failure 400 {string} string "获取XGMI错误状态失败"
+// @Router /XGMIErrorStatus [get]
 func XGMIErrorStatus(dvInd int) (status RSMIXGMIStatus, err error) {
 	return rsmiDevXGMIErrorStatus(dvInd)
 }
@@ -2600,8 +2633,17 @@ func DeviceCount() (count int, err error) {
 	return dmiGetDeviceCount()
 }
 
-func VDeviceSingleInfo(dvInd int) (vDeviceInfo DMIVDeviceInfo, err error) {
-	return dmiGetVDeviceInfo(dvInd)
+// VDeviceSingleInfo
+// @Summary 获取单个虚拟设备的信息
+// @Description 根据设备索引获取对应的虚拟设备信息
+// @Tags VirtualDevice
+// @Param vDvInd query int true "设备索引"
+// @Success 200 {object} DMIVDeviceInfo "虚拟设备信息"
+// @Failure 400 {string} string "请求参数错误"
+// @Failure 500 {string} string "内部服务器错误"
+// @Router /VDeviceSingleInfo [get]
+func VDeviceSingleInfo(vDvInd int) (vDeviceInfo DMIVDeviceInfo, err error) {
+	return dmiGetVDeviceInfo(vDvInd)
 }
 
 // VDeviceCount 返回虚拟设备的数量。
@@ -2739,4 +2781,8 @@ func EncryptionVMStatus() (status bool, err error) {
 // @Router /PrintEventList/{device} [get]
 func PrintEventList(device int, delay int, eventList []string) {
 	printEventList(device, delay, eventList)
+}
+
+func GetDeviceInfo(dvInd int) (deviceInfo DMIDeviceInfo, err error) {
+	return dmiGetDeviceInfo(dvInd)
 }
