@@ -268,7 +268,7 @@ func CollectDeviceMetrics() (monitorInfos []MonitorInfo, err error) {
 // @Success 200 {object} PhysicalDeviceInfo "返回物理设备信息"
 // @Failure 404 {string} string "设备未找到"
 // @Failure 500 {string} string "内部服务器错误"
-// @Router /get-device-by-dvind/{dvInd} [get]
+// @Router /GetDeviceByDvInd [get]
 func GetDeviceByDvInd(dvInd int) (physicalDeviceInfo PhysicalDeviceInfo, err error) {
 	devices, err := AllDeviceInfos()
 	if err != nil {
@@ -285,7 +285,6 @@ func GetDeviceByDvInd(dvInd int) (physicalDeviceInfo PhysicalDeviceInfo, err err
 
 func AllDeviceInfos() ([]PhysicalDeviceInfo, error) {
 	var allDevices []PhysicalDeviceInfo
-
 	// 获取物理设备数量
 	deviceCount, err := rsmiNumMonitorDevices()
 	if err != nil {
@@ -732,6 +731,15 @@ func EccStatus(dvInd int, block RSMIGpuBlock) (state string, err error) {
 	return
 }
 
+func EccCount(dvInd int, block RSMIGpuBlock) (errorCount RSMIErrorCount, err error) {
+	errorCount, err = rsmiDevEccCountGet(dvInd, block)
+	return
+}
+
+func EccEnabled(dvInd int) (enabledBlocks int64, err error) {
+	return rsmiDevEccEnabledGet(dvInd)
+}
+
 // Temperature 获取设备温度
 // @Summary 获取设备温度
 // @Description 返回指定设备的当前温度
@@ -931,7 +939,8 @@ func ResetPerfDeterminism(dvIdList []int) (failedMessage []FailedMessage) {
 }
 
 // 为设备选定的时钟类型设定相应的频率范围
-func SetClockRange(dvIdList []int, clkType string, minvalue string, maxvalue string, autoRespond bool) {
+func SetClockRange(dvIdList []int, clkType string, minvalue string, maxvalue string, autoRespond bool) (failedMessage []FailedMessage) {
+	errorMap := make(map[int][]string)
 	if clkType != "sclk" && clkType != "mclk" {
 		glog.Infof("device :%v,Invalid range identifier %v", dvIdList, clkType)
 		glog.Infof("Unsupported range type %s", clkType)
@@ -951,12 +960,19 @@ func SetClockRange(dvIdList []int, clkType string, minvalue string, maxvalue str
 			glog.Errorf("device:%v Successfully set %v from %v(MHz) to %v(MHz)", clkType, minVal, maxVal)
 		} else {
 			glog.Errorf("device:%v Unable to set %v from %v(MHz) to %v(MHz)", device, clkType, minVal, maxVal)
+			errorMap[device] = append(errorMap[device], err.Error())
+			glog.Errorf("Unable to diable performance determinism, device: %v, error: %v", device, err)
+
 		}
 	}
+	for id, msg := range errorMap {
+		failedMessage = append(failedMessage, FailedMessage{ID: id, ErrorMsg: strings.Join(msg, "; ")})
+	}
+	glog.Infof("SetClockRange failedMessage:%v", failedMessage)
+	return
 }
 
-//设置电压曲线
-
+// 设置电压曲线
 // SetPowerPlayTableLevel 设置 PowerPlay 级别
 // @Summary 设置设备的 PowerPlay 表级别
 // @Description 该函数为设备列表设置 PowerPlay 表级别。它会检查输入值的有效性并相应地调整电压设置。
@@ -970,34 +986,53 @@ func SetClockRange(dvIdList []int, clkType string, minvalue string, maxvalue str
 // @Success 200 {string} string "成功设置 PowerPlay 表级别"
 // @Failure 400 {string} string "输入无效或无法设置 PowerPlay 表级别"
 // @Router /SetPowerPlayTableLevel [post]
-func SetPowerPlayTableLevel(dvIdList []int, clkType string, point string, clk string, volt string, autoRespond bool) {
+func SetPowerPlayTableLevel(dvIdList []int, clkType string, point string, clk string, volt string, autoRespond bool) (failedMessage []FailedMessage) {
 	value := fmt.Sprintf("%s %s %s", point, clk, volt)
 	_, errPoint := strconv.Atoi(point)
 	_, errClk := strconv.Atoi(clk)
 	_, errVolt := strconv.Atoi(volt)
+
+	// 创建一个 errorMap 用来记录错误信息
+	errorMap := make(map[int][]string)
+
 	if errPoint != nil || errClk != nil || errVolt != nil {
 		glog.Infof("Unable to set PowerPlay table level")
 		glog.Infof("Non-integer characters are present in %s", value)
+		// 这里可以返回错误信息
+		failedMessage = append(failedMessage, FailedMessage{ID: -1, ErrorMsg: "Invalid non-integer characters in parameters"})
 		return
 	}
+
 	confirmOutOfSpecWarning(autoRespond)
+
 	for _, device := range dvIdList {
 		pointVal, _ := strconv.Atoi(point)
 		clkVal, _ := strconv.Atoi(clk)
 		voltVal, _ := strconv.Atoi(volt)
+
 		if clkType == "sclk" || clkType == "mclk" {
 			err := rsmiDevOdVoltInfoSet(device, pointVal, clkVal, voltVal)
 			if err == nil {
-				glog.Infof("device:%v Successfully set voltage point %v to %v(MHz) %v(mV)", point, clk, volt)
+				glog.Infof("device:%v Successfully set voltage point %v to %v(MHz) %v(mV)", device, point, clk, volt)
 			} else {
-				glog.Errorf("device:%v Unable to set voltage point %v to %v(MHz) %v(mV)", point, clk, volt)
-
+				errorMsg := fmt.Sprintf("Unable to set voltage point %v to %v(MHz) %v(mV)", point, clk, volt)
+				glog.Errorf("device:%v %s", device, errorMsg)
+				errorMap[device] = append(errorMap[device], errorMsg)
 			}
 		} else {
-			glog.Errorf("device:%v Unable to set %s range", clkType)
+			errorMsg := fmt.Sprintf("Unsupported range type %s", clkType)
+			glog.Errorf("device:%v Unable to set %s range", device, clkType)
 			glog.Infof("Unsupported range type %s", clkType)
+			errorMap[device] = append(errorMap[device], errorMsg)
 		}
 	}
+
+	// 将 errorMap 转换为 failedMessage 列表
+	for id, msg := range errorMap {
+		failedMessage = append(failedMessage, FailedMessage{ID: id, ErrorMsg: strings.Join(msg, "; ")})
+	}
+
+	return
 }
 
 // SetClockOverDrive 设置时钟速度为 OverDrive
@@ -1011,12 +1046,13 @@ func SetPowerPlayTableLevel(dvIdList []int, clkType string, point string, clk st
 // @Success 200 {string} string "成功设置时钟 OverDrive"
 // @Failure 400 {string} string "输入无效或无法设置时钟 OverDrive"
 // @Router /SetClockOverDrive [post]
-func SetClockOverDrive(dvIdList []int, clktype string, value string, autoRespond bool) {
+func SetClockOverDrive(dvIdList []int, clktype string, value string, autoRespond bool) (failedMessage []FailedMessage) {
 	glog.Infof("Set Clock OverDrive Range: 0 to 20%")
 	intValue, err := strconv.Atoi(value)
 	if err != nil {
 		glog.Infof("Unable to set OverDrive level")
 		glog.Errorf("%s it is not an integer", value)
+		failedMessage = append(failedMessage, FailedMessage{ID: -1, ErrorMsg: "Invalid non-integer value for OverDrive"})
 		return
 	}
 
@@ -1024,36 +1060,40 @@ func SetClockOverDrive(dvIdList []int, clktype string, value string, autoRespond
 
 	for _, device := range dvIdList {
 		if intValue < 0 {
-			glog.Errorf("Unable to set OverDrive device: %v", device)
+			glog.Errorf("Unable to set OverDrive for device: %v", device)
 			glog.Infof("Overdrive cannot be less than 0%")
-			return
+			failedMessage = append(failedMessage, FailedMessage{ID: device, ErrorMsg: "OverDrive cannot be less than 0%"})
+			continue
 		}
 		if intValue > 20 {
-			glog.Infof("device:%v,Setting OverDrive to 20%", device)
+			glog.Infof("device:%v, Setting OverDrive to 20%%", device)
 			glog.Infof("OverDrive cannot be set to a value greater than 20%")
 			intValue = 20
 		}
 		perf, _ := PerfLevel(device)
 		if perf != "MANUAL" {
 			err := rsmiDevPerfLevelSet(device, RSMI_DEV_PERF_LEVEL_MANUAL)
-
 			if err == nil {
 				glog.Infof("device:%v Performance level set to manual", device)
 			} else {
 				glog.Errorf("device:%v Unable to set performance level to manual")
+				failedMessage = append(failedMessage, FailedMessage{ID: device, ErrorMsg: err.Error()})
+				continue
 			}
 		}
 		if clktype == "mclk" {
 			fsFile := fmt.Sprintf("/sys/class/drm/card%d/device/pp_mclk_od", device)
 			if _, err := os.Stat(fsFile); os.IsNotExist(err) {
 				glog.Infof("Unable to write to sysfs file")
-				glog.Warning("does not exist ", fsFile)
+				glog.Warning("File does not exist: ", fsFile)
+				failedMessage = append(failedMessage, FailedMessage{ID: device, ErrorMsg: "Sysfs file does not exist for mclk OverDrive"})
 				continue
 			}
 			f, err := os.OpenFile(fsFile, os.O_WRONLY, 0644)
-			if err == nil {
-				glog.Infof("Unable to write to sysfs file %v", fsFile)
+			if err != nil {
+				glog.Infof("Unable to open sysfs file %v", fsFile)
 				glog.Warning("IO or OS error")
+				failedMessage = append(failedMessage, FailedMessage{ID: device, ErrorMsg: "Unable to open sysfs file for mclk OverDrive"})
 				continue
 			}
 			defer f.Close()
@@ -1061,22 +1101,25 @@ func SetClockOverDrive(dvIdList []int, clktype string, value string, autoRespond
 			if err != nil {
 				glog.Infof("Unable to write to sysfs file %v", fsFile)
 				glog.Warning("IO or OS error")
+				failedMessage = append(failedMessage, FailedMessage{ID: device, ErrorMsg: "Unable to write to sysfs file for mclk OverDrive"})
 				continue
 			}
 			glog.Infof("device%v Successfully set %s OverDrive to %d%%", device, clktype, intValue)
 		} else if clktype == "sclk" {
 			err := rsmiDevOverdriveLevelSet(device, intValue)
-
 			if err == nil {
 				glog.Infof("device:%v Successfully set %s OverDrive to %d%%", device, clktype, intValue)
 			} else {
 				glog.Errorf("device:%v Unable to set %s OverDrive to %d%%", device, clktype, intValue)
+				failedMessage = append(failedMessage, FailedMessage{ID: device, ErrorMsg: err.Error()})
 			}
 		} else {
 			glog.Errorf("device:%v Unable to set OverDrive", device)
 			glog.Errorf("Unsupported clock type %v", clktype)
+			failedMessage = append(failedMessage, FailedMessage{ID: device, ErrorMsg: "Unsupported clock type"})
 		}
 	}
+	return
 }
 
 // SetPerfDeterminism 设置时钟频率级别以启用性能确定性
@@ -1104,7 +1147,7 @@ func SetPerfDeterminism(dvIdList []int, clkvalue string) (failedMessage []Failed
 	for _, device := range dvIdList {
 		err := rsmiPerfDeterminismModeSet(device, intValue)
 		if err != nil {
-			errorMap[device] = append(errorMap[device], "Unable to set performance determinism")
+			errorMap[device] = append(errorMap[device], err.Error())
 			glog.Errorf("Unable to set performance determinism and clock frequency to %v for device %v", clkvalue, device)
 		}
 	}
@@ -1244,6 +1287,7 @@ func SetProfile(dvIdList []int, profile string) (failedMessages []FailedMessage)
 						}
 					}
 				} else {
+					glog.Errorf("device:%v Failed to set profile to: %v", device, err.Error())
 					failedMessages = append(failedMessages, FailedMessage{ID: device, ErrorMsg: fmt.Sprintf("Failed to set profile to: %s", profile)})
 				}
 			}
@@ -1392,7 +1436,7 @@ func ShowClocks(dvIdList []int) {
 		if err == nil {
 			glog.Infof("Supported PCIe frequencies on GPU%d", device)
 			for x := 0; x < int(bw.TransferRate.NumSupported); x++ {
-				fr := fmt.Sprintf("%.1fGT/s x%d", float64(bw.TransferRate.Frequency[x])/1000000000, bw.lanes[x])
+				fr := fmt.Sprintf("%.1fGT/s x%d", float64(bw.TransferRate.Frequency[x])/1000000000, bw.Lanes[x])
 				if uint32(x) == bw.TransferRate.Current {
 					glog.Infof("Device %d: %d %s *", device, x, fr)
 				} else {
@@ -1564,22 +1608,22 @@ func PidList() (pidList []string, err error) {
 // @Success 200 {array} RSMIUtilizationCounter "利用率计数器列表"
 // @Failure 400 {object} error "错误信息"
 // @Router /GetCoarseGrainUtil [get]
-func GetCoarseGrainUtil(device int, typeName *string) (utilizationCounters []RSMIUtilizationCounter, err error) {
+func GetCoarseGrainUtil(device int, typeName string) (utilizationCounters []RSMIUtilizationCounter, err error) {
 	var length int
 
-	if typeName != nil {
+	if typeName != "" {
 		// 获取特定类型的利用率计数器
 		var i RSMIUtilizationCounterType
 		var found bool
 		for index, name := range utilizationCounterName {
-			if name == *typeName {
+			if name == typeName {
 				i = RSMIUtilizationCounterType(index)
 				found = true
 				break
 			}
 		}
 		if !found {
-			glog.Infof("No such coarse grain counter type: %v", *typeName)
+			glog.Infof("No such coarse grain counter type: %v", typeName)
 			return nil, fmt.Errorf("no such coarse grain counter type")
 		}
 		length = 1
@@ -1629,7 +1673,7 @@ func ShowGpuUse(dvIdList []int) (deviceUseInfos []DeviceUseInfo, err error) {
 
 		// 获取粗粒度利用率
 		typeName := "GFX Activity"
-		utilCounters, err := GetCoarseGrainUtil(device, &typeName)
+		utilCounters, err := GetCoarseGrainUtil(device, typeName)
 		if err != nil {
 			fmt.Printf("Device %d: Error getting coarse grain utilization: %v\n", device, err)
 		} else {
@@ -1722,7 +1766,7 @@ func ShowMemUse(dvIdList []int) {
 			fmt.Println("device: ", device, "GPU memory use (%)", busyPercent)
 		}
 		typeName := "Memory Activity"
-		utilCounters, err := GetCoarseGrainUtil(device, &typeName)
+		utilCounters, err := GetCoarseGrainUtil(device, typeName)
 		if err == nil {
 			for _, utCounter := range utilCounters {
 				fmt.Println("device: ", device, utilizationCounterName[utCounter.Type], utCounter.Value)
@@ -1812,7 +1856,7 @@ func ShowPcieReplayCount(dvIdList []int) (pcieReplayCountInfos []PcieReplayCount
 // @Success 200 {string} string "成功返回进程信息"
 // @Failure 400 {string} string "请求错误"
 // @Router /showPids [get]
-func ShowPids() {
+func ShowPids() (err error) {
 	fmt.Printf("========== KFD Processes ==========\n")
 	dataArray := [][]string{
 		{"PID", "PROCESS NAME", "GPU(s)", "VRAM USED", "SDMA USED", "CU OCCUPANCY"},
@@ -1861,7 +1905,7 @@ func ShowPids() {
 
 		dataArray = append(dataArray, []string{
 			pidStr,
-			getProcessName(pid),
+			GetProcessName(pid),
 			gpuNumber,
 			vramUsage,
 			sdmaUsage,
@@ -1872,9 +1916,10 @@ func ShowPids() {
 	fmt.Println("KFD process information:")
 	print2DArray(dataArray)
 	fmt.Printf("==========\n")
+	return
 }
 
-func getProcessName(pid int) string {
+func GetProcessName(pid int) string {
 	if pid < 1 {
 		log.Println("PID must be greater than 0")
 		return "UNKNOWN"
@@ -1975,6 +2020,7 @@ func ShowPowerPlayTable(dvIdList []int) (devicePowerPlayInfos []DevicePowerPlayI
 		}
 
 		devicePowerPlayInfos = append(devicePowerPlayInfos, powerPlayInfo)
+		glog.Infof("DevicePowerPlayInfo:%v", dataToJson(devicePowerPlayInfos))
 	}
 
 	fmt.Println("===============================================================")

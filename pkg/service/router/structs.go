@@ -1,8 +1,8 @@
-package dcgm
+package router
 
 /*
-#cgo CFLAGS: -Wall -I./include
-#cgo LDFLAGS: -L./lib -lrocm_smi64 -lhydmi -Wl,--unresolved-symbols=ignore-in-object-files
+#cgo CFLAGS: -Wall -I../../dcgm/include
+#cgo LDFLAGS: -L../../dcgm/lib -lrocm_smi64 -lhydmi -Wl,--unresolved-symbols=ignore-in-object-files
 #include <stdint.h>
 #include <kfd_ioctl.h>
 #include <rocm_smi64Config.h>
@@ -121,7 +121,7 @@ const (
 	RSMI_VOLT_LAST                       = C.RSMI_VOLT_LAST
 )
 
-type RSMIUtilizationCounterType C.RSMI_UTILIZATION_COUNTER_TYPE
+type RSMIUtilizationCounterType uint32
 
 const (
 	RSMI_UTILIZATION_COUNTER_FIRST RSMIUtilizationCounterType = C.RSMI_UTILIZATION_COUNTER_FIRST
@@ -651,13 +651,13 @@ type DMIDeviceInfo struct {
 	Name             string
 	ComputeUnitCount int
 	// @swagignore
-	ComputeUnitRemainingCount uintptr
+	ComputeUnitRemainingCount uint64
 	// @swagignore
-	MemoryRemaining uintptr
+	MemoryRemaining uint64
 	// @swagignore
-	GlobalMemSize uintptr
+	GlobalMemSize uint64
 	// @swagignore
-	UsageMemSize    uintptr
+	UsageMemSize    uint64
 	DeviceID        int
 	Percent         int
 	MaxVDeviceCount int
@@ -673,11 +673,11 @@ type DMIVDeviceInfo struct {
 
 	// GlobalMemSize 虚拟设备的全局内存大小
 	// @swagignore
-	GlobalMemSize uintptr
+	GlobalMemSize uint64
 
 	// UsageMemSize 虚拟设备的已使用内存大小
 	// @swagignore
-	UsageMemSize uintptr
+	UsageMemSize uint64
 
 	// ContainerID 虚拟设备的容器ID
 	ContainerID uint64
@@ -775,10 +775,10 @@ type Device struct {
 	ComputeUnitCount float64
 
 	// ComputeUnitRemainingCount 设备剩余可用的计算单元数量
-	ComputeUnitRemainingCount uintptr
+	ComputeUnitRemainingCount uint64
 
 	// MemoryRemaining 设备剩余可用的内存量
-	MemoryRemaining uintptr
+	MemoryRemaining uint64
 
 	// MaxVDeviceCount 物理设备上支持的最大虚拟设备数量
 	MaxVDeviceCount int

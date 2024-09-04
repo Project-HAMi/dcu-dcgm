@@ -187,7 +187,7 @@ func rsmiDevPciBandwidthGet(dvInd int) (rsmiPcieBandwidth RSMIPcieBandwidth, err
 			Current:      uint32(bandwidth.transfer_rate.current),
 			Frequency:    *(*[32]uint64)(unsafe.Pointer(&bandwidth.transfer_rate)),
 		},
-		lanes: *(*[32]uint32)(unsafe.Pointer(&bandwidth.lanes)),
+		Lanes: *(*[32]uint32)(unsafe.Pointer(&bandwidth.lanes)),
 	}
 	glog.Infof("RSMIPcieBandwidth:%v", dataToJson(rsmiPcieBandwidth))
 	return
@@ -365,6 +365,7 @@ func rsmiDevMemoryReservedPagesGet(dvInd int) (numPages int, records []RSMIRetir
 func rsmiDevFanRpmsGet(dvInd, sensorInd int) (speed int64, err error) {
 	var cspeed C.int64_t
 	ret := C.rsmi_dev_fan_rpms_get(C.uint32_t(dvInd), C.uint32_t(sensorInd), &cspeed)
+	glog.Infof("rsmi_dev_fan_rpms_get: ret:%v ,retstr:%v", ret, errorString(ret))
 	if err = errorString(ret); err != nil {
 		return speed, fmt.Errorf("Error rsmi_dev_fan_rpms_get:%s", err)
 	}
@@ -377,6 +378,7 @@ func rsmiDevFanRpmsGet(dvInd, sensorInd int) (speed int64, err error) {
 func rsmiDevFanSpeedGet(dvInd, sensorInd int) (speed int64, err error) {
 	var cspeed C.int64_t
 	ret := C.rsmi_dev_fan_speed_get(C.uint32_t(dvInd), C.uint32_t(sensorInd), &cspeed)
+	glog.Infof("rsmi_dev_fan_speed_get ret:%v ,retstr:%v", ret, errorString(ret))
 	if err = errorString(ret); err != nil {
 		return speed, fmt.Errorf("Error rsmiDevFanSpeedGet:%s", err)
 	}
@@ -388,6 +390,7 @@ func rsmiDevFanSpeedGet(dvInd, sensorInd int) (speed int64, err error) {
 func rsmiDevFanSpeedMaxGet(dvInd, sensorInd int) (maxSpeed int64, err error) {
 	var cmaxSpeed C.uint64_t
 	ret := C.rsmi_dev_fan_speed_max_get(C.uint32_t(dvInd), C.uint32_t(sensorInd), &cmaxSpeed)
+	glog.Infof("rsmi_dev_fan_speed_max_get ret:%v ,retstr:%v", ret, errorString(ret))
 	if err = errorString(ret); err != nil {
 		return maxSpeed, fmt.Errorf("Error rsmiDevFanSpeedMaxGet:%s", err)
 	}
@@ -490,31 +493,6 @@ func rsmiDevFirmwareVersionGet(dvInd int, fwBlock RSMIFwBlock) (fwVersion int64,
 		return fwVersion, fmt.Errorf("Error rsmi_dev_firmware_version_get:%s", err)
 	}
 	fwVersion = int64(cfwBlock)
-	return
-}
-
-// rsmiDevEccCountGet 获取GPU块的错误计数
-func rsmiDevEccCountGet(dvInd int, gpuBlock RSMIGpuBlock) (errorCount RSMIErrorCount, err error) {
-	var cerrorCount C.rsmi_error_count_t
-	ret := C.rsmi_dev_ecc_count_get(C.uint32_t(dvInd), C.rsmi_gpu_block_t(gpuBlock), &cerrorCount)
-	if err = errorString(ret); err != nil {
-		return errorCount, fmt.Errorf("Error rsmi_dev_ecc_count_get:%s", err)
-	}
-	errorCount = RSMIErrorCount{
-		CorrectableErr:   uint64(cerrorCount.correctable_err),
-		UncorrectableErr: uint64(cerrorCount.uncorrectable_err),
-	}
-	return
-}
-
-// rsmiDevEccEnabledGet 获取已启用的ECC位掩码
-func rsmiDevEccEnabledGet(dvInd int) (enabledBlocks int64, err error) {
-	var cenabledBlocks C.uint64_t
-	ret := C.rsmi_dev_ecc_enabled_get(C.uint32_t(dvInd), &cenabledBlocks)
-	if err = errorString(ret); err != nil {
-		return enabledBlocks, fmt.Errorf("Error rsmi_dev_ecc_enabled_get:%s", err)
-	}
-	enabledBlocks = int64(cenabledBlocks)
 	return
 }
 

@@ -22,7 +22,7 @@ import (
 //	@license.url	http://www.apache.org/licenses/LICENSE-2.0.html
 
 //	@host		localhost:8080
-//	@BasePath	/api/v1
+//	@BasePath	/router/v1
 
 // @securityDefinitions.basic	BasicAuth
 func main() {
@@ -86,7 +86,7 @@ func main() {
 	dcgm.ShowFwInfo([]int{0, 1, 2}, []string{"all"})
 
 	//获取DCU设备的的粗粒度利用率
-	dcgm.GetCoarseGrainUtil(0, nil)
+	dcgm.GetCoarseGrainUtil(0, "all")
 	//批量获取DCU的使用率
 	dcgm.ShowGpuUse([]int{0, 1, 2})
 	//批量获取设备消耗的能量

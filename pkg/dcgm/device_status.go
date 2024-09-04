@@ -238,3 +238,31 @@ func rsmiDevEccStatusGet(dvInd int, block RSMIGpuBlock) (state RSMIRasErrState, 
 	glog.Infof("rsmiDevEccStatusGet:%v", sstate)
 	return
 }
+
+// rsmiDevEccCountGet 获取GPU块的错误计数
+func rsmiDevEccCountGet(dvInd int, gpuBlock RSMIGpuBlock) (errorCount RSMIErrorCount, err error) {
+	var cerrorCount C.rsmi_error_count_t
+	ret := C.rsmi_dev_ecc_count_get(C.uint32_t(dvInd), C.rsmi_gpu_block_t(gpuBlock), &cerrorCount)
+	glog.Infof("rsmiDevEccCountGet:%v,ret retstr:%v", ret, errorString(ret))
+	if err = errorString(ret); err != nil {
+		return errorCount, fmt.Errorf("Error rsmi_dev_ecc_count_get:%s", err)
+	}
+	errorCount = RSMIErrorCount{
+		CorrectableErr:   uint64(cerrorCount.correctable_err),
+		UncorrectableErr: uint64(cerrorCount.uncorrectable_err),
+	}
+	glog.Infof("DCUBlockType:%v, DevEccCount:%v", gpuBlock, dataToJson(errorCount))
+	return
+}
+
+// rsmiDevEccEnabledGet 获取已启用的ECC位掩码
+func rsmiDevEccEnabledGet(dvInd int) (enabledBlocks int64, err error) {
+	var cenabledBlocks C.uint64_t
+	ret := C.rsmi_dev_ecc_enabled_get(C.uint32_t(dvInd), &cenabledBlocks)
+	if err = errorString(ret); err != nil {
+		return enabledBlocks, fmt.Errorf("Error rsmi_dev_ecc_enabled_get:%s", err)
+	}
+	enabledBlocks = int64(cenabledBlocks)
+	glog.Infof("DCUBlockType:%v", enabledBlocks)
+	return
+}
