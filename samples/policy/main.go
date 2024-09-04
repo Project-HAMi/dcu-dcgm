@@ -32,7 +32,7 @@ func main() {
 
 	//为设备选定的时钟类型设定相应的频率范围（K100_AI卡不支持该操作）
 	dcgm.SetClockRange([]int{0}, "sclk", "1", "100", true)
-	//设置 PowerPlay 级别
+	//设置 PowerPlay 级别（K100_AI卡不支持该操作）
 	dcgm.SetPowerPlayTableLevel([]int{0}, "sclk", "1", "10", "100", true)
 
 	//设置时钟频率级别以启用性能确定性（K100_AI卡不支持该操作）

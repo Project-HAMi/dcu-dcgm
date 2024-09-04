@@ -1,0 +1,2842 @@
+definitions:
+  router.DMIDeviceInfo:
+    properties:
+      computeUnitCount:
+        type: integer
+      computeUnitRemainingCount:
+        description: '@swagignore'
+        type: integer
+      deviceID:
+        type: integer
+      globalMemSize:
+        description: '@swagignore'
+        type: integer
+      maxVDeviceCount:
+        type: integer
+      memoryRemaining:
+        description: '@swagignore'
+        type: integer
+      name:
+        type: string
+      percent:
+        type: integer
+      usageMemSize:
+        description: '@swagignore'
+        type: integer
+    type: object
+  router.DMIVDeviceInfo:
+    properties:
+      computeUnitCount:
+        description: ComputeUnitCount 虚拟设备的计算单元数量
+        type: integer
+      containerID:
+        description: ContainerID 虚拟设备的容器ID
+        type: integer
+      deviceID:
+        description: DeviceID 虚拟设备的设备ID
+        type: integer
+      globalMemSize:
+        description: |-
+          GlobalMemSize 虚拟设备的全局内存大小
+          @swagignore
+        type: integer
+      name:
+        description: Name 虚拟设备的名称
+        type: string
+      pciBusNumber:
+        description: PciBusNumber 虚拟设备的总线编号
+        type: string
+      percent:
+        description: Percent 虚拟设备的使用百分比
+        type: integer
+      usageMemSize:
+        description: |-
+          UsageMemSize 虚拟设备的已使用内存大小
+          @swagignore
+        type: integer
+      vminorNumber:
+        description: VMinorNumber 虚拟设备的索引号
+        type: integer
+    type: object
+  router.Device:
+    properties:
+      clk:
+        description: Clk 设备的当前时钟频率
+        type: number
+      computeUnitCount:
+        description: ComputeUnitCount 设备的计算单元总数
+        type: number
+      computeUnitRemainingCount:
+        description: ComputeUnitRemainingCount 设备剩余可用的计算单元数量
+        type: integer
+      deviceId:
+        description: DeviceId 设备的唯一标识符
+        type: string
+      maxVDeviceCount:
+        description: MaxVDeviceCount 物理设备上支持的最大虚拟设备数量
+        type: integer
+      memoryCap:
+        description: MemoryCap 设备的内存容量
+        type: number
+      memoryRemaining:
+        description: MemoryRemaining 设备剩余可用的内存量
+        type: integer
+      memoryUsed:
+        description: MemoryUsed 设备已使用的内存
+        type: number
+      minorNumber:
+        description: MinorNumber 设备的索引号
+        type: integer
+      pciBusNumber:
+        description: PciBusNumber 设备的总线编号
+        type: string
+      pcieBwMb:
+        description: PcieBwMb 设备的PCIe带宽 (MB/s)
+        type: number
+      powerCap:
+        description: PowerCap 设备的功耗上限
+        type: number
+      powerUsage:
+        description: PowerUsage 设备当前的功耗
+        type: number
+      subSystemName:
+        description: SubSystemName 设备的子系统名称
+        type: string
+      temperature:
+        description: Temperature 设备当前的温度
+        type: number
+      utilizationRate:
+        description: UtilizationRate 设备的利用率
+        type: number
+      vdeviceCount:
+        description: VDeviceCount 虚拟设备数量
+        type: integer
+    type: object
+  router.DeviceInfo:
+    properties:
+      computeUnit:
+        description: ComputeUnit 设备的计算单元数量
+        type: number
+      devType:
+        description: DevType 设备类型
+        type: string
+      devTypeName:
+        description: DevTypeName 设备类型名称
+        type: string
+      deviceId:
+        description: DeviceId 设备ID
+        type: string
+      dvInd:
+        description: DvInd 设备索引
+        type: integer
+      memoryTotal:
+        description: MemoryTotal 设备的内存总量
+        type: number
+      memoryUsed:
+        description: MemoryUsed 设备的已使用内存量
+        type: number
+      pciBusNumber:
+        description: PciBusNumber 设备的总线号
+        type: string
+    type: object
+  router.DeviceMemVendorInfo:
+    properties:
+      deviceID:
+        description: DeviceID 设备索引号
+        type: integer
+      vendor:
+        description: Vendor 供应商信息
+        type: string
+    type: object
+  router.DevicePowerInfo:
+    properties:
+      deviceID:
+        description: DeviceID 设备索引号
+        type: integer
+      power:
+        description: Power 设备功率
+        type: integer
+    type: object
+  router.DevicePowerPlayInfo:
+    properties:
+      deviceID:
+        description: DeviceID 设备索引号
+        type: integer
+      od_MCLK:
+        description: OD_MCLK MCLK
+        type: string
+      od_RANGE:
+        description: OD_RANGE RANGE
+        items:
+          type: string
+        type: array
+      od_SCLK:
+        description: OD_SCLK SCLK
+        items:
+          type: string
+        type: array
+      od_VDDC_CURVE:
+        description: OD_VDDC_CURVE DDC_CURVE
+        items:
+          type: string
+        type: array
+    type: object
+  router.DeviceProfile:
+    properties:
+      deviceID:
+        description: DeviceID 设备索引号
+        type: integer
+      profiles:
+        description: Profiles 文件信息
+        items:
+          type: string
+        type: array
+    type: object
+  router.DeviceSerialInfo:
+    properties:
+      deviceID:
+        description: DeviceID 设备索引号
+        type: integer
+      serialNumber:
+        description: SerialNumber 设备序列号
+        type: string
+    type: object
+  router.DeviceUIdInfo:
+    properties:
+      deviceID:
+        description: DeviceID 设备索引号
+        type: integer
+      uid:
+        description: UId 设备唯一id
+        type: string
+    type: object
+  router.DeviceUseInfo:
+    properties:
+      deviceID:
+        description: DeviceID 设备索引号
+        type: integer
+      gpuusePercent:
+        description: GPUUsePercent 设备使用率
+        type: integer
+      utilization:
+        additionalProperties:
+          type: integer
+        description: 利用率
+        type: object
+    type: object
+  router.DeviceVBIOSInfo:
+    properties:
+      deviceID:
+        description: DeviceID 设备索引号
+        type: integer
+      vbios:
+        description: VBIOS 版本信息
+        type: string
+    type: object
+  router.DeviceVoltageInfo:
+    properties:
+      deviceID:
+        description: DeviceID 设备索引号
+        type: integer
+      voltage:
+        description: Voltage 电压信息
+        type: integer
+    type: object
+  router.DeviceproductInfo:
+    properties:
+      cardModel:
+        description: CardModel 设备子系统名称
+        type: string
+      cardSKU:
+        description: CardSKU SKU
+        type: string
+      cardSeries:
+        description: CardSeries 设备名称
+        type: string
+      cardVendor:
+        description: CardVendor 设备供应商名称
+        type: string
+      deviceID:
+        description: DeviceID 设备索引号
+        type: integer
+    type: object
+  router.FailedMessage:
+    description: 包含重置clock操作失败时的设备ID和错误信息
+    properties:
+      errorMsg:
+        description: ErrorMsg 错误信息
+        type: string
+      id:
+        description: ID 设备ID
+        type: integer
+    type: object
+  router.FirmwareInfo:
+    properties:
+      deviceID:
+        description: DeviceID 设备索引号
+        type: integer
+      firmwareVer:
+        additionalProperties:
+          type: string
+        description: FirmwareVer 固件块名称到版本信息的映射
+        type: object
+    type: object
+  router.MetricsTableHeader:
+    properties:
+      contentRevision:
+        description: ContentRevision   内容版本
+        type: integer
+      formatRevision:
+        description: FormatRevision   格式版本
+        type: integer
+      structureSize:
+        description: StructureSize   结构体大小
+        type: integer
+    type: object
+  router.MonitorInfo:
+    properties:
+      clk:
+        description: Clk 备系统时钟速度列表
+        type: number
+      deviceId:
+        description: DeviceId 设备序列号
+        type: string
+      memoryCap:
+        description: MemoryCap 设备内存总量
+        type: number
+      memoryUsed:
+        description: MemoryUsed 设备内存使用量
+        type: number
+      minorNumber:
+        description: MinorNumber 设备索引号
+        type: integer
+      pciBusNumber:
+        description: PciBusNumber PCI ID
+        type: string
+      pcieBwMb:
+        description: PcieBwMb pcie流量信息
+        type: number
+      powerCap:
+        description: PowerCap 设备功率上限
+        type: number
+      powerUsage:
+        description: PowerUsage 设备平均功耗
+        type: number
+      subSystemName:
+        description: SubSystemName 型号名称
+        type: string
+      temperature:
+        description: Temperature 设备温度
+        type: number
+      utilizationRate:
+        description: UtilizationRate 设备忙碌时间百分比
+        type: number
+    type: object
+  router.PcieBandwidthInfo:
+    properties:
+      bw:
+        description: Bw bw
+        type: number
+      deviceID:
+        description: DeviceID 设备索引号
+        type: integer
+      maxPktSz:
+        description: MaxPktSz 最大PktSz
+        type: integer
+      received:
+        description: Received 接收
+        type: integer
+      sent:
+        description: Sent 发送
+        type: integer
+    type: object
+  router.PcieReplayCountInfo:
+    properties:
+      count:
+        description: 重放总数
+        type: integer
+      deviceID:
+        description: DeviceID 设备索引号
+        type: integer
+    type: object
+  router.PhysicalDeviceInfo:
+    properties:
+      device:
+        allOf:
+        - $ref: '#/definitions/router.Device'
+        description: Device 物理设备的详细信息
+      virtualDevices:
+        description: VirtualDevices 该物理设备上关联的虚拟设备信息列表
+        items:
+          $ref: '#/definitions/router.DMIVDeviceInfo'
+        type: array
+    type: object
+  router.RSMIFrequencies:
+    properties:
+      current:
+        description: Current 表示当前使用的频率
+        type: integer
+      frequency:
+        description: Frequency 表示设备支持的频率列表
+        items:
+          type: integer
+        type: array
+      numSupported:
+        description: NumSupported 表示设备支持的频率数量
+        type: integer
+    type: object
+  router.RSMIGPUMetrics:
+    properties:
+      averageDclk0Frequency:
+        description: AverageDclk0Frequency   平均显示时钟0频率
+        type: integer
+      averageDclk1Frequency:
+        description: AverageDclk1Frequency   平均显示时钟1频率
+        type: integer
+      averageGfxActivity:
+        description: AverageGfxActivity   平均图形活动
+        type: integer
+      averageGfxclkFrequency:
+        description: AverageGfxclkFrequency   平均图形时钟频率
+        type: integer
+      averageMmActivity:
+        description: AverageMmActivity   平均多媒体活动
+        type: integer
+      averageSocclkFrequency:
+        description: AverageSocclkFrequency   平均SoC时钟频率
+        type: integer
+      averageSocketPower:
+        description: AverageSocketPower   平均插座功率
+        type: integer
+      averageUclkFrequency:
+        description: AverageUclkFrequency   平均内存时钟频率
+        type: integer
+      averageUmcActivity:
+        description: AverageUmcActivity   平均内存控制器活动
+        type: integer
+      averageVclk0Frequency:
+        description: AverageVclk0Frequency   平均视频时钟0频率
+        type: integer
+      averageVclk1Frequency:
+        description: AverageVclk1Frequency   平均视频时钟1频率
+        type: integer
+      commonHeader:
+        allOf:
+        - $ref: '#/definitions/router.MetricsTableHeader'
+        description: CommonHeader   公共表头
+      currentDclk0:
+        description: CurrentDclk0   当前显示时钟0
+        type: integer
+      currentDclk1:
+        description: CurrentDclk1   当前显示时钟1
+        type: integer
+      currentFanSpeed:
+        description: CurrentFanSpeed   当前风扇速度
+        type: integer
+      currentGfxclk:
+        description: CurrentGfxclk   当前图形时钟
+        type: integer
+      currentSocclk:
+        description: CurrentSocclk   当前SoC时钟
+        type: integer
+      currentUclk:
+        description: CurrentUclk   当前内存时钟
+        type: integer
+      currentVclk0:
+        description: CurrentVclk0   当前视频时钟0
+        type: integer
+      currentVclk1:
+        description: CurrentVclk1   当前视频时钟1
+        type: integer
+      energyAccumulator:
+        description: EnergyAccumulator   能量累加器
+        type: integer
+      gfxActivityAcc:
+        description: GfxActivityAcc   图形活动累加器
+        type: integer
+      memActivityAcc:
+        description: MemActivityAcc   内存活动累加器
+        type: integer
+      padding:
+        description: Padding   填充
+        type: integer
+      pcieLinkSpeed:
+        description: PcieLinkSpeed   PCIe链路速度（0.1 GT/s）
+        type: integer
+      pcieLinkWidth:
+        description: PcieLinkWidth   PCIe链路宽度
+        type: integer
+      systemClockCounter:
+        description: SystemClockCounter   系统时钟计数器
+        type: integer
+      temperatureEdge:
+        description: TemperatureEdge   边缘温度
+        type: integer
+      temperatureHotspot:
+        description: TemperatureHotspot   热点温度
+        type: integer
+      temperatureMem:
+        description: TemperatureMem   内存温度
+        type: integer
+      temperatureVRGfx:
+        description: TemperatureVRGfx   VR图形温度
+        type: integer
+      temperatureVRMem:
+        description: TemperatureVRMem   VR内存温度
+        type: integer
+      temperatureVRSoc:
+        description: TemperatureVRSoc   VRSoC温度
+        type: integer
+      tempetureHBM:
+        description: TempetureHBM   高带宽内存温度
+        items:
+          type: integer
+        type: array
+      throttleStatus:
+        description: ThrottleStatus   节流状态
+        type: integer
+    type: object
+  router.RSMIPcieBandwidth:
+    properties:
+      lanes:
+        description: lanes 表示 PCIe 通道的配置
+        items:
+          type: integer
+        type: array
+      transferRate:
+        allOf:
+        - $ref: '#/definitions/router.RSMIFrequencies'
+        description: TransferRate 表示传输速率的频率信息
+    type: object
+  router.RSMIUtilizationCounter:
+    properties:
+      type:
+        description: Type 表示利用率计数器的类型
+        type: integer
+      value:
+        description: Value 表示计数器的值
+        type: integer
+    type: object
+  router.TemperatureInfo:
+    properties:
+      deviceID:
+        description: DeviceID 设备索引号
+        type: integer
+      sensorTemps:
+        additionalProperties:
+          type: number
+        description: SensorTemps 传感器名称到温度的映射
+        type: object
+    type: object
+info:
+  contact: {}
+paths:
+  /AllDeviceInfos:
+    get:
+      description: 该接口返回所有物理设备的详细信息。
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 所有设备的详细信息
+          schema:
+            items:
+              $ref: '#/definitions/router.PhysicalDeviceInfo'
+            type: array
+        "400":
+          description: 无效的请求参数
+          schema: {}
+        "500":
+          description: 服务器内部错误
+          schema: {}
+      summary: 获取所有物理设备信息
+      tags:
+      - 设备
+  /CollectDeviceMetrics:
+    get:
+      description: 收集所有设备的监控指标信息。
+      responses:
+        "200":
+          description: 设备监控指标信息列表
+          schema:
+            items:
+              $ref: '#/definitions/router.MonitorInfo'
+            type: array
+        "400":
+          description: 请求错误
+          schema: {}
+        "404":
+          description: 设备未找到
+          schema: {}
+      summary: 获取设备监控中的指标
+  /CreateVDevices:
+    post:
+      description: 在指定的物理设备上创建指定数量的虚拟设备，返回创建的虚拟设备ID集合
+      parameters:
+      - description: 物理设备的索引
+        in: query
+        name: dvInd
+        required: true
+        type: integer
+      - description: 要创建的虚拟设备数量
+        in: query
+        name: vDevCount
+        required: true
+        type: integer
+      - collectionFormat: csv
+        description: 每个虚拟设备的计算单元数量
+        in: query
+        items:
+          type: integer
+        name: vDevCUs
+        required: true
+        type: array
+      - collectionFormat: csv
+        description: 每个虚拟设备的内存大小
+        in: query
+        items:
+          type: integer
+        name: vDevMemSize
+        required: true
+        type: array
+      responses:
+        "200":
+          description: 虚拟设备创建成功，返回虚拟设备ID集合
+          schema:
+            items:
+              type: integer
+            type: array
+        "400":
+          description: 创建虚拟设备失败
+          schema:
+            type: string
+      summary: 创建虚拟设备
+      tags:
+      - 虚拟设备
+  /DestroySingleVDevice:
+    delete:
+      description: 销毁指定索引的虚拟设备
+      parameters:
+      - description: 虚拟设备的索引
+        in: query
+        name: vDvInd
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: 虚拟设备销毁成功
+          schema:
+            type: string
+        "400":
+          description: 虚拟设备销毁失败
+          schema:
+            type: string
+      summary: 销毁单个虚拟设备
+      tags:
+      - 虚拟设备
+  /DestroyVDevice:
+    delete:
+      description: 销毁指定物理设备上的所有虚拟设备
+      parameters:
+      - description: 物理设备的索引
+        in: query
+        name: dvInd
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: 虚拟设备销毁成功
+          schema:
+            type: string
+        "400":
+          description: 虚拟设备销毁失败
+          schema:
+            type: string
+      summary: 销毁所有虚拟设备
+      tags:
+      - 虚拟设备
+  /DevBrand/{dvInd}:
+    get:
+      description: 根据设备索引获取品牌名称
+      parameters:
+      - description: 设备索引
+        in: path
+        name: dvInd
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: 设备品牌名称
+          schema:
+            type: string
+        "400":
+          description: 请求失败
+          schema: {}
+      summary: 获取设备品牌名称
+  /DevFanRpms/{dvInd}:
+    get:
+      consumes:
+      - application/json
+      description: 获取指定设备的风扇速度（RPM）
+      parameters:
+      - description: 设备索引
+        in: path
+        name: dvInd
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 风扇速度 (RPM)
+          schema:
+            type: integer
+        "400":
+          description: 失败信息
+          schema:
+            type: string
+      summary: 获取设备的风扇速度
+      tags:
+      - Device
+  /DevGpuMetricsInfo/{dvInd}:
+    get:
+      description: 根据设备 ID 获取 GPU 的度量信息。
+      parameters:
+      - description: 设备 ID
+        in: path
+        name: dvInd
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: GPU 度量信息
+          schema:
+            $ref: '#/definitions/router.RSMIGPUMetrics'
+        "400":
+          description: 请求错误
+          schema: {}
+        "404":
+          description: 设备未找到
+          schema: {}
+      summary: 获取 GPU 度量信息
+  /DevID:
+    get:
+      description: 根据设备索引返回设备ID的十六进制值
+      parameters:
+      - description: 设备索引
+        in: query
+        name: dvInd
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回设备ID的十六进制值
+          schema:
+            type: int
+        "400":
+          description: 请求参数错误
+          schema: {}
+        "500":
+          description: 服务器内部错误
+          schema: {}
+      summary: 获取设备ID的十六进制值
+      tags:
+      - Device
+  /DevPciBandwidth/{dvInd}:
+    get:
+      description: 根据设备 ID 获取设备的可用 PCIe 带宽列表。
+      parameters:
+      - description: 设备 ID
+        in: path
+        name: dvInd
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: PCIe 带宽列表
+          schema:
+            $ref: '#/definitions/router.RSMIPcieBandwidth'
+        "400":
+          description: 请求错误
+          schema: {}
+        "404":
+          description: 设备未找到
+          schema: {}
+      summary: 获取可用的 PCIe 带宽列表
+  /DevPerfLevelSet/{dvInd}:
+    post:
+      description: 根据设备 ID 设置 PowerPlay 性能级别。
+      parameters:
+      - description: 设备 ID
+        in: path
+        name: dvInd
+        required: true
+        type: integer
+      - description: 要设置的性能级别
+        in: query
+        name: level
+        required: true
+        type: string
+      responses:
+        "200":
+          description: 操作成功
+          schema:
+            type: string
+        "400":
+          description: 请求错误
+          schema: {}
+        "404":
+          description: 设备未找到
+          schema: {}
+      summary: 设置设备 PowerPlay 性能级别
+  /DevPowerProfileSet:
+    post:
+      consumes:
+      - application/json
+      description: 设置指定设备的功率配置文件
+      parameters:
+      - description: 设备索引
+        in: path
+        name: dvInd
+        required: true
+        type: integer
+      - description: 保留参数，通常为0
+        in: query
+        name: reserved
+        required: true
+        type: integer
+      - description: 功率配置文件的枚举值
+        in: query
+        name: profile
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功信息
+          schema:
+            type: string
+        "400":
+          description: 失败信息
+          schema:
+            type: string
+      summary: 设置设备功率配置文件
+      tags:
+      - Power
+  /DevSku/{dvInd}:
+    get:
+      description: 根据设备索引获取SKU
+      parameters:
+      - description: 设备索引
+        in: path
+        name: dvInd
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回设备SKU
+          schema:
+            type: int
+        "400":
+          description: 获取设备SKU失败
+          schema: {}
+      summary: 获取设备SKU
+  /DevVendorName/{dvInd}:
+    get:
+      description: 根据设备索引获取供应商名称
+      parameters:
+      - description: 设备索引
+        in: path
+        name: dvInd
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: 返回设备供应商名称
+          schema:
+            type: string
+        "400":
+          description: 请求失败
+          schema: {}
+      summary: 获取设备供应商名称
+  /DevVramVendor/{dvInd}:
+    get:
+      description: 根据设备索引获取显存供应商名称
+      parameters:
+      - description: 设备索引
+        in: path
+        name: dvInd
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: 返回显存供应商名称
+          schema:
+            type: string
+        "400":
+          description: 请求失败
+          schema: {}
+      summary: 获取设备显存供应商名称
+  /DeviceInfos:
+    get:
+      description: 返回所有设备的详细信息列表
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回设备信息列表
+          schema:
+            $ref: '#/definitions/router.DeviceInfo'
+        "500":
+          description: 服务器内部错误
+          schema: {}
+      summary: 获取设备信息列表
+      tags:
+      - Device
+  /EccStatus/{dvInd}:
+    get:
+      description: 返回指定GPU块的ECC状态
+      parameters:
+      - description: 设备索引
+        in: path
+        name: dvInd
+        required: true
+        type: integer
+      - description: GPU块
+        in: query
+        name: block
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回ECC状态
+          schema:
+            type: string
+        "400":
+          description: 请求参数错误
+          schema: {}
+        "500":
+          description: 服务器内部错误
+          schema: {}
+      summary: 获取GPU块的ECC状态
+  /EncryptionVMStatus:
+    get:
+      description: 返回虚拟机是否处于加密状态
+      responses:
+        "200":
+          description: 加密状态
+          schema:
+            type: boolean
+        "400":
+          description: 操作失败
+          schema:
+            type: string
+      summary: 获取当前虚拟机的加密状态
+      tags:
+      - VirtualDevice
+  /GetBus/{device}:
+    get:
+      consumes:
+      - application/json
+      description: 获取指定设备的总线信息
+      parameters:
+      - description: 设备索引
+        in: path
+        name: dvInd
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设备总线ID
+          schema:
+            type: string
+        "400":
+          description: 失败信息
+          schema:
+            type: string
+      summary: 获取设备总线信息
+      tags:
+      - Device
+  /MaxPower:
+    get:
+      description: 根据设备索引返回设备的最大功率（以瓦特为单位）
+      parameters:
+      - description: 设备索引
+        in: query
+        name: dvInd
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回设备的最大功率
+          schema:
+            type: int64
+        "400":
+          description: 请求参数错误
+          schema: {}
+        "500":
+          description: 服务器内部错误
+          schema: {}
+      summary: 获取设备的最大功率
+      tags:
+      - Device
+  /MemInfo:
+    get:
+      description: 根据设备索引和内存类型返回内存的使用量和总量
+      parameters:
+      - description: 设备索引
+        in: query
+        name: dvInd
+        required: true
+        type: integer
+      - description: '内存类型（可选值: vram, vis_vram, gtt）'
+        in: query
+        name: memType
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回指定内存类型的使用量和总量
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 请求参数错误
+          schema: {}
+        "500":
+          description: 服务器内部错误
+          schema: {}
+      summary: 获取设备的指定内存使用情况
+      tags:
+      - Memory
+  /MemoryPercent/{dvInd}:
+    get:
+      description: 根据设备 ID 获取设备内存的使用百分比。
+      parameters:
+      - description: 设备 ID
+        in: path
+        name: dvInd
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: 内存使用百分比
+          schema:
+            type: int
+        "400":
+          description: 请求错误
+          schema: {}
+        "404":
+          description: 设备未找到
+          schema: {}
+      summary: 获取内存使用百分比
+  /NumMonitorDevices:
+    get:
+      description: 获取监视的 GPU 数量
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: GPU 数量
+          schema:
+            type: int
+        "500":
+          description: 获取 GPU 数量失败
+          schema: {}
+      summary: 获取 GPU 数量
+  /PerfLevel/{dvInd}:
+    get:
+      description: 返回指定设备的当前性能等级
+      parameters:
+      - description: 设备索引
+        in: path
+        name: dvInd
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回当前性能水平
+          schema:
+            type: string
+        "400":
+          description: 请求参数错误
+          schema: {}
+        "500":
+          description: 服务器内部错误
+          schema: {}
+      summary: 获取设备的当前性能水平
+  /Power/{dvInd}:
+    get:
+      description: 返回指定设备的平均功耗
+      parameters:
+      - description: 设备索引
+        in: path
+        name: dvInd
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回平均功耗（瓦特）
+          schema:
+            type: int64
+        "400":
+          description: 请求参数错误
+          schema: {}
+        "500":
+          description: 服务器内部错误
+          schema: {}
+      summary: 获取设备的平均功耗
+  /PrintEventList/{device}:
+    get:
+      description: 打印指定设备的事件列表，并设置延迟
+      parameters:
+      - description: 设备索引
+        in: path
+        name: device
+        required: true
+        type: integer
+      - description: 延迟时间（秒）
+        in: query
+        name: delay
+        required: true
+        type: integer
+      - collectionFormat: csv
+        description: 事件列表
+        in: query
+        items:
+          type: string
+        name: eventList
+        required: true
+        type: array
+      responses:
+        "200":
+          description: 操作成功
+          schema:
+            type: string
+        "400":
+          description: 操作失败
+          schema:
+            type: string
+      summary: 打印设备的事件列表
+      tags:
+      - Event
+  /ProcessName:
+    get:
+      description: 根据进程ID（PID）返回对应的进程名称
+      parameters:
+      - description: 进程ID
+        in: query
+        name: pid
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回进程名称
+          schema:
+            type: string
+        "400":
+          description: 请求参数错误
+          schema: {}
+        "500":
+          description: 服务器内部错误
+          schema: {}
+      summary: 获取指定PID的进程名
+      tags:
+      - Process
+  /ResetClocks:
+    post:
+      description: 重置指定设备的时钟和性能等级为默认值
+      parameters:
+      - description: 设备ID列表
+        in: body
+        name: dvIdList
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回失败消息列表
+          schema:
+            items:
+              $ref: '#/definitions/router.FailedMessage'
+            type: array
+        "400":
+          description: 请求参数错误
+          schema: {}
+        "500":
+          description: 服务器内部错误
+          schema: {}
+      summary: 重置设备时钟
+  /ResetFans:
+    post:
+      description: 重置指定设备的风扇控制为默认值
+      parameters:
+      - description: 设备ID列表
+        in: body
+        name: dvIdList
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 复位成功
+          schema:
+            type: string
+        "400":
+          description: 请求参数错误
+          schema: {}
+        "500":
+          description: 服务器内部错误
+          schema: {}
+      summary: 复位风扇控制
+  /ResetPerfDeterminism:
+    post:
+      consumes:
+      - application/json
+      description: 该接口用于重置指定设备的性能决定性设置。请求体中需要包含设备ID列表。
+      parameters:
+      - description: 设备ID列表
+        in: body
+        name: dvIdList
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回失败的设备及其错误信息
+          schema:
+            items:
+              $ref: '#/definitions/router.FailedMessage'
+            type: array
+        "400":
+          description: 无效的请求体
+          schema: {}
+      summary: 重置Performance Determinism
+      tags:
+      - 设备
+  /ResetProfile:
+    post:
+      parameters:
+      - description: 设备ID列表
+        in: body
+        name: dvIdList
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回失败的设备及其错误信息
+          schema:
+            items:
+              $ref: '#/definitions/router.FailedMessage'
+            type: array
+      summary: 重置指定设备的电源配置文件和性能级别
+  /ResetXGMIErr:
+    post:
+      parameters:
+      - description: 设备ID列表
+        in: body
+        name: dvIdList
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回失败的设备及其错误信息
+          schema:
+            items:
+              $ref: '#/definitions/router.FailedMessage'
+            type: array
+      summary: 重置指定设备的XGMI错误状态
+  /SetClockOverDrive:
+    post:
+      consumes:
+      - application/json
+      description: 设置设备的时钟OverDrive
+      parameters:
+      - description: 设备ID列表
+        in: body
+        name: dvIdList
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      - description: 时钟类型（sclk 或 mclk）
+        in: query
+        name: clktype
+        required: true
+        type: string
+      - description: OverDrive值，表示为百分比（0-20%）
+        in: query
+        name: value
+        required: true
+        type: string
+      - description: 自动响应超出规格的警告
+        in: query
+        name: autoRespond
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功设置时钟OverDrive
+          schema:
+            type: string
+        "400":
+          description: 无效的请求参数或无法设置时钟OverDrive
+          schema:
+            type: string
+      summary: 设置设备的时钟OverDrive
+      tags:
+      - 设备
+  /SetClockRange:
+    post:
+      consumes:
+      - application/json
+      description: 设置设备的时钟频率范围（sclk 或 mclk）
+      parameters:
+      - description: 设备ID列表
+        in: body
+        name: dvIdList
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      - description: 时钟类型（sclk 或 mclk）
+        in: query
+        name: clkType
+        required: true
+        type: string
+      - description: 最小值（MHz）
+        in: query
+        name: minvalue
+        required: true
+        type: string
+      - description: 最大值（MHz）
+        in: query
+        name: maxvalue
+        required: true
+        type: string
+      - description: 自动响应超出规格的警告
+        in: query
+        name: autoRespond
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 时钟范围设置成功
+          schema:
+            type: string
+        "400":
+          description: 无效的请求参数或无法设置时钟范围
+          schema: {}
+      summary: 设置设备的时钟频率范围
+      tags:
+      - 设备
+  /SetEncryptionVMStatus:
+    post:
+      description: 根据提供的状态开启或关闭虚拟机加密
+      parameters:
+      - description: 加密状态
+        in: query
+        name: status
+        required: true
+        type: boolean
+      responses:
+        "200":
+          description: 操作成功
+          schema:
+            type: string
+        "400":
+          description: 操作失败
+          schema:
+            type: string
+      summary: 设置虚拟机加密状态
+      tags:
+      - VirtualDevice
+  /SetFanSpeed:
+    post:
+      consumes:
+      - application/json
+      description: 根据设备ID列表和给定的风扇速度，设置设备的风扇速度
+      parameters:
+      - description: 设备 ID 列表
+        in: body
+        name: dvIdList
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      - description: 风扇速度值（0-255,单位:RPM）
+        in: query
+        name: fan
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功信息
+          schema:
+            type: string
+        "400":
+          description: 失败信息
+          schema:
+            type: string
+      summary: 设置风扇转速
+      tags:
+      - Device
+  /SetPerfDeterminism:
+    post:
+      consumes:
+      - application/json
+      description: 设置设备的性能确定性
+      parameters:
+      - description: 设备ID列表
+        in: body
+        name: dvIdList
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      - description: 时钟频率值
+        in: query
+        name: clkvalue
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回失败的设备及其错误信息
+          schema:
+            items:
+              $ref: '#/definitions/router.FailedMessage'
+            type: array
+        "400":
+          description: 无效的请求体或无法设置性能确定性
+          schema: {}
+      summary: 设置设备的性能确定性
+      tags:
+      - 设备
+  /SetPerformanceLevel:
+    post:
+      consumes:
+      - application/json
+      description: 根据设备ID列表和给定的性能等级，设置设备的性能等级
+      parameters:
+      - description: 设备 ID 列表
+        in: body
+        name: deviceList
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      - description: 性能等级 (auto, low, high, normal)
+        in: query
+        name: level
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/router.FailedMessage'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/router.FailedMessage'
+      summary: 设置设备性能等级
+      tags:
+      - Device
+  /SetPowerPlayTableLevel:
+    post:
+      consumes:
+      - application/json
+      description: 设置设备的PowerPlay表级别
+      parameters:
+      - description: 设备ID列表
+        in: body
+        name: dvIdList
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      - description: 时钟类型（sclk 或 mclk）
+        in: query
+        name: clkType
+        required: true
+        type: string
+      - description: 电压点
+        in: query
+        name: point
+        required: true
+        type: string
+      - description: 时钟值（MHz）
+        in: query
+        name: clk
+        required: true
+        type: string
+      - description: 电压值（mV）
+        in: query
+        name: volt
+        required: true
+        type: string
+      - description: 自动响应超出规格的警告
+        in: query
+        name: autoRespond
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功设置PowerPlay表级别
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 无效的请求参数或无法设置PowerPlay表级别，返回失败消息列表
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 设置设备的PowerPlay表级别
+      tags:
+      - 设备
+  /SetProfile:
+    post:
+      consumes:
+      - application/json
+      description: 根据设备ID列表和给定的功率配置文件，设置设备的功率配置
+      parameters:
+      - description: 设备 ID 列表
+        in: body
+        name: dvIdList
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      - description: 功率配置文件名称:CUSTOM、VIDEO、POWER SAVING、COMPUTE、VR、3D FULL SCREEN、BOOTUP
+          DEFAULT
+        in: query
+        name: profile
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设置成功的消息列表
+          schema:
+            items:
+              $ref: '#/definitions/router.FailedMessage'
+            type: array
+        "400":
+          description: 失败的消息列表
+          schema:
+            $ref: '#/definitions/router.FailedMessage'
+      summary: 设置功率配置
+      tags:
+      - Power
+  /ShowAllConciseHw:
+    post:
+      consumes:
+      - application/json
+      description: 显示指定设备列表的简要硬件信息
+      parameters:
+      - description: 设备 ID 列表
+        in: body
+        name: dvIdList
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功信息
+          schema:
+            type: string
+        "400":
+          description: 失败信息
+          schema:
+            type: string
+      summary: 显示设备硬件信息
+      tags:
+      - Hardware
+  /ShowClocks:
+    post:
+      consumes:
+      - application/json
+      description: 显示指定设备的时钟信息
+      parameters:
+      - description: 设备 ID 列表
+        in: body
+        name: dvIdList
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功信息
+          schema:
+            type: string
+        "400":
+          description: 失败信息
+          schema:
+            type: string
+      summary: 显示时钟信息
+      tags:
+      - Clock
+  /StartVDevice/{vDvInd}:
+    get:
+      description: 启动虚拟设备，指定设备索引
+      parameters:
+      - description: 虚拟设备索引
+        in: path
+        name: vDvInd
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: 操作成功
+          schema:
+            type: string
+        "400":
+          description: 操作失败
+          schema:
+            type: string
+      summary: 启动指定的虚拟设备
+      tags:
+      - VirtualDevice
+  /StopVDevice/{vDvInd}:
+    get:
+      description: 停止虚拟设备，指定设备索引
+      parameters:
+      - description: 虚拟设备索引
+        in: path
+        name: vDvInd
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: 操作成功
+          schema:
+            type: string
+        "400":
+          description: 操作失败
+          schema:
+            type: string
+      summary: 停止指定的虚拟设备
+      tags:
+      - VirtualDevice
+  /Temperature/{dvInd}:
+    get:
+      description: 返回指定设备的当前温度
+      parameters:
+      - description: 设备索引
+        in: path
+        name: dvInd
+        required: true
+        type: integer
+      - description: 传感器类型:0：Edge GPU temperature; 1:Junction/hotspot temperature;2:VRAM
+          temperature
+        in: query
+        name: sensorType
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回温度（摄氏度）
+          schema:
+            type: float64
+        "400":
+          description: 请求参数错误
+          schema: {}
+        "500":
+          description: 服务器内部错误
+          schema: {}
+      summary: 获取设备温度
+  /UpdateSingleVDevice:
+    put:
+      description: 更新指定虚拟设备的计算单元和内存大小
+      parameters:
+      - description: 虚拟设备的索引
+        in: query
+        name: vDvInd
+        required: true
+        type: integer
+      - description: 更新后的计算单元数量
+        in: query
+        name: vDevCUs
+        required: true
+        type: integer
+      - description: 更新后的内存大小
+        in: query
+        name: vDevMemSize
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: 虚拟设备更新成功
+          schema:
+            type: string
+        "400":
+          description: 虚拟设备更新失败
+          schema:
+            type: string
+      summary: 更新虚拟设备资源
+      tags:
+      - 虚拟设备
+  /VDeviceSingleInfo:
+    get:
+      description: 根据设备索引获取对应的虚拟设备信息
+      parameters:
+      - description: 设备索引
+        in: query
+        name: vDvInd
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: 虚拟设备信息
+          schema:
+            $ref: '#/definitions/router.DMIVDeviceInfo'
+        "400":
+          description: 请求参数错误
+          schema:
+            type: string
+        "500":
+          description: 内部服务器错误
+          schema:
+            type: string
+      summary: 获取单个虚拟设备的信息
+      tags:
+      - VirtualDevice
+  /VbiosVersion/{dvInd}:
+    get:
+      description: 返回指定设备的VBIOS版本
+      parameters:
+      - description: 设备索引
+        in: path
+        name: dvInd
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回VBIOS版本
+          schema:
+            type: string
+        "400":
+          description: 请求参数错误
+          schema: {}
+        "500":
+          description: 服务器内部错误
+          schema: {}
+      summary: 获取设备的VBIOS版本
+  /Version:
+    get:
+      description: 返回指定组件的驱动程序版本
+      parameters:
+      - description: 驱动组件:FIRST、DRIVER、LAST
+        in: query
+        name: component
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回驱动程序版本
+          schema:
+            type: string
+        "400":
+          description: 请求参数错误
+          schema: {}
+        "500":
+          description: 服务器内部错误
+          schema: {}
+      summary: 获取当前系统的驱动程序版本
+  /XGMIErrorStatus:
+    get:
+      description: 获取指定物理设备的XGMI（高速互连链路）错误状态。
+      parameters:
+      - description: 物理设备的索引
+        in: query
+        name: dvInd
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: 返回XGMI错误状态码
+          schema:
+            type: integer
+        "400":
+          description: 获取XGMI错误状态失败
+          schema:
+            type: string
+      summary: 获取XGMI错误状态
+      tags:
+      - XGMI状态
+  /XGMIHiveIdGet:
+    get:
+      parameters:
+      - description: 设备索引
+        in: query
+        name: dvInd
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回设备的XGMI hive id
+          schema:
+            type: int64
+      summary: 获取指定设备的XGMI hive id
+  /device/info/{dvInd}:
+    get:
+      description: 根据设备索引获取对应的设备信息
+      parameters:
+      - description: 设备索引
+        in: path
+        name: dvInd
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: 设备信息
+          schema:
+            $ref: '#/definitions/router.DMIDeviceInfo'
+        "400":
+          description: 请求参数错误
+          schema:
+            type: string
+        "500":
+          description: 内部服务器错误
+          schema:
+            type: string
+      summary: 获取设备信息
+      tags:
+      - Device
+  /device/power:
+    post:
+      description: 获取并展示指定设备的平均图形功率消耗
+      parameters:
+      - description: 设备 ID 列表
+        in: body
+        name: dvIdList
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      responses:
+        "200":
+          description: 设备的功率信息
+          schema:
+            items:
+              $ref: '#/definitions/router.DevicePowerInfo'
+            type: array
+        "400":
+          description: 请求参数错误
+          schema:
+            type: string
+      summary: 展示设备的平均功率消耗
+      tags:
+      - 设备
+  /device/powerplay:
+    post:
+      description: 获取并展示指定设备的GPU内存时钟频率和电压表
+      parameters:
+      - description: 设备 ID 列表
+        in: body
+        name: dvIdList
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      responses:
+        "200":
+          description: 设备的GPU时钟频率和电压信息
+          schema:
+            items:
+              $ref: '#/definitions/router.DevicePowerPlayInfo'
+            type: array
+        "400":
+          description: 请求参数错误
+          schema:
+            type: string
+      summary: 展示设备的GPU内存时钟频率和电压
+      tags:
+      - 设备
+  /device/product:
+    post:
+      description: 获取并显示指定设备的产品名称、供应商、系列、型号和SKU信息
+      parameters:
+      - description: 设备 ID 列表
+        in: body
+        name: dvIdList
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      responses:
+        "200":
+          description: 设备的产品信息列表
+          schema:
+            items:
+              $ref: '#/definitions/router.DeviceproductInfo'
+            type: array
+        "400":
+          description: 请求参数错误
+          schema:
+            type: string
+      summary: 显示设备的产品名称
+      tags:
+      - 设备
+  /device/profile:
+    post:
+      description: 获取并显示指定设备的电源配置文件，包括可用的电源配置选项
+      parameters:
+      - description: 设备 ID 列表
+        in: body
+        name: dvIdList
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      responses:
+        "200":
+          description: 设备的电源配置文件信息列表
+          schema:
+            items:
+              $ref: '#/definitions/router.DeviceProfile'
+            type: array
+        "400":
+          description: 请求参数错误
+          schema:
+            type: string
+      summary: 显示设备的电源配置文件
+      tags:
+      - 设备
+  /device/range:
+    post:
+      description: 获取并显示指定设备的有效电流或电压范围
+      parameters:
+      - description: 设备ID列表
+        in: body
+        name: dvIdList
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      - description: 范围类型 (sclk, mclk, voltage)
+        in: body
+        name: rangeType
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: 设备的电流或电压范围信息
+          schema:
+            type: string
+        "400":
+          description: 请求参数错误
+          schema:
+            type: string
+      summary: 显示设备的电流或电压范围（K100_AI卡不支持该操作）
+      tags:
+      - 设备
+  /device/retiredpages:
+    post:
+      description: 获取并显示指定设备的退役内存页信息
+      parameters:
+      - description: 设备ID列表
+        in: body
+        name: dvIdList
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      - description: 退役类型 (默认为'all')
+        in: body
+        name: retiredType
+        schema:
+          type: string
+      responses:
+        "200":
+          description: 设备的退役页信息
+          schema:
+            type: string
+        "400":
+          description: 请求参数错误
+          schema:
+            type: string
+      summary: 显示设备的退役页信息
+      tags:
+      - 设备
+  /device/serialnumber:
+    post:
+      description: 获取并显示指定设备的序列号信息
+      parameters:
+      - description: 设备ID列表
+        in: body
+        name: dvIdList
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      responses:
+        "200":
+          description: 设备的序列号信息列表
+          schema:
+            items:
+              $ref: '#/definitions/router.DeviceSerialInfo'
+            type: array
+        "400":
+          description: 请求参数错误
+          schema:
+            type: string
+      summary: 显示设备的序列号
+      tags:
+      - 设备
+  /deviceCount:
+    get:
+      description: 获取当前系统中的设备数量
+      responses:
+        "200":
+          description: 设备数量
+          schema:
+            type: int
+        "500":
+          description: 内部服务器错误
+          schema:
+            type: string
+      summary: 获取设备数量
+      tags:
+      - Device
+  /deviceRemainingInfo/{dvInd}:
+    get:
+      description: 获取指定设备的剩余计算单元和内存信息
+      parameters:
+      - description: 物理设备索引
+        in: path
+        name: dvInd
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: 剩余的内存信息
+          schema:
+            type: string
+        "400":
+          description: 无效的设备索引
+          schema:
+            type: string
+        "500":
+          description: 内部服务器错误
+          schema:
+            type: string
+      summary: 获取设备剩余信息
+      tags:
+      - Device
+  /deviceinfo/{dvInd}:
+    get:
+      consumes:
+      - application/json
+      description: 根据设备 ID 获取物理设备的详细信息
+      parameters:
+      - description: Device ID
+        in: path
+        name: dvInd
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设备信息
+          schema:
+            $ref: '#/definitions/router.PhysicalDeviceInfo'
+        "400":
+          description: Invalid device ID
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: 获取设备信息
+      tags:
+      - Device
+  /devicename/{dvInd}:
+    get:
+      consumes:
+      - application/json
+      description: 根据设备 ID 获取设备名称
+      parameters:
+      - description: Device ID
+        in: path
+        name: dvInd
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设备名称
+          schema:
+            type: string
+        "400":
+          description: Invalid device ID
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: 获取设备名称
+      tags:
+      - Device
+  /energy:
+    post:
+      description: 获取并展示指定设备的能量消耗情况。
+      parameters:
+      - description: 设备 ID 列表
+        in: body
+        name: dvIdList
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      responses:
+        "200":
+          description: 成功返回设备的能量消耗信息
+          schema:
+            type: string
+        "400":
+          description: 请求参数错误
+          schema:
+            type: string
+      summary: 展示设备的能量消耗
+      tags:
+      - 设备
+  /fans/current:
+    post:
+      consumes:
+      - application/json
+      description: 显示指定设备的当前风扇转速和风扇级别
+      parameters:
+      - description: 设备 ID 列表
+        in: body
+        name: dvIdList
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功信息
+          schema:
+            type: string
+        "400":
+          description: 失败信息
+          schema:
+            type: string
+      summary: 展示风扇转速和风扇级别
+      tags:
+      - Fan
+  /fanspeedinfo/{dvInd}:
+    get:
+      consumes:
+      - application/json
+      description: 获取指定设备的风扇转速及其占最大转速的百分比
+      parameters:
+      - description: Device ID
+        in: path
+        name: dvInd
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 风扇转速信息
+          schema:
+            additionalProperties:
+              type: integer
+            type: object
+        "400":
+          description: Invalid device ID
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: 获取风扇转速
+      tags:
+      - Device
+  /firmware/info:
+    get:
+      parameters:
+      - collectionFormat: csv
+        description: 设备 ID 列表
+        in: query
+        items:
+          type: integer
+        name: dvIdList
+        required: true
+        type: array
+      - collectionFormat: csv
+        description: 固件类型列表
+        in: query
+        items:
+          type: string
+        name: fwType
+        required: true
+        type: array
+      responses:
+        "200":
+          description: 固件版本信息列表
+          schema:
+            items:
+              $ref: '#/definitions/router.FirmwareInfo'
+            type: array
+        "400":
+          description: 错误信息
+          schema: {}
+      summary: 显示设备固件版本信息
+      tags:
+      - Firmware
+  /gpu/use:
+    post:
+      parameters:
+      - description: 设备 ID 列表
+        in: body
+        name: dvIdList
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      responses:
+        "200":
+          description: 设备使用信息列表
+          schema:
+            items:
+              $ref: '#/definitions/router.DeviceUseInfo'
+            type: array
+        "400":
+          description: 错误信息
+          schema: {}
+      summary: 显示设备的 DCU 使用率
+      tags:
+      - DCU
+  /gpuuse/{dvInd}:
+    get:
+      consumes:
+      - application/json
+      description: 获取指定设备的DCU当前使用百分比
+      parameters:
+      - description: Device ID
+        in: path
+        name: dvInd
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: GPU使用百分比
+          schema:
+            type: int
+        "400":
+          description: Invalid device ID
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: 获取DCU使用率
+      tags:
+      - Device
+  /memory/info:
+    post:
+      description: 获取并展示指定设备的内存使用情况，包括不同类型的内存。
+      parameters:
+      - description: 设备 ID 列表
+        in: body
+        name: dvIdList
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      - description: 内存类型列表，如 'all' 或指定类型
+        in: body
+        name: memTypes
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      responses:
+        "200":
+          description: 成功返回设备的内存信息
+          schema:
+            type: string
+        "400":
+          description: 请求参数错误
+          schema:
+            type: string
+      summary: 展示设备内存信息
+      tags:
+      - 设备
+  /memory/use:
+    post:
+      description: 获取并展示指定设备的当前内存使用百分比和其他相关的利用率数据。
+      parameters:
+      - description: 设备 ID 列表
+        in: body
+        name: dvIdList
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      responses:
+        "200":
+          description: 成功返回设备的内存使用信息
+          schema:
+            type: string
+        "400":
+          description: 请求参数错误
+          schema:
+            type: string
+      summary: 展示设备内存使用情况
+      tags:
+      - 设备
+  /memory/vendor:
+    post:
+      description: 获取并展示指定设备的内存供应商信息。
+      parameters:
+      - description: 设备 ID 列表
+        in: body
+        name: dvIdList
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      responses:
+        "200":
+          description: 成功返回设备的内存供应商信息
+          schema:
+            items:
+              $ref: '#/definitions/router.DeviceMemVendorInfo'
+            type: array
+        "400":
+          description: 请求参数错误
+          schema:
+            type: string
+      summary: 展示设备的内存供应商信息
+      tags:
+      - 设备
+  /pcie/bandwidth:
+    post:
+      description: 获取并展示指定设备的PCIe带宽使用情况，包括发送和接收的带宽。
+      parameters:
+      - description: 设备 ID 列表
+        in: body
+        name: dvIdList
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      responses:
+        "200":
+          description: 成功返回设备的PCIe带宽使用信息
+          schema:
+            items:
+              $ref: '#/definitions/router.PcieBandwidthInfo'
+            type: array
+        "400":
+          description: 请求参数错误
+          schema:
+            type: string
+      summary: 展示设备的PCIe带宽使用情况
+      tags:
+      - 设备
+  /pcie/replaycount:
+    post:
+      description: 获取并展示指定设备的PCIe重放计数。
+      parameters:
+      - description: 设备 ID 列表
+        in: body
+        name: dvIdList
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      responses:
+        "200":
+          description: 设备的PCIe重放计数信息
+          schema:
+            items:
+              $ref: '#/definitions/router.PcieReplayCountInfo'
+            type: array
+        "400":
+          description: 请求参数错误
+          schema:
+            type: string
+      summary: 展示设备的PCIe重放计数
+      tags:
+      - 设备
+  /picbusinfo/{dvInd}:
+    get:
+      consumes:
+      - application/json
+      description: 获取设备的总线信息 (BDF格式)
+      parameters:
+      - description: Device ID
+        in: path
+        name: dvInd
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 总线信息
+          schema:
+            type: string
+        "400":
+          description: Invalid device ID
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: 获取总线信息
+      tags:
+      - Device
+  /pids:
+    get:
+      description: 获取并展示当前系统中运行的KFD进程的详细信息。
+      responses:
+        "200":
+          description: 成功返回进程信息
+          schema:
+            type: string
+        "400":
+          description: 请求错误
+          schema:
+            type: string
+      summary: 展示系统中正在运行的KFD进程信息
+      tags:
+      - 系统
+  /process/list:
+    get:
+      responses:
+        "200":
+          description: 进程 ID 列表
+          schema:
+            items:
+              type: string
+            type: array
+        "400":
+          description: 错误信息
+          schema: {}
+      summary: 获取计算进程列表
+      tags:
+      - Process
+  /showEvents:
+    post:
+      description: 获取并显示指定设备的事件信息。
+      parameters:
+      - description: 设备ID列表
+        in: body
+        name: dvIdList
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      - description: 事件类型列表
+        in: body
+        name: eventTypes
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      responses:
+        "200":
+          description: 成功返回设备的事件信息
+          schema:
+            type: string
+        "400":
+          description: 请求参数错误
+          schema:
+            type: string
+      summary: 显示设备的事件
+      tags:
+      - 设备
+  /showHopsTopology:
+    post:
+      description: 显示 GPU 设备之间的跳数信息。
+      parameters:
+      - description: 设备 ID 列表
+        in: body
+        name: dvIdList
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      responses:
+        "200":
+          description: GPU 拓扑跳数信息
+          schema:
+            type: string
+      summary: 显示 GPU 拓扑跳数
+      tags:
+      - Topology
+  /showHwTopology:
+    post:
+      description: 显示一组 GPU 设备的权重、跳数、链接类型和 NUMA 节点信息。
+      parameters:
+      - description: 设备 ID 列表
+        in: body
+        name: dvIdList
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      responses:
+        "200":
+          description: 完整的硬件拓扑信息
+          schema:
+            type: string
+      summary: 显示完整的硬件拓扑信息
+      tags:
+      - Topology
+  /showNumaTopology:
+    post:
+      description: 显示一组 GPU 设备的 NUMA 节点和关联信息。
+      parameters:
+      - description: 设备 ID 列表
+        in: body
+        name: dvIdList
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      responses:
+        "200":
+          description: NUMA 节点信息
+          schema:
+            type: string
+      summary: 显示 NUMA 节点信息
+      tags:
+      - Topology
+  /showTypeTopology:
+    post:
+      description: 显示 GPU 设备之间的链接类型信息。
+      parameters:
+      - description: 设备 ID 列表
+        in: body
+        name: dvIdList
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      responses:
+        "200":
+          description: GPU 拓扑链接类型信息
+          schema:
+            type: string
+      summary: 显示 GPU 拓扑链接类型
+      tags:
+      - Topology
+  /showUId:
+    post:
+      description: 获取并显示指定设备的唯一ID信息。
+      parameters:
+      - description: 设备ID列表
+        in: body
+        name: dvIdList
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      responses:
+        "200":
+          description: 设备的唯一ID信息列表
+          schema:
+            items:
+              $ref: '#/definitions/router.DeviceUIdInfo'
+            type: array
+        "400":
+          description: 请求参数错误
+          schema:
+            type: string
+      summary: 显示设备的唯一ID
+      tags:
+      - 设备
+  /showVbiosVersion:
+    post:
+      description: 获取并显示指定设备的VBIOS版本信息。
+      parameters:
+      - description: 设备ID列表
+        in: body
+        name: dvIdList
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      responses:
+        "200":
+          description: 设备的VBIOS版本信息列表
+          schema:
+            items:
+              $ref: '#/definitions/router.DeviceVBIOSInfo'
+            type: array
+        "400":
+          description: 请求参数错误
+          schema:
+            type: string
+      summary: 显示设备的VBIOS版本
+      tags:
+      - 设备
+  /showVoltage:
+    post:
+      description: 获取并显示指定设备的当前电压信息。
+      parameters:
+      - description: 设备ID列表
+        in: body
+        name: dvIdList
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      responses:
+        "200":
+          description: 设备的电压信息列表
+          schema:
+            items:
+              $ref: '#/definitions/router.DeviceVoltageInfo'
+            type: array
+        "400":
+          description: 请求参数错误
+          schema:
+            type: string
+      summary: 显示设备的电压信息
+      tags:
+      - 设备
+  /showVoltageCurve:
+    post:
+      description: 获取并显示指定设备的电压曲线点信息。
+      parameters:
+      - description: 设备ID列表
+        in: body
+        name: dvIdList
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      responses:
+        "200":
+          description: 设备的电压曲线点信息
+          schema:
+            type: string
+        "400":
+          description: 请求参数错误
+          schema:
+            type: string
+      summary: 显示设备的电压曲线点
+      tags:
+      - 设备
+  /showWeightTopology:
+    post:
+      description: 显示 GPU 设备之间的权重信息。
+      parameters:
+      - description: 设备 ID 列表
+        in: body
+        name: dvIdList
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      responses:
+        "200":
+          description: GPU 拓扑权重信息
+          schema:
+            type: string
+      summary: 显示 GPU 拓扑权重
+      tags:
+      - Topology
+  /showXgmiErr:
+    post:
+      description: 显示一组 GPU 设备的 XGMI 错误状态。
+      parameters:
+      - description: 设备 ID 列表
+        in: body
+        name: dvIdList
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      responses:
+        "200":
+          description: XGMI 错误状态信息
+          schema:
+            type: string
+      summary: 显示 XGMI 错误状态
+      tags:
+      - Topology
+  /temps/current:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 设备 ID 列表
+        in: body
+        name: dvIdList
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 温度信息列表
+          schema:
+            $ref: '#/definitions/router.TemperatureInfo'
+        "400":
+          description: 错误信息
+          schema: {}
+      summary: 显示设备温度传感器数据
+      tags:
+      - Temperature
+  /utilization/coarse:
+    post:
+      parameters:
+      - description: 设备 ID
+        in: body
+        name: device
+        required: true
+        schema:
+          type: integer
+      - description: 利用率计数器类型名称
+        in: body
+        name: typeName
+        schema:
+          type: string
+      responses:
+        "200":
+          description: 利用率计数器列表
+          schema:
+            items:
+              $ref: '#/definitions/router.RSMIUtilizationCounter'
+            type: array
+        "400":
+          description: 错误信息
+          schema: {}
+      summary: 获取设备粗粒度利用率
+      tags:
+      - Utilization
+  /vDeviceCount:
+    get:
+      description: 获取当前系统中的虚拟设备数量
+      responses:
+        "200":
+          description: 虚拟设备数量
+          schema:
+            type: int
+        "500":
+          description: 内部服务器错误
+          schema:
+            type: string
+      summary: 获取虚拟设备数量
+      tags:
+      - Device
+swagger: "2.0"
