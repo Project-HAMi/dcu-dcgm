@@ -26,6 +26,7 @@ func rsmiComputeProcessInfoGet() (processInfo []RSMIProcessInfo, numItems int, e
 	var cnumItems C.uint32_t
 	// 第一次调用获取进程数量
 	ret := C.rsmi_compute_process_info_get(nil, &cnumItems)
+	glog.Infof("rsmiComputeProcessInfoGet:%v, cnumItems:%v", ret, cnumItems)
 	if err := errorString(ret); err != nil {
 		return nil, 0, fmt.Errorf("Error rsmiComputeProcessInfoGet (initial call): %s", err)
 	}
