@@ -125,7 +125,10 @@ func DevVramVendor(dvInd int) (name string, err error) {
 // @Router /DevPciBandwidth [get]
 func DevPciBandwidth(dvInd int) (rsmiPcieBandwidth RSMIPcieBandwidth, err error) {
 	return rsmiDevPciBandwidthGet(dvInd)
+}
 
+func DevPciBandwidthSet(dvInd int, bwBitmask int64) (err error) {
+	return rsmiDevPciBandwidthSet(dvInd, bwBitmask)
 }
 
 // @Summary 获取内存使用百分比
@@ -171,6 +174,10 @@ func DevGpuMetricsInfo(dvInd int) (gpuMetrics RSMIGPUMetrics, err error) {
 	return rsmiDevGpuMetricsInfoGet(dvInd)
 }
 
+func DevPowerCapRange(dvInd int, senserId int) (max, min int64, err error) {
+	return rsmiDevPowerCapRangeGet(dvInd, senserId)
+}
+
 // @Summary 获取设备监控中的指标
 // @Description 收集所有设备的监控指标信息。
 // @Produce json
@@ -188,6 +195,7 @@ func CollectDeviceMetrics() (monitorInfos []MonitorInfo, err error) {
 		if err != nil {
 			return nil, err
 		}
+		glog.Infof("CollectDeviceMetrics bdfid:%v", bdfid)
 		// 解析BDFID
 		domain := (bdfid >> 32) & 0xffffffff
 		bus := (bdfid >> 8) & 0xff
@@ -257,8 +265,11 @@ func CollectDeviceMetrics() (monitorInfos []MonitorInfo, err error) {
 
 /*func CollectVDeviceMetrics() (devices []PhysicalDeviceInfo, err error) {
 
-
 }*/
+
+func DevGpuClkFreqSet(dvInd int, clkType RSMIClkType, freqBitmask int64) (err error) {
+	return rsmiDevGpuClkFreqSet(dvInd, clkType, freqBitmask)
+}
 
 // GetDeviceByDvInd 根据设备的 dvInd 获取物理设备信息
 // @Summary 获取物理设备信息
@@ -356,18 +367,19 @@ func AllDeviceInfos() ([]PhysicalDeviceInfo, error) {
 		//glog.Infof(" DCU[%v] SCLK : %.0f", i, sclk)
 		computeUnit := computeUnitType[devTypeName]
 		device := Device{
-			MinorNumber:      i,
-			PciBusNumber:     pciBusNumber,
-			DeviceId:         deviceId,
-			SubSystemName:    devTypeName,
-			Temperature:      t,
-			PowerUsage:       pu,
-			PowerCap:         pc,
-			MemoryCap:        mc,
-			MemoryUsed:       mu,
-			UtilizationRate:  ur,
-			PcieBwMb:         pcieBwMb,
-			Clk:              sclk,
+			MinorNumber:     i,
+			PciBusNumber:    pciBusNumber,
+			DeviceId:        deviceId,
+			SubSystemName:   devTypeName,
+			Temperature:     t,
+			PowerUsage:      pu,
+			PowerCap:        pc,
+			MemoryCap:       mc,
+			MemoryUsed:      mu,
+			UtilizationRate: ur,
+			PcieBwMb:        pcieBwMb,
+			Clk:             sclk,
+
 			ComputeUnitCount: computeUnit,
 			MaxVDeviceCount:  maxVDeviceCount,
 			VDeviceCount:     0,
@@ -740,6 +752,11 @@ func EccEnabled(dvInd int) (enabledBlocks int64, err error) {
 	return rsmiDevEccEnabledGet(dvInd)
 }
 
+// 设置设备的性能确定性模式(K100 AI不支持)
+func PerfDeterminismMode(dvInd int, clkValue int64) (err error) {
+	return rsmiPerfDeterminismModeSet(dvInd, clkValue)
+}
+
 // Temperature 获取设备温度
 // @Summary 获取设备温度
 // @Description 返回指定设备的当前温度
@@ -785,6 +802,16 @@ func Version(component RSMISwComponent) (varStr string, err error) {
 	varStr, err = rsmiVersionStrGet(component, 256)
 	glog.Infof("component; Version:%v,%v", component, varStr)
 	return
+}
+
+// 设置设备超速百分比
+func DevOverdriveLevelSet(dvInd, od int) (err error) {
+	return rsmiDevOverdriveLevelSet(dvInd, od)
+}
+
+// 获取设备的超速百分比
+func DevOverdriveLevelGet(dvInd int) (od int, err error) {
+	return rsmiDevOverdriveLevelGet(dvInd)
 }
 
 // ResetClocks 将设备的时钟重置为默认值
@@ -973,6 +1000,10 @@ func SetClockRange(dvIdList []int, clkType string, minvalue string, maxvalue str
 }
 
 // 设置电压曲线
+func DevOdVoltInfoSet(dvInd, vPoint, clkValue, voltValue int) (err error) {
+	return rsmiDevOdVoltInfoSet(dvInd, vPoint, clkValue, voltValue)
+}
+
 // SetPowerPlayTableLevel 设置 PowerPlay 级别
 // @Summary 设置设备的 PowerPlay 表级别
 // @Description 该函数为设备列表设置 PowerPlay 表级别。它会检查输入值的有效性并相应地调整电压设置。
@@ -1967,6 +1998,12 @@ func ShowPower(dvIdList []int) (devicePowerInfos []DevicePowerInfo, err error) {
 		}
 	}
 	glog.Infof("devicePowerInfos:%v", dataToJson(devicePowerInfos))
+	return
+}
+
+// 获取设备电压/频率曲线信息(K100 AI不支持)
+func DevOdVoltInfoGet(deInd int) (odv RSMIOdVoltFreqData, err error) {
+	odv, err = rsmiDevOdVoltInfoGet(deInd)
 	return
 }
 

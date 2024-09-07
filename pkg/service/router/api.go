@@ -11,7 +11,6 @@ import (
 
 // @Summary 获取设备名称
 // @Description 根据设备 ID 获取设备名称
-// @Tags Device
 // @Accept  json
 // @Produce  json
 // @Param   dvInd     path   int     true  "Device ID"
@@ -156,7 +155,43 @@ func DevPciBandwidth(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, ErrorResponse("请求失败"))
 		return
 	}
-	c.JSON(http.StatusOK, rsmiPcieBandwidth)
+	response := map[string]interface{}{
+		"rsmiPcieBandwidth": rsmiPcieBandwidth,
+	}
+	c.JSON(http.StatusOK, SuccessResponse(response))
+}
+
+// DevPciBandwidthSet 设置设备允许的 PCIe 带宽
+// @Summary 设置设备允许的 PCIe 带宽
+// @Description 根据设备索引和带宽掩码限制设备允许的 PCIe 带宽
+// @Produce json
+// @Param dvInd query int true "设备索引"
+// @Param bwBitmask query int64 true "带宽掩码"
+// @Success 200 {string} string "操作成功"
+// @Failure 400 {string} string "请求参数错误"
+// @Failure 500 {string} string "服务器内部错误"
+// @Router /DevPciBandwidthSet [post]
+func DevPciBandwidthSet(c *gin.Context) {
+	var dvInd int
+	var bwBitmask int64
+
+	// 获取 query 中的 dvInd 和 bwBitmask 参数
+	if err := c.ShouldBindQuery(&dvInd); err != nil {
+		c.JSON(http.StatusBadRequest, "Invalid dvInd parameter")
+		return
+	}
+	if err := c.ShouldBindQuery(&bwBitmask); err != nil {
+		c.JSON(http.StatusBadRequest, "Invalid bwBitmask parameter")
+		return
+	}
+
+	// 调用已有的 DevPciBandwidthSet 函数
+	if err := dcgm.DevPciBandwidthSet(dvInd, bwBitmask); err != nil {
+		c.JSON(http.StatusInternalServerError, ErrorResponse(err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, SuccessResponse(nil))
 }
 
 // 获取内存使用百分比
@@ -247,7 +282,6 @@ func CollectDeviceMetrics(c *gin.Context) {
 
 // @Summary 获取设备信息
 // @Description 根据设备 ID 获取物理设备的详细信息
-// @Tags Device
 // @Accept  json
 // @Produce  json
 // @Param   dvInd     path   int     true  "Device ID"
@@ -271,7 +305,6 @@ func GetDeviceByDvInd(c *gin.Context) {
 
 // @Summary 获取所有物理设备信息
 // @Description 该接口返回所有物理设备的详细信息。
-// @Tags 设备
 // @Produce json
 // @Success 200 {array} PhysicalDeviceInfo "所有设备的详细信息"
 // @Failure 400 {object} error "无效的请求参数"
@@ -288,7 +321,6 @@ func AllDeviceInfos(c *gin.Context) {
 
 // @Summary 获取总线信息
 // @Description 获取设备的总线信息 (BDF格式)
-// @Tags Device
 // @Accept  json
 // @Produce  json
 // @Param   dvInd     path   int     true  "Device ID"
@@ -315,7 +347,6 @@ func PicBusInfo(c *gin.Context) {
 
 // @Summary 获取风扇转速
 // @Description 获取指定设备的风扇转速及其占最大转速的百分比
-// @Tags Device
 // @Accept  json
 // @Produce  json
 // @Param   dvInd     path   int     true  "Device ID"
@@ -345,7 +376,6 @@ func FanSpeedInfo(c *gin.Context) {
 
 // @Summary 获取DCU使用率
 // @Description 获取指定设备的DCU当前使用百分比
-// @Tags Device
 // @Accept  json
 // @Produce  json
 // @Param   dvInd     path   int     true  "Device ID"
@@ -373,7 +403,6 @@ func GPUUse(c *gin.Context) {
 
 // @Summary 获取设备ID的十六进制值
 // @Description 根据设备索引返回设备ID的十六进制值
-// @Tags Device
 // @Produce json
 // @Param dvInd query int true "设备索引"
 // @Success 200 {int} id "返回设备ID的十六进制值"
@@ -400,7 +429,6 @@ func GetDevID(c *gin.Context) {
 
 // @Summary 获取设备的最大功率
 // @Description 根据设备索引返回设备的最大功率（以瓦特为单位）
-// @Tags Device
 // @Produce json
 // @Param dvInd query int true "设备索引"
 // @Success 200 {int64} power "返回设备的最大功率"
@@ -427,7 +455,6 @@ func GetMaxPower(c *gin.Context) {
 
 // @Summary 获取设备的指定内存使用情况
 // @Description 根据设备索引和内存类型返回内存的使用量和总量
-// @Tags Memory
 // @Produce json
 // @Param dvInd query int true "设备索引"
 // @Param memType query string true "内存类型（可选值: vram, vis_vram, gtt）"
@@ -459,7 +486,6 @@ func GetMemInfo(c *gin.Context) {
 
 // @Summary 获取设备信息列表
 // @Description 返回所有设备的详细信息列表
-// @Tags Device
 // @Produce json
 // @Success 200 {object} DeviceInfo "返回设备信息列表"
 // @Failure 500 {object} error "服务器内部错误"
@@ -476,7 +502,6 @@ func GetDeviceInfos(c *gin.Context) {
 
 // @Summary 获取指定PID的进程名
 // @Description 根据进程ID（PID）返回对应的进程名称
-// @Tags Process
 // @Produce json
 // @Param pid query int true "进程ID"
 // @Success 200 {string} string "返回进程名称"
@@ -647,6 +672,39 @@ func VbiosVersion(c *gin.Context) {
 	c.JSON(http.StatusOK, SuccessResponse(devVbios))
 }
 
+// Swagger 注解
+// @Summary 设置 GPU 时钟频率
+// @Description 设置 GPU 上指定时钟的允许频率。clkType 设置为默认值，无需传递。
+// @Tags GPU
+// @Accept json
+// @Produce json
+// @Param dvInd query int true "设备索引"
+// @Param freqBitmask query int64 true "掩码
+// @Success 200 {object} map[string]interface{} "成功"
+// @Failure 400 {object} error "请求参数错误"
+// @Failure 500 {object} error "服务器内部错误"
+// @Router /DevGpuClkFreqSet [post]
+func DevGpuClkFreqSet(c *gin.Context) {
+	dvInd, err := strconv.Atoi(c.Query("dvInd"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, ErrorResponse("无效的 dvInd 参数"))
+		return
+	}
+	freqBitmask, err := strconv.ParseInt(c.Query("freqBitmask"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, ErrorResponse("无效的 bwBitmask 参数"))
+		return
+	}
+
+	// 调用 DevGpuClkFreqSet 函数
+	err = dcgm.DevGpuClkFreqSet(dvInd, dcgm.RSMI_CLK_TYPE_SYS, freqBitmask)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, ErrorResponse(err.Error()))
+		return
+	}
+	c.JSON(http.StatusOK, SuccessResponse(nil))
+}
+
 // Version 获取当前系统的驱动程序版本
 // @Summary 获取当前系统的驱动程序版本
 // @Description 返回指定组件的驱动程序版本
@@ -766,7 +824,6 @@ func ResetXGMIErr(c *gin.Context) {
 // XGMIErrorStatus 获取XGMI错误状态
 // @Summary 获取XGMI错误状态
 // @Description 获取指定物理设备的XGMI（高速互连链路）错误状态。
-// @Tags XGMI状态
 // @Param dvInd query int true "物理设备的索引"
 // @Success 200 {integer} int "返回XGMI错误状态码"
 // @Failure 400 {string} string "获取XGMI错误状态失败"
@@ -816,7 +873,6 @@ func XGMIHiveIdGet(c *gin.Context) {
 // ResetPerfDeterminism 处理重置Performance Determinism
 // @Summary 重置Performance Determinism
 // @Description 该接口用于重置指定设备的性能决定性设置。请求体中需要包含设备ID列表。
-// @Tags 设备
 // @Accept json
 // @Produce json
 // @Param dvIdList body []int true "设备ID列表"
@@ -844,7 +900,6 @@ func ResetPerfDeterminism(c *gin.Context) {
 // SetClockRange 处理设置时钟频率范围
 // @Summary 设置设备的时钟频率范围
 // @Description 设置设备的时钟频率范围（sclk 或 mclk）
-// @Tags 设备
 // @Accept json
 // @Produce json
 // @Param dvIdList body []int true "设备ID列表"
@@ -881,7 +936,6 @@ func SetClockRange(c *gin.Context) {
 // SetPowerPlayTableLevel 处理设置PowerPlay表级别
 // @Summary 设置设备的PowerPlay表级别
 // @Description 设置设备的PowerPlay表级别
-// @Tags 设备
 // @Accept json
 // @Produce json
 // @Param dvIdList body []int true "设备ID列表"
@@ -920,7 +974,6 @@ func SetPowerPlayTableLevel(c *gin.Context) {
 // SetClockOverDrive 处理设置时钟OverDrive
 // @Summary 设置设备的时钟OverDrive
 // @Description 设置设备的时钟OverDrive
-// @Tags 设备
 // @Accept json
 // @Produce json
 // @Param dvIdList body []int true "设备ID列表"
@@ -955,7 +1008,6 @@ func SetClockOverDrive(c *gin.Context) {
 // setPerfDeterminism 处理设置性能确定性
 // @Summary 设置设备的性能确定性
 // @Description 设置设备的性能确定性
-// @Tags 设备
 // @Accept json
 // @Produce json
 // @Param dvIdList body []int true "设备ID列表"
@@ -988,7 +1040,6 @@ func SetPerfDeterminism(c *gin.Context) {
 // SetFanSpeed 设置风扇转速
 // @Summary 设置风扇转速
 // @Description 根据设备ID列表和给定的风扇速度，设置设备的风扇速度
-// @Tags Device
 // @Accept  json
 // @Produce  json
 // @Param dvIdList body []int true "设备 ID 列表"
@@ -1012,7 +1063,6 @@ func SetFanSpeed(c *gin.Context) {
 // DevFanRpms 获取设备的风扇速度
 // @Summary 获取设备的风扇速度
 // @Description 获取指定设备的风扇速度（RPM）
-// @Tags Device
 // @Accept  json
 // @Produce  json
 // @Param dvInd path int true "设备索引"
@@ -1040,7 +1090,6 @@ func DevFanRpms(c *gin.Context) {
 // SetPerformanceLevel 设置设备性能等级
 // @Summary 设置设备性能等级
 // @Description 根据设备ID列表和给定的性能等级，设置设备的性能等级
-// @Tags Device
 // @Accept  json
 // @Produce  json
 // @Param deviceList body []int true "设备 ID 列表"
@@ -1068,7 +1117,6 @@ func SetPerformanceLevel(c *gin.Context) {
 // SetProfile 设置功率配置
 // @Summary 设置功率配置
 // @Description 根据设备ID列表和给定的功率配置文件，设置设备的功率配置
-// @Tags Power
 // @Accept  json
 // @Produce  json
 // @Param dvIdList body []int true "设备 ID 列表"
@@ -1092,7 +1140,6 @@ func SetProfile(c *gin.Context) {
 // DevPowerProfileSet 设置设备功率配置文件
 // @Summary 设置设备功率配置文件
 // @Description 设置指定设备的功率配置文件
-// @Tags Power
 // @Accept  json
 // @Produce  json
 // @Param dvInd path int true "设备索引"
@@ -1132,7 +1179,6 @@ func DevPowerProfileSet(c *gin.Context) {
 // GetBus 获取设备总线信息
 // @Summary 获取设备总线信息
 // @Description 获取指定设备的总线信息
-// @Tags Device
 // @Accept  json
 // @Produce  json
 // @Param dvInd path int true "设备索引"
@@ -1161,7 +1207,6 @@ func GetBus(c *gin.Context) {
 // ShowAllConciseHw 显示设备硬件信息
 // @Summary 显示设备硬件信息
 // @Description 显示指定设备列表的简要硬件信息
-// @Tags Hardware
 // @Accept  json
 // @Produce  json
 // @Param dvIdList body []int true "设备 ID 列表"
@@ -1183,7 +1228,6 @@ func ShowAllConciseHw(c *gin.Context) {
 // ShowClocks 显示时钟信息
 // @Summary 显示时钟信息
 // @Description 显示指定设备的时钟信息
-// @Tags Clock
 // @Accept  json
 // @Produce  json
 // @Param dvIdList body []int true "设备 ID 列表"
@@ -1205,7 +1249,6 @@ func ShowClocks(c *gin.Context) {
 // ShowCurrentFans 展示风扇转速和风扇级别
 // @Summary 展示风扇转速和风扇级别
 // @Description 显示指定设备的当前风扇转速和风扇级别
-// @Tags Fan
 // @Accept  json
 // @Produce  json
 // @Param dvIdList body []int true "设备 ID 列表"
@@ -1225,7 +1268,6 @@ func ShowCurrentFans(c *gin.Context) {
 
 // ShowCurrentTemps 显示设备温度传感器数据
 // @Summary 显示设备温度传感器数据
-// @Tags Temperature
 // @Accept  json
 // @Produce  json
 // @Param dvIdList body []int true "设备 ID 列表"
@@ -1252,7 +1294,6 @@ func ShowCurrentTemps(c *gin.Context) {
 
 // ShowFwInfo 显示设备固件版本信息
 // @Summary 显示设备固件版本信息
-// @Tags Firmware
 // @Param dvIdList query []int true "设备 ID 列表"
 // @Param fwType query []string true "固件类型列表"
 // @Success 200 {object} []FirmwareInfo "固件版本信息列表"
@@ -1285,7 +1326,6 @@ func ShowFwInfo(c *gin.Context) {
 
 // PidList 获取计算进程列表
 // @Summary 获取计算进程列表
-// @Tags Process
 // @Success 200 {array} string "进程 ID 列表"
 // @Failure 400 {object} error "错误信息"
 // @Router /process/list [get]
@@ -1303,7 +1343,6 @@ func PidList(c *gin.Context) {
 
 // GetCoarseGrainUtil 获取设备粗粒度利用率
 // @Summary 获取设备粗粒度利用率
-// @Tags Utilization
 // @Param device body int true "设备 ID"
 // @Param typeName body string false "利用率计数器类型名称"
 // @Success 200 {array} RSMIUtilizationCounter "利用率计数器列表"
@@ -1335,7 +1374,6 @@ func GetCoarseGrainUtil(c *gin.Context) {
 
 // ShowGpuUse 显示设备的 DCU 使用率
 // @Summary 显示设备的 DCU 使用率
-// @Tags DCU
 // @Param dvIdList body []int true "设备 ID 列表"
 // @Success 200 {object} []DeviceUseInfo "设备使用信息列表"
 // @Failure 400 {object} error "错误信息"
@@ -1360,7 +1398,6 @@ func ShowGpuUse(c *gin.Context) {
 // ShowEnergy 展示设备消耗的能量
 // @Summary 展示设备的能量消耗
 // @Description 获取并展示指定设备的能量消耗情况。
-// @Tags 设备
 // @Param dvIdList body []int true "设备 ID 列表"
 // @Success 200 {string} string "成功返回设备的能量消耗信息"
 // @Failure 400 {string} string "请求参数错误"
@@ -1379,7 +1416,6 @@ func ShowEnergy(c *gin.Context) {
 // ShowMemInfo 展示设备的内存信息
 // @Summary 展示设备内存信息
 // @Description 获取并展示指定设备的内存使用情况，包括不同类型的内存。
-// @Tags 设备
 // @Param dvIdList body []int true "设备 ID 列表"
 // @Param memTypes body []string true "内存类型列表，如 'all' 或指定类型"
 // @Success 200 {string} string "成功返回设备的内存信息"
@@ -1403,7 +1439,6 @@ func ShowMemInfo(c *gin.Context) {
 // ShowMemUse 展示设备的内存使用情况
 // @Summary 展示设备内存使用情况
 // @Description 获取并展示指定设备的当前内存使用百分比和其他相关的利用率数据。
-// @Tags 设备
 // @Param dvIdList body []int true "设备 ID 列表"
 // @Success 200 {string} string "成功返回设备的内存使用信息"
 // @Failure 400 {string} string "请求参数错误"
@@ -1422,7 +1457,6 @@ func ShowMemUse(c *gin.Context) {
 // ShowMemVendor 展示设备供应商信息
 // @Summary 展示设备的内存供应商信息
 // @Description 获取并展示指定设备的内存供应商信息。
-// @Tags 设备
 // @Param dvIdList body []int true "设备 ID 列表"
 // @Success 200 {object} []DeviceMemVendorInfo "成功返回设备的内存供应商信息"
 // @Failure 400 {string} string "请求参数错误"
@@ -1448,7 +1482,6 @@ func ShowMemVendor(c *gin.Context) {
 // ShowPcieBw 展示设备的PCIe带宽使用情况
 // @Summary 展示设备的PCIe带宽使用情况
 // @Description 获取并展示指定设备的PCIe带宽使用情况，包括发送和接收的带宽。
-// @Tags 设备
 // @Param dvIdList body []int true "设备 ID 列表"
 // @Success 200 {object} []PcieBandwidthInfo "成功返回设备的PCIe带宽使用信息"
 // @Failure 400 {string} string "请求参数错误"
@@ -1475,7 +1508,6 @@ func ShowPcieBw(c *gin.Context) {
 // ShowPcieReplayCount 展示设备的PCIe重放计数
 // @Summary 展示设备的PCIe重放计数
 // @Description 获取并展示指定设备的PCIe重放计数。
-// @Tags 设备
 // @Param dvIdList body []int true "设备 ID 列表"
 // @Success 200 {object} []PcieReplayCountInfo "设备的PCIe重放计数信息"
 // @Failure 400 {string} string "请求参数错误"
@@ -1502,7 +1534,6 @@ func ShowPcieReplayCount(c *gin.Context) {
 // ShowPids 展示进程信息
 // @Summary 展示系统中正在运行的KFD进程信息
 // @Description 获取并展示当前系统中运行的KFD进程的详细信息。
-// @Tags 系统
 // @Success 200 {string} string "成功返回进程信息"
 // @Failure 400 {string} string "请求错误"
 // @Router /pids [get]
@@ -1518,7 +1549,6 @@ func ShowPids(c *gin.Context) {
 
 // @Summary 展示设备的平均功率消耗
 // @Description 获取并展示指定设备的平均图形功率消耗
-// @Tags 设备
 // @Param dvIdList body []int true "设备 ID 列表"
 // @Success 200 {object} []DevicePowerInfo "设备的功率信息"
 // @Failure 400 {string} string "请求参数错误"
@@ -1542,7 +1572,6 @@ func GetDevicePower(c *gin.Context) {
 
 // @Summary 展示设备的GPU内存时钟频率和电压
 // @Description 获取并展示指定设备的GPU内存时钟频率和电压表
-// @Tags 设备
 // @Param dvIdList body []int true "设备 ID 列表"
 // @Success 200 {object} []DevicePowerPlayInfo "设备的GPU时钟频率和电压信息"
 // @Failure 400 {string} string "请求参数错误"
@@ -1566,7 +1595,6 @@ func GetDevicePowerPlayTable(c *gin.Context) {
 
 // @Summary 显示设备的产品名称
 // @Description 获取并显示指定设备的产品名称、供应商、系列、型号和SKU信息
-// @Tags 设备
 // @Param dvIdList body []int true "设备 ID 列表"
 // @Success 200 {array} DeviceproductInfo "设备的产品信息列表"
 // @Failure 400 {string} string "请求参数错误"
@@ -1590,7 +1618,6 @@ func GetDeviceProductName(c *gin.Context) {
 
 // @Summary 显示设备的电源配置文件
 // @Description 获取并显示指定设备的电源配置文件，包括可用的电源配置选项
-// @Tags 设备
 // @Param dvIdList body []int true "设备 ID 列表"
 // @Success 200 {array} DeviceProfile "设备的电源配置文件信息列表"
 // @Failure 400 {string} string "请求参数错误"
@@ -1615,7 +1642,6 @@ func GetDeviceProfile(c *gin.Context) {
 // GetDeviceRange 显示设备的电流或电压范围
 // @Summary 显示设备的电流或电压范围（K100_AI卡不支持该操作）
 // @Description 获取并显示指定设备的有效电流或电压范围
-// @Tags 设备
 // @Param dvIdList body []int true "设备ID列表"
 // @Param rangeType body string true "范围类型 (sclk, mclk, voltage)"
 // @Success 200 {string} string "设备的电流或电压范围信息"
@@ -1638,7 +1664,6 @@ func GetDeviceRange(c *gin.Context) {
 
 // @Summary 显示设备的退役页信息
 // @Description 获取并显示指定设备的退役内存页信息
-// @Tags 设备
 // @Param dvIdList body []int true "设备ID列表"
 // @Param retiredType body string false "退役类型 (默认为'all')"
 // @Success 200 {string} string "设备的退役页信息"
@@ -1660,7 +1685,6 @@ func GetDeviceRetiredPages(c *gin.Context) {
 
 // @Summary 显示设备的序列号
 // @Description 获取并显示指定设备的序列号信息
-// @Tags 设备
 // @Param dvIdList body []int true "设备ID列表"
 // @Success 200 {array} DeviceSerialInfo "设备的序列号信息列表"
 // @Failure 400 {string} string "请求参数错误"
@@ -1685,7 +1709,6 @@ func GetDeviceSerialNumber(c *gin.Context) {
 // ShowUId 显示设备的唯一ID
 // @Summary 显示设备的唯一ID
 // @Description 获取并显示指定设备的唯一ID信息。
-// @Tags 设备
 // @Param dvIdList body []int true "设备ID列表"
 // @Success 200 {array} DeviceUIdInfo "设备的唯一ID信息列表"
 // @Failure 400 {string} string "请求参数错误"
@@ -1711,7 +1734,6 @@ func ShowUId(c *gin.Context) {
 // ShowVbiosVersion 显示设备的VBIOS版本
 // @Summary 显示设备的VBIOS版本
 // @Description 获取并显示指定设备的VBIOS版本信息。
-// @Tags 设备
 // @Param dvIdList body []int true "设备ID列表"
 // @Success 200 {array} DeviceVBIOSInfo "设备的VBIOS版本信息列表"
 // @Failure 400 {string} string "请求参数错误"
@@ -1737,7 +1759,6 @@ func ShowVbiosVersion(c *gin.Context) {
 // ShowEvents 显示设备的事件
 // @Summary 显示设备的事件
 // @Description 获取并显示指定设备的事件信息。
-// @Tags 设备
 // @Param dvIdList body []int true "设备ID列表"
 // @Param eventTypes body []string true "事件类型列表"
 // @Success 200 {string} string "成功返回设备的事件信息"
@@ -1761,7 +1782,6 @@ func ShowEvents(c *gin.Context) {
 // ShowVoltage 显示设备的电压信息
 // @Summary 显示设备的电压信息
 // @Description 获取并显示指定设备的当前电压信息。
-// @Tags 设备
 // @Param dvIdList body []int true "设备ID列表"
 // @Success 200 {array} DeviceVoltageInfo "设备的电压信息列表"
 // @Failure 400 {string} string "请求参数错误"
@@ -1787,7 +1807,6 @@ func ShowVoltage(c *gin.Context) {
 // ShowVoltageCurve 显示设备的电压曲线点
 // @Summary 显示设备的电压曲线点
 // @Description 获取并显示指定设备的电压曲线点信息。
-// @Tags 设备
 // @Param dvIdList body []int true "设备ID列表"
 // @Success 200 {string} string "设备的电压曲线点信息"
 // @Failure 400 {string} string "请求参数错误"
@@ -1806,7 +1825,6 @@ func ShowVoltageCurve(c *gin.Context) {
 // ShowXgmiErr 显示 XGMI 错误状态
 // @Summary 显示 XGMI 错误状态
 // @Description 显示一组 GPU 设备的 XGMI 错误状态。
-// @Tags Topology
 // @Param dvIdList body []int true "设备 ID 列表"
 // @Success 200 {string} string "XGMI 错误状态信息"
 // @Router /showXgmiErr [post]
@@ -1824,7 +1842,6 @@ func ShowXgmiErr(c *gin.Context) {
 // ShowWeightTopology 显示 GPU 拓扑权重
 // @Summary 显示 GPU 拓扑权重
 // @Description 显示 GPU 设备之间的权重信息。
-// @Tags Topology
 // @Param dvIdList body []int true "设备 ID 列表"
 // @Success 200 {string} string "GPU 拓扑权重信息"
 // @Router /showWeightTopology [post]
@@ -1841,7 +1858,6 @@ func ShowWeightTopology(c *gin.Context) {
 // ShowHopsTopology 显示 GPU 拓扑跳数
 // @Summary 显示 GPU 拓扑跳数
 // @Description 显示 GPU 设备之间的跳数信息。
-// @Tags Topology
 // @Param dvIdList body []int true "设备 ID 列表"
 // @Success 200 {string} string "GPU 拓扑跳数信息"
 // @Router /showHopsTopology [post]
@@ -1859,7 +1875,6 @@ func ShowHopsTopology(c *gin.Context) {
 // ShowTypeTopology 显示 GPU 拓扑中两台设备之间的链接类型。
 // @Summary 显示 GPU 拓扑链接类型
 // @Description 显示 GPU 设备之间的链接类型信息。
-// @Tags Topology
 // @Param dvIdList body []int true "设备 ID 列表"
 // @Success 200 {string} string "GPU 拓扑链接类型信息"
 // @Router /showTypeTopology [post]
@@ -1876,7 +1891,6 @@ func ShowTypeTopology(c *gin.Context) {
 // ShowNumaTopology 显示指定设备的 NUMA 节点信息。
 // @Summary 显示 NUMA 节点信息
 // @Description 显示一组 GPU 设备的 NUMA 节点和关联信息。
-// @Tags Topology
 // @Param dvIdList body []int true "设备 ID 列表"
 // @Success 200 {string} string "NUMA 节点信息"
 // @Router /showNumaTopology [post]
@@ -1894,7 +1908,6 @@ func ShowNumaTopology(c *gin.Context) {
 // ShowHwTopology 显示指定设备的完整硬件拓扑信息。
 // @Summary 显示完整的硬件拓扑信息
 // @Description 显示一组 GPU 设备的权重、跳数、链接类型和 NUMA 节点信息。
-// @Tags Topology
 // @Param dvIdList body []int true "设备 ID 列表"
 // @Success 200 {string} string "完整的硬件拓扑信息"
 // @Router /showHwTopology [post]
@@ -1912,7 +1925,6 @@ func ShowHwTopology(c *gin.Context) {
 // DeviceCount 返回设备的数量
 // @Summary 获取设备数量
 // @Description 获取当前系统中的设备数量
-// @Tags Device
 // @Success 200 {int} int "设备数量"
 // @Failure 500 {object} string "内部服务器错误"
 // @Router /deviceCount [get]
@@ -1931,7 +1943,6 @@ func DeviceCount(c *gin.Context) {
 // VDeviceSingleInfo 获取单个虚拟设备的信息
 // @Summary 获取单个虚拟设备的信息
 // @Description 根据设备索引获取对应的虚拟设备信息
-// @Tags VirtualDevice
 // @Param vDvInd query int true "设备索引"
 // @Success 200 {object} DMIVDeviceInfo "虚拟设备信息"
 // @Failure 400 {string} string "请求参数错误"
@@ -1957,7 +1968,6 @@ func VDeviceSingleInfo(c *gin.Context) {
 // VDeviceCount 返回虚拟设备的数量
 // @Summary 获取虚拟设备数量
 // @Description 获取当前系统中的虚拟设备数量
-// @Tags Device
 // @Success 200 {int} int "虚拟设备数量"
 // @Failure 500 {object} string "内部服务器错误"
 // @Router /vDeviceCount [get]
@@ -1976,7 +1986,6 @@ func VDeviceCount(c *gin.Context) {
 // DeviceRemainingInfo 返回指定物理设备的剩余计算单元（CU）和内存信息
 // @Summary 获取设备剩余信息
 // @Description 获取指定设备的剩余计算单元和内存信息
-// @Tags Device
 // @Param dvInd path int true "物理设备索引"
 // @Success 200 {string} uint64 "剩余的CU信息"
 // @Success 200 {string} uint64 "剩余的内存信息"
@@ -2007,7 +2016,6 @@ func DeviceRemainingInfo(c *gin.Context) {
 // CreateVDevices 创建指定数量的虚拟设备
 // @Summary 创建虚拟设备
 // @Description 在指定的物理设备上创建指定数量的虚拟设备，返回创建的虚拟设备ID集合
-// @Tags 虚拟设备
 // @Param dvInd query int true "物理设备的索引"
 // @Param vDevCount query int true "要创建的虚拟设备数量"
 // @Param vDevCUs query []int true "每个虚拟设备的计算单元数量"
@@ -2049,7 +2057,6 @@ func CreateVDevices(c *gin.Context) {
 // DestroyVDevice 销毁指定物理设备上的所有虚拟设备
 // @Summary 销毁所有虚拟设备
 // @Description 销毁指定物理设备上的所有虚拟设备
-// @Tags 虚拟设备
 // @Param dvInd query int true "物理设备的索引"
 // @Success 200 {string} string "虚拟设备销毁成功"
 // @Failure 400 {string} string "虚拟设备销毁失败"
@@ -2070,7 +2077,6 @@ func DestroyVDevice(c *gin.Context) {
 // DestroySingleVDevice 销毁指定虚拟设备
 // @Summary 销毁单个虚拟设备
 // @Description 销毁指定索引的虚拟设备
-// @Tags 虚拟设备
 // @Param vDvInd query int true "虚拟设备的索引"
 // @Success 200 {string} string "虚拟设备销毁成功"
 // @Failure 400 {string} string "虚拟设备销毁失败"
@@ -2091,7 +2097,6 @@ func DestroySingleVDevice(c *gin.Context) {
 // UpdateSingleVDevice 更新指定设备资源大小
 // @Summary 更新虚拟设备资源
 // @Description 更新指定虚拟设备的计算单元和内存大小
-// @Tags 虚拟设备
 // @Param vDvInd query int true "虚拟设备的索引"
 // @Param vDevCUs query int true "更新后的计算单元数量"
 // @Param vDevMemSize query int true "更新后的内存大小"
@@ -2122,7 +2127,6 @@ func UpdateSingleVDevice(c *gin.Context) {
 // 启动虚拟设备
 // @Summary 启动指定的虚拟设备
 // @Description 启动虚拟设备，指定设备索引
-// @Tags VirtualDevice
 // @Param vDvInd path int true "虚拟设备索引"
 // @Success 200 {string} string "操作成功"
 // @Failure 400 {string} string "操作失败"
@@ -2144,7 +2148,6 @@ func StartVDevice(c *gin.Context) {
 // 停止虚拟设备
 // @Summary 停止指定的虚拟设备
 // @Description 停止虚拟设备，指定设备索引
-// @Tags VirtualDevice
 // @Param vDvInd path int true "虚拟设备索引"
 // @Success 200 {string} string "操作成功"
 // @Failure 400 {string} string "操作失败"
@@ -2166,7 +2169,6 @@ func StopVDevice(c *gin.Context) {
 // 设置虚拟机加密状态
 // @Summary 设置虚拟机加密状态
 // @Description 根据提供的状态开启或关闭虚拟机加密
-// @Tags VirtualDevice
 // @Param status query bool true "加密状态"
 // @Success 200 {string} string "操作成功"
 // @Failure 400 {string} string "操作失败"
@@ -2188,7 +2190,6 @@ func SetEncryptionVMStatus(c *gin.Context) {
 // 获取加密虚拟机状态
 // @Summary 获取当前虚拟机的加密状态
 // @Description 返回虚拟机是否处于加密状态
-// @Tags VirtualDevice
 // @Success 200 {boolean} boolean "加密状态"
 // @Failure 400 {string} string "操作失败"
 // @Router /EncryptionVMStatus [get]
@@ -2207,7 +2208,6 @@ func EncryptionVMStatus(c *gin.Context) {
 // 打印事件列表
 // @Summary 打印设备的事件列表
 // @Description 打印指定设备的事件列表，并设置延迟
-// @Tags Event
 // @Param device path int true "设备索引"
 // @Param delay query int true "延迟时间（秒）"
 // @Param eventList query []string true "事件列表"
@@ -2235,7 +2235,6 @@ func PrintEventList(c *gin.Context) {
 // GetDeviceInfo 获取设备信息
 // @Summary 获取设备信息
 // @Description 根据设备索引获取对应的设备信息
-// @Tags Device
 // @Param dvInd path int true "设备索引"
 // @Success 200 {object} DMIDeviceInfo "设备信息"
 // @Failure 400 {string} string "请求参数错误"

@@ -21,9 +21,6 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
-                "tags": [
-                    "设备"
-                ],
                 "summary": "获取所有物理设备信息",
                 "responses": {
                     "200": {
@@ -74,9 +71,6 @@ const docTemplate = `{
         "/CreateVDevices": {
             "post": {
                 "description": "在指定的物理设备上创建指定数量的虚拟设备，返回创建的虚拟设备ID集合",
-                "tags": [
-                    "虚拟设备"
-                ],
                 "summary": "创建虚拟设备",
                 "parameters": [
                     {
@@ -138,9 +132,6 @@ const docTemplate = `{
         "/DestroySingleVDevice": {
             "delete": {
                 "description": "销毁指定索引的虚拟设备",
-                "tags": [
-                    "虚拟设备"
-                ],
                 "summary": "销毁单个虚拟设备",
                 "parameters": [
                     {
@@ -170,9 +161,6 @@ const docTemplate = `{
         "/DestroyVDevice": {
             "delete": {
                 "description": "销毁指定物理设备上的所有虚拟设备",
-                "tags": [
-                    "虚拟设备"
-                ],
                 "summary": "销毁所有虚拟设备",
                 "parameters": [
                     {
@@ -234,9 +222,6 @@ const docTemplate = `{
                 ],
                 "produces": [
                     "application/json"
-                ],
-                "tags": [
-                    "Device"
                 ],
                 "summary": "获取设备的风扇速度",
                 "parameters": [
@@ -300,9 +285,6 @@ const docTemplate = `{
                 "description": "根据设备索引返回设备ID的十六进制值",
                 "produces": [
                     "application/json"
-                ],
-                "tags": [
-                    "Device"
                 ],
                 "summary": "获取设备ID的十六进制值",
                 "parameters": [
@@ -409,9 +391,6 @@ const docTemplate = `{
                 ],
                 "produces": [
                     "application/json"
-                ],
-                "tags": [
-                    "Power"
                 ],
                 "summary": "设置设备功率配置文件",
                 "parameters": [
@@ -543,9 +522,6 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
-                "tags": [
-                    "Device"
-                ],
                 "summary": "获取设备信息列表",
                 "responses": {
                     "200": {
@@ -605,9 +581,6 @@ const docTemplate = `{
         "/EncryptionVMStatus": {
             "get": {
                 "description": "返回虚拟机是否处于加密状态",
-                "tags": [
-                    "VirtualDevice"
-                ],
                 "summary": "获取当前虚拟机的加密状态",
                 "responses": {
                     "200": {
@@ -633,9 +606,6 @@ const docTemplate = `{
                 ],
                 "produces": [
                     "application/json"
-                ],
-                "tags": [
-                    "Device"
                 ],
                 "summary": "获取设备总线信息",
                 "parameters": [
@@ -668,9 +638,6 @@ const docTemplate = `{
                 "description": "根据设备索引返回设备的最大功率（以瓦特为单位）",
                 "produces": [
                     "application/json"
-                ],
-                "tags": [
-                    "Device"
                 ],
                 "summary": "获取设备的最大功率",
                 "parameters": [
@@ -705,9 +672,6 @@ const docTemplate = `{
                 "description": "根据设备索引和内存类型返回内存的使用量和总量",
                 "produces": [
                     "application/json"
-                ],
-                "tags": [
-                    "Memory"
                 ],
                 "summary": "获取设备的指定内存使用情况",
                 "parameters": [
@@ -868,9 +832,6 @@ const docTemplate = `{
         "/PrintEventList/{device}": {
             "get": {
                 "description": "打印指定设备的事件列表，并设置延迟",
-                "tags": [
-                    "Event"
-                ],
                 "summary": "打印设备的事件列表",
                 "parameters": [
                     {
@@ -920,9 +881,6 @@ const docTemplate = `{
                 "description": "根据进程ID（PID）返回对应的进程名称",
                 "produces": [
                     "application/json"
-                ],
-                "tags": [
-                    "Process"
                 ],
                 "summary": "获取指定PID的进程名",
                 "parameters": [
@@ -1042,9 +1000,6 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
-                "tags": [
-                    "设备"
-                ],
                 "summary": "重置Performance Determinism",
                 "parameters": [
                     {
@@ -1152,9 +1107,6 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
-                "tags": [
-                    "设备"
-                ],
                 "summary": "设置设备的时钟OverDrive",
                 "parameters": [
                     {
@@ -1215,9 +1167,6 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
-                "tags": [
-                    "设备"
-                ],
                 "summary": "设置设备的时钟频率范围",
                 "parameters": [
                     {
@@ -1277,9 +1226,6 @@ const docTemplate = `{
         "/SetEncryptionVMStatus": {
             "post": {
                 "description": "根据提供的状态开启或关闭虚拟机加密",
-                "tags": [
-                    "VirtualDevice"
-                ],
                 "summary": "设置虚拟机加密状态",
                 "parameters": [
                     {
@@ -1314,9 +1260,6 @@ const docTemplate = `{
                 ],
                 "produces": [
                     "application/json"
-                ],
-                "tags": [
-                    "Device"
                 ],
                 "summary": "设置风扇转速",
                 "parameters": [
@@ -1365,9 +1308,6 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
-                "tags": [
-                    "设备"
-                ],
                 "summary": "设置设备的性能确定性",
                 "parameters": [
                     {
@@ -1415,9 +1355,6 @@ const docTemplate = `{
                 ],
                 "produces": [
                     "application/json"
-                ],
-                "tags": [
-                    "Device"
                 ],
                 "summary": "设置设备性能等级",
                 "parameters": [
@@ -1468,9 +1405,6 @@ const docTemplate = `{
                 ],
                 "produces": [
                     "application/json"
-                ],
-                "tags": [
-                    "设备"
                 ],
                 "summary": "设置设备的PowerPlay表级别",
                 "parameters": [
@@ -1548,9 +1482,6 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
-                "tags": [
-                    "Power"
-                ],
                 "summary": "设置功率配置",
                 "parameters": [
                     {
@@ -1601,9 +1532,6 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
-                "tags": [
-                    "Hardware"
-                ],
                 "summary": "显示设备硬件信息",
                 "parameters": [
                     {
@@ -1644,9 +1572,6 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
-                "tags": [
-                    "Clock"
-                ],
                 "summary": "显示时钟信息",
                 "parameters": [
                     {
@@ -1681,9 +1606,6 @@ const docTemplate = `{
         "/StartVDevice/{vDvInd}": {
             "get": {
                 "description": "启动虚拟设备，指定设备索引",
-                "tags": [
-                    "VirtualDevice"
-                ],
                 "summary": "启动指定的虚拟设备",
                 "parameters": [
                     {
@@ -1713,9 +1635,6 @@ const docTemplate = `{
         "/StopVDevice/{vDvInd}": {
             "get": {
                 "description": "停止虚拟设备，指定设备索引",
-                "tags": [
-                    "VirtualDevice"
-                ],
                 "summary": "停止指定的虚拟设备",
                 "parameters": [
                     {
@@ -1786,9 +1705,6 @@ const docTemplate = `{
         "/UpdateSingleVDevice": {
             "put": {
                 "description": "更新指定虚拟设备的计算单元和内存大小",
-                "tags": [
-                    "虚拟设备"
-                ],
                 "summary": "更新虚拟设备资源",
                 "parameters": [
                     {
@@ -1832,9 +1748,6 @@ const docTemplate = `{
         "/VDeviceSingleInfo": {
             "get": {
                 "description": "根据设备索引获取对应的虚拟设备信息",
-                "tags": [
-                    "VirtualDevice"
-                ],
                 "summary": "获取单个虚拟设备的信息",
                 "parameters": [
                     {
@@ -1938,9 +1851,6 @@ const docTemplate = `{
         "/XGMIErrorStatus": {
             "get": {
                 "description": "获取指定物理设备的XGMI（高速互连链路）错误状态。",
-                "tags": [
-                    "XGMI状态"
-                ],
                 "summary": "获取XGMI错误状态",
                 "parameters": [
                     {
@@ -1995,9 +1905,6 @@ const docTemplate = `{
         "/device/info/{dvInd}": {
             "get": {
                 "description": "根据设备索引获取对应的设备信息",
-                "tags": [
-                    "Device"
-                ],
                 "summary": "获取设备信息",
                 "parameters": [
                     {
@@ -2033,9 +1940,6 @@ const docTemplate = `{
         "/device/power": {
             "post": {
                 "description": "获取并展示指定设备的平均图形功率消耗",
-                "tags": [
-                    "设备"
-                ],
                 "summary": "展示设备的平均功率消耗",
                 "parameters": [
                     {
@@ -2073,9 +1977,6 @@ const docTemplate = `{
         "/device/powerplay": {
             "post": {
                 "description": "获取并展示指定设备的GPU内存时钟频率和电压表",
-                "tags": [
-                    "设备"
-                ],
                 "summary": "展示设备的GPU内存时钟频率和电压",
                 "parameters": [
                     {
@@ -2113,9 +2014,6 @@ const docTemplate = `{
         "/device/product": {
             "post": {
                 "description": "获取并显示指定设备的产品名称、供应商、系列、型号和SKU信息",
-                "tags": [
-                    "设备"
-                ],
                 "summary": "显示设备的产品名称",
                 "parameters": [
                     {
@@ -2153,9 +2051,6 @@ const docTemplate = `{
         "/device/profile": {
             "post": {
                 "description": "获取并显示指定设备的电源配置文件，包括可用的电源配置选项",
-                "tags": [
-                    "设备"
-                ],
                 "summary": "显示设备的电源配置文件",
                 "parameters": [
                     {
@@ -2193,9 +2088,6 @@ const docTemplate = `{
         "/device/range": {
             "post": {
                 "description": "获取并显示指定设备的有效电流或电压范围",
-                "tags": [
-                    "设备"
-                ],
                 "summary": "显示设备的电流或电压范围（K100_AI卡不支持该操作）",
                 "parameters": [
                     {
@@ -2239,9 +2131,6 @@ const docTemplate = `{
         "/device/retiredpages": {
             "post": {
                 "description": "获取并显示指定设备的退役内存页信息",
-                "tags": [
-                    "设备"
-                ],
                 "summary": "显示设备的退役页信息",
                 "parameters": [
                     {
@@ -2284,9 +2173,6 @@ const docTemplate = `{
         "/device/serialnumber": {
             "post": {
                 "description": "获取并显示指定设备的序列号信息",
-                "tags": [
-                    "设备"
-                ],
                 "summary": "显示设备的序列号",
                 "parameters": [
                     {
@@ -2324,9 +2210,6 @@ const docTemplate = `{
         "/deviceCount": {
             "get": {
                 "description": "获取当前系统中的设备数量",
-                "tags": [
-                    "Device"
-                ],
                 "summary": "获取设备数量",
                 "responses": {
                     "200": {
@@ -2347,9 +2230,6 @@ const docTemplate = `{
         "/deviceRemainingInfo/{dvInd}": {
             "get": {
                 "description": "获取指定设备的剩余计算单元和内存信息",
-                "tags": [
-                    "Device"
-                ],
                 "summary": "获取设备剩余信息",
                 "parameters": [
                     {
@@ -2391,9 +2271,6 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
-                "tags": [
-                    "Device"
-                ],
                 "summary": "获取设备信息",
                 "parameters": [
                     {
@@ -2431,9 +2308,6 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
-                "tags": [
-                    "Device"
-                ],
                 "summary": "获取设备名称",
                 "parameters": [
                     {
@@ -2465,9 +2339,6 @@ const docTemplate = `{
         "/energy": {
             "post": {
                 "description": "获取并展示指定设备的能量消耗情况。",
-                "tags": [
-                    "设备"
-                ],
                 "summary": "展示设备的能量消耗",
                 "parameters": [
                     {
@@ -2507,9 +2378,6 @@ const docTemplate = `{
                 ],
                 "produces": [
                     "application/json"
-                ],
-                "tags": [
-                    "Fan"
                 ],
                 "summary": "展示风扇转速和风扇级别",
                 "parameters": [
@@ -2551,9 +2419,6 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
-                "tags": [
-                    "Device"
-                ],
                 "summary": "获取风扇转速",
                 "parameters": [
                     {
@@ -2587,9 +2452,6 @@ const docTemplate = `{
         },
         "/firmware/info": {
             "get": {
-                "tags": [
-                    "Firmware"
-                ],
                 "summary": "显示设备固件版本信息",
                 "parameters": [
                     {
@@ -2634,9 +2496,6 @@ const docTemplate = `{
         },
         "/gpu/use": {
             "post": {
-                "tags": [
-                    "DCU"
-                ],
                 "summary": "显示设备的 DCU 使用率",
                 "parameters": [
                     {
@@ -2678,9 +2537,6 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
-                "tags": [
-                    "Device"
-                ],
                 "summary": "获取DCU使用率",
                 "parameters": [
                     {
@@ -2712,9 +2568,6 @@ const docTemplate = `{
         "/memory/info": {
             "post": {
                 "description": "获取并展示指定设备的内存使用情况，包括不同类型的内存。",
-                "tags": [
-                    "设备"
-                ],
                 "summary": "展示设备内存信息",
                 "parameters": [
                     {
@@ -2761,9 +2614,6 @@ const docTemplate = `{
         "/memory/use": {
             "post": {
                 "description": "获取并展示指定设备的当前内存使用百分比和其他相关的利用率数据。",
-                "tags": [
-                    "设备"
-                ],
                 "summary": "展示设备内存使用情况",
                 "parameters": [
                     {
@@ -2798,9 +2648,6 @@ const docTemplate = `{
         "/memory/vendor": {
             "post": {
                 "description": "获取并展示指定设备的内存供应商信息。",
-                "tags": [
-                    "设备"
-                ],
                 "summary": "展示设备的内存供应商信息",
                 "parameters": [
                     {
@@ -2838,9 +2685,6 @@ const docTemplate = `{
         "/pcie/bandwidth": {
             "post": {
                 "description": "获取并展示指定设备的PCIe带宽使用情况，包括发送和接收的带宽。",
-                "tags": [
-                    "设备"
-                ],
                 "summary": "展示设备的PCIe带宽使用情况",
                 "parameters": [
                     {
@@ -2878,9 +2722,6 @@ const docTemplate = `{
         "/pcie/replaycount": {
             "post": {
                 "description": "获取并展示指定设备的PCIe重放计数。",
-                "tags": [
-                    "设备"
-                ],
                 "summary": "展示设备的PCIe重放计数",
                 "parameters": [
                     {
@@ -2924,9 +2765,6 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
-                "tags": [
-                    "Device"
-                ],
                 "summary": "获取总线信息",
                 "parameters": [
                     {
@@ -2958,9 +2796,6 @@ const docTemplate = `{
         "/pids": {
             "get": {
                 "description": "获取并展示当前系统中运行的KFD进程的详细信息。",
-                "tags": [
-                    "系统"
-                ],
                 "summary": "展示系统中正在运行的KFD进程信息",
                 "responses": {
                     "200": {
@@ -2980,9 +2815,6 @@ const docTemplate = `{
         },
         "/process/list": {
             "get": {
-                "tags": [
-                    "Process"
-                ],
                 "summary": "获取计算进程列表",
                 "responses": {
                     "200": {
@@ -3004,9 +2836,6 @@ const docTemplate = `{
         "/showEvents": {
             "post": {
                 "description": "获取并显示指定设备的事件信息。",
-                "tags": [
-                    "设备"
-                ],
                 "summary": "显示设备的事件",
                 "parameters": [
                     {
@@ -3053,9 +2882,6 @@ const docTemplate = `{
         "/showHopsTopology": {
             "post": {
                 "description": "显示 GPU 设备之间的跳数信息。",
-                "tags": [
-                    "Topology"
-                ],
                 "summary": "显示 GPU 拓扑跳数",
                 "parameters": [
                     {
@@ -3084,9 +2910,6 @@ const docTemplate = `{
         "/showHwTopology": {
             "post": {
                 "description": "显示一组 GPU 设备的权重、跳数、链接类型和 NUMA 节点信息。",
-                "tags": [
-                    "Topology"
-                ],
                 "summary": "显示完整的硬件拓扑信息",
                 "parameters": [
                     {
@@ -3115,9 +2938,6 @@ const docTemplate = `{
         "/showNumaTopology": {
             "post": {
                 "description": "显示一组 GPU 设备的 NUMA 节点和关联信息。",
-                "tags": [
-                    "Topology"
-                ],
                 "summary": "显示 NUMA 节点信息",
                 "parameters": [
                     {
@@ -3146,9 +2966,6 @@ const docTemplate = `{
         "/showTypeTopology": {
             "post": {
                 "description": "显示 GPU 设备之间的链接类型信息。",
-                "tags": [
-                    "Topology"
-                ],
                 "summary": "显示 GPU 拓扑链接类型",
                 "parameters": [
                     {
@@ -3177,9 +2994,6 @@ const docTemplate = `{
         "/showUId": {
             "post": {
                 "description": "获取并显示指定设备的唯一ID信息。",
-                "tags": [
-                    "设备"
-                ],
                 "summary": "显示设备的唯一ID",
                 "parameters": [
                     {
@@ -3217,9 +3031,6 @@ const docTemplate = `{
         "/showVbiosVersion": {
             "post": {
                 "description": "获取并显示指定设备的VBIOS版本信息。",
-                "tags": [
-                    "设备"
-                ],
                 "summary": "显示设备的VBIOS版本",
                 "parameters": [
                     {
@@ -3257,9 +3068,6 @@ const docTemplate = `{
         "/showVoltage": {
             "post": {
                 "description": "获取并显示指定设备的当前电压信息。",
-                "tags": [
-                    "设备"
-                ],
                 "summary": "显示设备的电压信息",
                 "parameters": [
                     {
@@ -3297,9 +3105,6 @@ const docTemplate = `{
         "/showVoltageCurve": {
             "post": {
                 "description": "获取并显示指定设备的电压曲线点信息。",
-                "tags": [
-                    "设备"
-                ],
                 "summary": "显示设备的电压曲线点",
                 "parameters": [
                     {
@@ -3334,9 +3139,6 @@ const docTemplate = `{
         "/showWeightTopology": {
             "post": {
                 "description": "显示 GPU 设备之间的权重信息。",
-                "tags": [
-                    "Topology"
-                ],
                 "summary": "显示 GPU 拓扑权重",
                 "parameters": [
                     {
@@ -3365,9 +3167,6 @@ const docTemplate = `{
         "/showXgmiErr": {
             "post": {
                 "description": "显示一组 GPU 设备的 XGMI 错误状态。",
-                "tags": [
-                    "Topology"
-                ],
                 "summary": "显示 XGMI 错误状态",
                 "parameters": [
                     {
@@ -3401,9 +3200,6 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
-                "tags": [
-                    "Temperature"
-                ],
                 "summary": "显示设备温度传感器数据",
                 "parameters": [
                     {
@@ -3435,9 +3231,6 @@ const docTemplate = `{
         },
         "/utilization/coarse": {
             "post": {
-                "tags": [
-                    "Utilization"
-                ],
                 "summary": "获取设备粗粒度利用率",
                 "parameters": [
                     {
@@ -3478,9 +3271,6 @@ const docTemplate = `{
         "/vDeviceCount": {
             "get": {
                 "description": "获取当前系统中的虚拟设备数量",
-                "tags": [
-                    "Device"
-                ],
                 "summary": "获取虚拟设备数量",
                 "responses": {
                     "200": {

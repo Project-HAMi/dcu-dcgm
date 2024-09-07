@@ -60,6 +60,7 @@ func rsmiDevOverdriveLevelSet(dvInd, od int) (err error) {
 // rsmiDevGpuClkFreqSet 设置可用于指定时钟的频率集
 func rsmiDevGpuClkFreqSet(dvInd int, clkType RSMIClkType, freqBitmask int64) (err error) {
 	ret := C.rsmi_dev_gpu_clk_freq_set(C.uint32_t(dvInd), C.rsmi_clk_type_t(clkType), C.uint64_t(freqBitmask))
+	glog.Infof("rsmi_dev_gpu_clk_freq_set: ret: %v, retStr:%v", ret, errorString(ret))
 	if err = errorString(ret); err != nil {
 		return fmt.Errorf("Error rsmi_dev_gpu_clk_freq_set:%s", err)
 	}
