@@ -15,6 +15,8 @@ func InitRouter() *gin.Engine {
 	router.GET("/DevVendorName/:dvInd", DevVendorName)
 	router.GET("/DevVramVendor/:dvInd", DevVramVendor)
 	router.GET("/DevPciBandwidth/:dvInd", DevPciBandwidth)
+	router.POST("/DevPciBandwidthSet", DevPciBandwidthSet)
+
 	router.GET("/MemoryPercent/:dvInd", MemoryPercent)
 	// 路由注册
 	router.GET("/PerfLevel/:dvInd", PerfLevel)
@@ -41,6 +43,8 @@ func InitRouter() *gin.Engine {
 	router.GET("/ProcessName", GetProcessName)
 	// 路由注册
 	router.GET("/Power/:dvInd", Power)
+
+	router.POST("/DevGpuClkFreqSet", DevGpuClkFreqSet)
 	// 路由注册
 	router.GET("/EccStatus/:dvInd", EccStatus)
 	// 路由注册
@@ -49,9 +53,10 @@ func InitRouter() *gin.Engine {
 	router.GET("/VbiosVersion/:dvInd", VbiosVersion)
 	// 路由注册
 	router.GET("/Version", Version)
-	// 路由注册
+	// 重置设备时钟(K100 AI不支持)
 	router.POST("/ResetClocks", ResetClocks)
 	router.POST("/ResetFans", ResetFans)
+
 	router.POST("/ResetProfile", ResetProfile)
 	//(K100 AI不支持)
 	router.POST("/ResetXGMIErr", ResetXGMIErr)

@@ -21,9 +21,8 @@ func main() {
 	defer glog.Flush()
 	// 初始化服务
 	err := dcgm.Init()
-
 	if err != nil {
-		log.Fatalf("DCGM 初始化失败: %v", err)
+		glog.Errorf("DCGM 初始化失败: %v", err)
 	}
 	defer dcgm.ShutDown()
 	log.Println("服务启动中...")
@@ -34,13 +33,13 @@ func main() {
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	// 启动服务
 	// 从环境变量获取端口号，默认为 8080
-	port := os.Getenv("PORT")
+	port := os.Getenv("DCU_DCGM_LISTEN")
 	if port == "" {
 		port = "16081"
 	}
 	// 启动服务器，监听指定的端口号
 	err = r.Run(":" + port)
 	if err != nil {
-		log.Fatalf("Failed to start server: %v", err)
+		glog.Error("Failed to start server: %v", err)
 	}
 }

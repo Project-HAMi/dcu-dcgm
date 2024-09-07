@@ -550,8 +550,6 @@ paths:
           description: 服务器内部错误
           schema: {}
       summary: 获取所有物理设备信息
-      tags:
-      - 设备
   /CollectDeviceMetrics:
     get:
       description: 收集所有设备的监控指标信息。
@@ -611,8 +609,6 @@ paths:
           schema:
             type: string
       summary: 创建虚拟设备
-      tags:
-      - 虚拟设备
   /DestroySingleVDevice:
     delete:
       description: 销毁指定索引的虚拟设备
@@ -632,8 +628,6 @@ paths:
           schema:
             type: string
       summary: 销毁单个虚拟设备
-      tags:
-      - 虚拟设备
   /DestroyVDevice:
     delete:
       description: 销毁指定物理设备上的所有虚拟设备
@@ -653,8 +647,6 @@ paths:
           schema:
             type: string
       summary: 销毁所有虚拟设备
-      tags:
-      - 虚拟设备
   /DevBrand/{dvInd}:
     get:
       description: 根据设备索引获取品牌名称
@@ -696,8 +688,6 @@ paths:
           schema:
             type: string
       summary: 获取设备的风扇速度
-      tags:
-      - Device
   /DevGpuMetricsInfo/{dvInd}:
     get:
       description: 根据设备 ID 获取 GPU 的度量信息。
@@ -742,8 +732,6 @@ paths:
           description: 服务器内部错误
           schema: {}
       summary: 获取设备ID的十六进制值
-      tags:
-      - Device
   /DevPciBandwidth/{dvInd}:
     get:
       description: 根据设备 ID 获取设备的可用 PCIe 带宽列表。
@@ -824,8 +812,6 @@ paths:
           schema:
             type: string
       summary: 设置设备功率配置文件
-      tags:
-      - Power
   /DevSku/{dvInd}:
     get:
       description: 根据设备索引获取SKU
@@ -896,8 +882,6 @@ paths:
           description: 服务器内部错误
           schema: {}
       summary: 获取设备信息列表
-      tags:
-      - Device
   /EccStatus/{dvInd}:
     get:
       description: 返回指定GPU块的ECC状态
@@ -939,8 +923,6 @@ paths:
           schema:
             type: string
       summary: 获取当前虚拟机的加密状态
-      tags:
-      - VirtualDevice
   /GetBus/{device}:
     get:
       consumes:
@@ -964,8 +946,6 @@ paths:
           schema:
             type: string
       summary: 获取设备总线信息
-      tags:
-      - Device
   /MaxPower:
     get:
       description: 根据设备索引返回设备的最大功率（以瓦特为单位）
@@ -989,8 +969,6 @@ paths:
           description: 服务器内部错误
           schema: {}
       summary: 获取设备的最大功率
-      tags:
-      - Device
   /MemInfo:
     get:
       description: 根据设备索引和内存类型返回内存的使用量和总量
@@ -1020,8 +998,6 @@ paths:
           description: 服务器内部错误
           schema: {}
       summary: 获取设备的指定内存使用情况
-      tags:
-      - Memory
   /MemoryPercent/{dvInd}:
     get:
       description: 根据设备 ID 获取设备内存的使用百分比。
@@ -1135,8 +1111,6 @@ paths:
           schema:
             type: string
       summary: 打印设备的事件列表
-      tags:
-      - Event
   /ProcessName:
     get:
       description: 根据进程ID（PID）返回对应的进程名称
@@ -1160,8 +1134,6 @@ paths:
           description: 服务器内部错误
           schema: {}
       summary: 获取指定PID的进程名
-      tags:
-      - Process
   /ResetClocks:
     post:
       description: 重置指定设备的时钟和性能等级为默认值
@@ -1243,8 +1215,6 @@ paths:
           description: 无效的请求体
           schema: {}
       summary: 重置Performance Determinism
-      tags:
-      - 设备
   /ResetProfile:
     post:
       parameters:
@@ -1327,8 +1297,6 @@ paths:
           schema:
             type: string
       summary: 设置设备的时钟OverDrive
-      tags:
-      - 设备
   /SetClockRange:
     post:
       consumes:
@@ -1373,8 +1341,6 @@ paths:
           description: 无效的请求参数或无法设置时钟范围
           schema: {}
       summary: 设置设备的时钟频率范围
-      tags:
-      - 设备
   /SetEncryptionVMStatus:
     post:
       description: 根据提供的状态开启或关闭虚拟机加密
@@ -1394,8 +1360,6 @@ paths:
           schema:
             type: string
       summary: 设置虚拟机加密状态
-      tags:
-      - VirtualDevice
   /SetFanSpeed:
     post:
       consumes:
@@ -1427,8 +1391,6 @@ paths:
           schema:
             type: string
       summary: 设置风扇转速
-      tags:
-      - Device
   /SetPerfDeterminism:
     post:
       consumes:
@@ -1461,8 +1423,6 @@ paths:
           description: 无效的请求体或无法设置性能确定性
           schema: {}
       summary: 设置设备的性能确定性
-      tags:
-      - 设备
   /SetPerformanceLevel:
     post:
       consumes:
@@ -1496,8 +1456,6 @@ paths:
           schema:
             $ref: '#/definitions/router.FailedMessage'
       summary: 设置设备性能等级
-      tags:
-      - Device
   /SetPowerPlayTableLevel:
     post:
       consumes:
@@ -1550,8 +1508,6 @@ paths:
             additionalProperties: true
             type: object
       summary: 设置设备的PowerPlay表级别
-      tags:
-      - 设备
   /SetProfile:
     post:
       consumes:
@@ -1586,8 +1542,6 @@ paths:
           schema:
             $ref: '#/definitions/router.FailedMessage'
       summary: 设置功率配置
-      tags:
-      - Power
   /ShowAllConciseHw:
     post:
       consumes:
@@ -1614,8 +1568,6 @@ paths:
           schema:
             type: string
       summary: 显示设备硬件信息
-      tags:
-      - Hardware
   /ShowClocks:
     post:
       consumes:
@@ -1642,8 +1594,6 @@ paths:
           schema:
             type: string
       summary: 显示时钟信息
-      tags:
-      - Clock
   /StartVDevice/{vDvInd}:
     get:
       description: 启动虚拟设备，指定设备索引
@@ -1663,8 +1613,6 @@ paths:
           schema:
             type: string
       summary: 启动指定的虚拟设备
-      tags:
-      - VirtualDevice
   /StopVDevice/{vDvInd}:
     get:
       description: 停止虚拟设备，指定设备索引
@@ -1684,8 +1632,6 @@ paths:
           schema:
             type: string
       summary: 停止指定的虚拟设备
-      tags:
-      - VirtualDevice
   /Temperature/{dvInd}:
     get:
       description: 返回指定设备的当前温度
@@ -1744,8 +1690,6 @@ paths:
           schema:
             type: string
       summary: 更新虚拟设备资源
-      tags:
-      - 虚拟设备
   /VDeviceSingleInfo:
     get:
       description: 根据设备索引获取对应的虚拟设备信息
@@ -1769,8 +1713,6 @@ paths:
           schema:
             type: string
       summary: 获取单个虚拟设备的信息
-      tags:
-      - VirtualDevice
   /VbiosVersion/{dvInd}:
     get:
       description: 返回指定设备的VBIOS版本
@@ -1836,8 +1778,6 @@ paths:
           schema:
             type: string
       summary: 获取XGMI错误状态
-      tags:
-      - XGMI状态
   /XGMIHiveIdGet:
     get:
       parameters:
@@ -1877,8 +1817,6 @@ paths:
           schema:
             type: string
       summary: 获取设备信息
-      tags:
-      - Device
   /device/power:
     post:
       description: 获取并展示指定设备的平均图形功率消耗
@@ -1903,8 +1841,6 @@ paths:
           schema:
             type: string
       summary: 展示设备的平均功率消耗
-      tags:
-      - 设备
   /device/powerplay:
     post:
       description: 获取并展示指定设备的GPU内存时钟频率和电压表
@@ -1929,8 +1865,6 @@ paths:
           schema:
             type: string
       summary: 展示设备的GPU内存时钟频率和电压
-      tags:
-      - 设备
   /device/product:
     post:
       description: 获取并显示指定设备的产品名称、供应商、系列、型号和SKU信息
@@ -1955,8 +1889,6 @@ paths:
           schema:
             type: string
       summary: 显示设备的产品名称
-      tags:
-      - 设备
   /device/profile:
     post:
       description: 获取并显示指定设备的电源配置文件，包括可用的电源配置选项
@@ -1981,8 +1913,6 @@ paths:
           schema:
             type: string
       summary: 显示设备的电源配置文件
-      tags:
-      - 设备
   /device/range:
     post:
       description: 获取并显示指定设备的有效电流或电压范围
@@ -2011,8 +1941,6 @@ paths:
           schema:
             type: string
       summary: 显示设备的电流或电压范围（K100_AI卡不支持该操作）
-      tags:
-      - 设备
   /device/retiredpages:
     post:
       description: 获取并显示指定设备的退役内存页信息
@@ -2040,8 +1968,6 @@ paths:
           schema:
             type: string
       summary: 显示设备的退役页信息
-      tags:
-      - 设备
   /device/serialnumber:
     post:
       description: 获取并显示指定设备的序列号信息
@@ -2066,8 +1992,6 @@ paths:
           schema:
             type: string
       summary: 显示设备的序列号
-      tags:
-      - 设备
   /deviceCount:
     get:
       description: 获取当前系统中的设备数量
@@ -2081,8 +2005,6 @@ paths:
           schema:
             type: string
       summary: 获取设备数量
-      tags:
-      - Device
   /deviceRemainingInfo/{dvInd}:
     get:
       description: 获取指定设备的剩余计算单元和内存信息
@@ -2106,8 +2028,6 @@ paths:
           schema:
             type: string
       summary: 获取设备剩余信息
-      tags:
-      - Device
   /deviceinfo/{dvInd}:
     get:
       consumes:
@@ -2133,8 +2053,6 @@ paths:
           description: Internal Server Error
           schema: {}
       summary: 获取设备信息
-      tags:
-      - Device
   /devicename/{dvInd}:
     get:
       consumes:
@@ -2160,8 +2078,6 @@ paths:
           description: Internal Server Error
           schema: {}
       summary: 获取设备名称
-      tags:
-      - Device
   /energy:
     post:
       description: 获取并展示指定设备的能量消耗情况。
@@ -2184,8 +2100,6 @@ paths:
           schema:
             type: string
       summary: 展示设备的能量消耗
-      tags:
-      - 设备
   /fans/current:
     post:
       consumes:
@@ -2212,8 +2126,6 @@ paths:
           schema:
             type: string
       summary: 展示风扇转速和风扇级别
-      tags:
-      - Fan
   /fanspeedinfo/{dvInd}:
     get:
       consumes:
@@ -2241,8 +2153,6 @@ paths:
           description: Internal Server Error
           schema: {}
       summary: 获取风扇转速
-      tags:
-      - Device
   /firmware/info:
     get:
       parameters:
@@ -2273,8 +2183,6 @@ paths:
           description: 错误信息
           schema: {}
       summary: 显示设备固件版本信息
-      tags:
-      - Firmware
   /gpu/use:
     post:
       parameters:
@@ -2297,8 +2205,6 @@ paths:
           description: 错误信息
           schema: {}
       summary: 显示设备的 DCU 使用率
-      tags:
-      - DCU
   /gpuuse/{dvInd}:
     get:
       consumes:
@@ -2324,8 +2230,6 @@ paths:
           description: Internal Server Error
           schema: {}
       summary: 获取DCU使用率
-      tags:
-      - Device
   /memory/info:
     post:
       description: 获取并展示指定设备的内存使用情况，包括不同类型的内存。
@@ -2356,8 +2260,6 @@ paths:
           schema:
             type: string
       summary: 展示设备内存信息
-      tags:
-      - 设备
   /memory/use:
     post:
       description: 获取并展示指定设备的当前内存使用百分比和其他相关的利用率数据。
@@ -2380,8 +2282,6 @@ paths:
           schema:
             type: string
       summary: 展示设备内存使用情况
-      tags:
-      - 设备
   /memory/vendor:
     post:
       description: 获取并展示指定设备的内存供应商信息。
@@ -2406,8 +2306,6 @@ paths:
           schema:
             type: string
       summary: 展示设备的内存供应商信息
-      tags:
-      - 设备
   /pcie/bandwidth:
     post:
       description: 获取并展示指定设备的PCIe带宽使用情况，包括发送和接收的带宽。
@@ -2432,8 +2330,6 @@ paths:
           schema:
             type: string
       summary: 展示设备的PCIe带宽使用情况
-      tags:
-      - 设备
   /pcie/replaycount:
     post:
       description: 获取并展示指定设备的PCIe重放计数。
@@ -2458,8 +2354,6 @@ paths:
           schema:
             type: string
       summary: 展示设备的PCIe重放计数
-      tags:
-      - 设备
   /picbusinfo/{dvInd}:
     get:
       consumes:
@@ -2485,8 +2379,6 @@ paths:
           description: Internal Server Error
           schema: {}
       summary: 获取总线信息
-      tags:
-      - Device
   /pids:
     get:
       description: 获取并展示当前系统中运行的KFD进程的详细信息。
@@ -2500,8 +2392,6 @@ paths:
           schema:
             type: string
       summary: 展示系统中正在运行的KFD进程信息
-      tags:
-      - 系统
   /process/list:
     get:
       responses:
@@ -2515,8 +2405,6 @@ paths:
           description: 错误信息
           schema: {}
       summary: 获取计算进程列表
-      tags:
-      - Process
   /showEvents:
     post:
       description: 获取并显示指定设备的事件信息。
@@ -2547,8 +2435,6 @@ paths:
           schema:
             type: string
       summary: 显示设备的事件
-      tags:
-      - 设备
   /showHopsTopology:
     post:
       description: 显示 GPU 设备之间的跳数信息。
@@ -2567,8 +2453,6 @@ paths:
           schema:
             type: string
       summary: 显示 GPU 拓扑跳数
-      tags:
-      - Topology
   /showHwTopology:
     post:
       description: 显示一组 GPU 设备的权重、跳数、链接类型和 NUMA 节点信息。
@@ -2587,8 +2471,6 @@ paths:
           schema:
             type: string
       summary: 显示完整的硬件拓扑信息
-      tags:
-      - Topology
   /showNumaTopology:
     post:
       description: 显示一组 GPU 设备的 NUMA 节点和关联信息。
@@ -2607,8 +2489,6 @@ paths:
           schema:
             type: string
       summary: 显示 NUMA 节点信息
-      tags:
-      - Topology
   /showTypeTopology:
     post:
       description: 显示 GPU 设备之间的链接类型信息。
@@ -2627,8 +2507,6 @@ paths:
           schema:
             type: string
       summary: 显示 GPU 拓扑链接类型
-      tags:
-      - Topology
   /showUId:
     post:
       description: 获取并显示指定设备的唯一ID信息。
@@ -2653,8 +2531,6 @@ paths:
           schema:
             type: string
       summary: 显示设备的唯一ID
-      tags:
-      - 设备
   /showVbiosVersion:
     post:
       description: 获取并显示指定设备的VBIOS版本信息。
@@ -2679,8 +2555,6 @@ paths:
           schema:
             type: string
       summary: 显示设备的VBIOS版本
-      tags:
-      - 设备
   /showVoltage:
     post:
       description: 获取并显示指定设备的当前电压信息。
@@ -2705,8 +2579,6 @@ paths:
           schema:
             type: string
       summary: 显示设备的电压信息
-      tags:
-      - 设备
   /showVoltageCurve:
     post:
       description: 获取并显示指定设备的电压曲线点信息。
@@ -2729,8 +2601,6 @@ paths:
           schema:
             type: string
       summary: 显示设备的电压曲线点
-      tags:
-      - 设备
   /showWeightTopology:
     post:
       description: 显示 GPU 设备之间的权重信息。
@@ -2749,8 +2619,6 @@ paths:
           schema:
             type: string
       summary: 显示 GPU 拓扑权重
-      tags:
-      - Topology
   /showXgmiErr:
     post:
       description: 显示一组 GPU 设备的 XGMI 错误状态。
@@ -2769,8 +2637,6 @@ paths:
           schema:
             type: string
       summary: 显示 XGMI 错误状态
-      tags:
-      - Topology
   /temps/current:
     post:
       consumes:
@@ -2795,8 +2661,6 @@ paths:
           description: 错误信息
           schema: {}
       summary: 显示设备温度传感器数据
-      tags:
-      - Temperature
   /utilization/coarse:
     post:
       parameters:
@@ -2822,8 +2686,6 @@ paths:
           description: 错误信息
           schema: {}
       summary: 获取设备粗粒度利用率
-      tags:
-      - Utilization
   /vDeviceCount:
     get:
       description: 获取当前系统中的虚拟设备数量
@@ -2837,6 +2699,4 @@ paths:
           schema:
             type: string
       summary: 获取虚拟设备数量
-      tags:
-      - Device
 swagger: "2.0"
