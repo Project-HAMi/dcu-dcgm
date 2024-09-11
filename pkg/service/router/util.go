@@ -119,3 +119,59 @@ func ErrorResponse(data interface{}) Response {
 		Data:    data,
 	}
 }
+
+// ConvertFrequencyToSclkClock 将sclk频率值转换为对应的十进制值
+func ConvertFrequencyToSclkClock(freq string) (int64, error) {
+	switch freq {
+	case "600":
+		return 1, nil
+	case "700":
+		return 2, nil
+	case "750":
+		return 4, nil
+	case "800":
+		return 8, nil
+	case "900":
+		return 16, nil
+	case "1000":
+		return 32, nil
+	case "1106":
+		return 64, nil
+	case "1200":
+		return 128, nil
+	case "1270":
+		return 256, nil
+	case "1319":
+		return 512, nil
+	case "1400":
+		return 1024, nil
+	case "1500":
+		return 2048, nil
+	default:
+		return 0, fmt.Errorf("invalid frequency value: %s", freq)
+	}
+}
+
+// ConvertFrequencyToSocclkClock 将socclk频率值转换为对应的十进制值
+func ConvertFrequencyToSocclkClock(freq string) (int64, error) {
+	switch freq {
+	case "309":
+		return 1, nil
+	case "523":
+		return 2, nil
+	case "566":
+		return 4, nil
+	case "618":
+		return 8, nil
+	case "680":
+		return 16, nil
+	case "755":
+		return 32, nil
+	case "850":
+		return 64, nil
+	case "971":
+		return 128, nil
+	default:
+		return 0, fmt.Errorf("invalid frequency value: %s", freq)
+	}
+}

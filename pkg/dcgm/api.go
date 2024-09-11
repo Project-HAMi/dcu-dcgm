@@ -243,6 +243,11 @@ func CollectDeviceMetrics() (monitorInfos []MonitorInfo, err error) {
 		clk, _ := rsmiDevGpuClkFreqGet(i, RSMI_CLK_TYPE_SYS)
 		sclk, _ := strconv.ParseFloat(fmt.Sprintf("%.2f", float64(clk.Frequency[clk.Current])/1000000.0), 64)
 		glog.Infof(" DCU[%v] SCLK : %.0f", i, sclk)
+		soc, _ := rsmiDevGpuClkFreqGet(i, RSMI_CLK_TYPE_SOC)
+		socclk, _ := strconv.ParseFloat(fmt.Sprintf("%.2f", float64(soc.Frequency[soc.Current])/1000000.0), 64)
+		glog.Infof(" DCU[%v] SOCCLK : %.0f", i, socclk)
+		//获取当前性能水平
+		perf, err := PerfLevel(i)
 		monitorInfo := MonitorInfo{
 			MinorNumber:     i,
 			PciBusNumber:    pciBusNumber,
@@ -256,6 +261,8 @@ func CollectDeviceMetrics() (monitorInfos []MonitorInfo, err error) {
 			UtilizationRate: ur,
 			PcieBwMb:        pcieBwMb,
 			Clk:             sclk,
+			PerfLevel:       perf,
+			Socclk:          socclk,
 		}
 		monitorInfos = append(monitorInfos, monitorInfo)
 	}

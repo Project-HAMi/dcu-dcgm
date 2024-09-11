@@ -3,6 +3,7 @@ package router
 import (
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -679,7 +680,7 @@ func VbiosVersion(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param dvInd query int true "设备索引"
-// @Param freqBitmask query int64 true "掩码
+// @Param freqBitmask query int64 true "频率掩码"
 // @Success 200 {object} map[string]interface{} "成功"
 // @Failure 400 {object} error "请求参数错误"
 // @Failure 500 {object} error "服务器内部错误"
@@ -2256,4 +2257,109 @@ func GetDeviceInfo(c *gin.Context) {
 		"deviceInfo": deviceInfo,
 	}
 	c.JSON(http.StatusOK, SuccessResponse(response))
+}
+
+// DeviceControl 处理设备控制
+// @Summary 控制设备的性能级别、时钟频率和风扇重置
+// @Description 根据传入的设备控制信息，设置设备的性能级别、时钟频率，并可选择性重置风扇
+// @Accept json
+// @Produce json
+// @Param deviceControl body DeviceControlInfo true "设备控制信息"
+// @Success 200 {object} string "成功返回操作结果"
+// @Failure 400 {object} string "无效的请求参数或操作失败"
+// @Failure 500 {object} string "内部服务器错误"
+// @Router /device/control [post]
+func DeviceControl(c *gin.Context) {
+	var deviceInfo DeviceControlInfo
+	var validationErrors []string // 存储所有验证失败的字段和原因
+	// 绑定 JSON 请求体到 deviceInfo 对象
+	if err := c.ShouldBindJSON(&deviceInfo); err != nil {
+		c.JSON(http.StatusBadRequest, ErrorResponse(err.Error()))
+		return
+	}
+
+	// 验证 DvInd 参数
+	dvInd := deviceInfo.DvInd
+	if dvInd < 0 {
+		validationErrors = append(validationErrors, "无效的 DvInd")
+	}
+	// 验证 Level 参数
+	var levelConverted dcgm.RSMIDevPerfLevel
+	if deviceInfo.PerfLevel != "" {
+		var err error
+		levelConverted, err = ConvertToRSMIDevPerfLevel(deviceInfo.PerfLevel)
+		if err != nil {
+			validationErrors = append(validationErrors, "无效的性能级别 Level")
+		}
+	}
+
+	// 验证 SclkClock 参数
+	var sclkClock int64
+	if deviceInfo.SclkClock != "" {
+		var err error
+		sclkClock, err = ConvertFrequencyToSclkClock(deviceInfo.SclkClock)
+		if err != nil {
+			validationErrors = append(validationErrors, "无效的 SclkClock 参数："+err.Error())
+		}
+	}
+
+	// 验证 SocclkClock 参数
+	var socclkClock int64
+	if deviceInfo.SocclkClock != "" {
+		var err error
+		socclkClock, err = ConvertFrequencyToSocclkClock(deviceInfo.SocclkClock)
+		if err != nil {
+			validationErrors = append(validationErrors, "无效的 SocclkClock 参数："+err.Error())
+		}
+	}
+
+	// 如果有任何验证失败的参数，返回错误
+	if len(validationErrors) > 0 {
+		c.JSON(http.StatusBadRequest, ErrorResponse("以下参数无效: "+strings.Join(validationErrors, ", ")))
+		return
+	}
+	// 执行方法逻辑并收集错误
+	var executionErrors []string
+
+	// 调用 DevPerfLevelSet 函数，如果 Level 字段存在
+	if deviceInfo.PerfLevel != "" {
+		err := dcgm.DevPerfLevelSet(dvInd, levelConverted)
+		if err != nil {
+			executionErrors = append(executionErrors, "设置性能级别失败: "+err.Error())
+		}
+	}
+
+	// 调用 DevGpuClkFreqSet 函数，如果 SclkClock 字段存在
+	if deviceInfo.SclkClock != "" {
+		err := dcgm.DevGpuClkFreqSet(dvInd, dcgm.RSMI_CLK_TYPE_SYS, sclkClock)
+		if err != nil {
+			executionErrors = append(executionErrors, "设置时钟频率失败: "+err.Error())
+		}
+	}
+
+	// 调用 DevGpuClkFreqSet 函数，如果 SocclkClock 字段存在
+	if deviceInfo.SocclkClock != "" {
+		err := dcgm.DevGpuClkFreqSet(dvInd, dcgm.RSMI_CLK_TYPE_SOC, socclkClock)
+		if err != nil {
+			executionErrors = append(executionErrors, "设置时钟频率失败: "+err.Error())
+		}
+	}
+
+	// 调用 ResetFans 函数，如果 ResetFan 为 true
+	if deviceInfo.ResetFan {
+		err := dcgm.ResetFans([]int{dvInd})
+		if err != nil {
+			executionErrors = append(executionErrors, "重置风扇失败: "+err.Error())
+		}
+	}
+
+	// 如果有任何方法执行失败，返回失败的错误信息
+	if len(executionErrors) > 0 {
+		executionErrorInfo := map[string]interface{}{
+			"executionErrors": executionErrors,
+		}
+		c.JSON(http.StatusBadRequest, ErrorResponse(executionErrorInfo))
+		return
+	}
+	c.JSON(http.StatusOK, SuccessResponse(nil))
 }

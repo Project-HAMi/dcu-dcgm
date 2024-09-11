@@ -1011,3 +1011,32 @@ const (
 	LinkTypeXGMI    = "XGMI"
 	LinkTypeUnknown = "XXXX"
 )
+
+// DeviceControlInfo 控制设备信息
+type DeviceControlInfo struct {
+	// DvInd 设备索引号
+	DvInd int
+	// PerfLevel 性能水平
+	PerfLevel string
+	// SclkClock sclk时钟频率 600、700、750、800、900、1000、1106、1200、1270、1319、1400、1500、1600
+	SclkClock string
+	// SocclkClock soclk时钟频率 309、523、566、618、680、755、850、971
+	SocclkClock string
+	// ResetFan 是否重置风扇控制
+	ResetFan bool
+}
+
+const (
+	Freq600Mhz  = 1    // 0b000000000001
+	Freq700Mhz  = 2    // 0b000000000010
+	Freq750Mhz  = 4    // 0b000000000100
+	Freq800Mhz  = 8    // 0b000000001000
+	Freq900Mhz  = 16   // 0b000000010000
+	Freq1000Mhz = 32   // 0b000000100000
+	Freq1106Mhz = 64   // 0b000001000000
+	Freq1200Mhz = 128  // 0b000010000000
+	Freq1270Mhz = 256  // 0b000100000000
+	Freq1319Mhz = 512  // 0b001000000000
+	Freq1400Mhz = 1024 // 0b010000000000
+	Freq1600Mhz = 2048 // 0b100000000000
+)
