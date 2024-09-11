@@ -143,9 +143,11 @@ type RSMIUtilizationCounter struct {
 type RSMIClkType C.rsmi_clk_type_t
 
 const (
+	// sclk clock level
 	RSMI_CLK_TYPE_SYS  RSMIClkType = C.RSMI_CLK_TYPE_SYS
 	RSMI_CLK_TYPE_DF   RSMIClkType = C.RSMI_CLK_TYPE_DF
 	RSMI_CLK_TYPE_DCEF RSMIClkType = C.RSMI_CLK_TYPE_DCEF
+	// socclk clock level
 	RSMI_CLK_TYPE_SOC  RSMIClkType = C.RSMI_CLK_TYPE_SOC
 	RSMI_CLK_TYPE_MEM  RSMIClkType = C.RSMI_CLK_TYPE_MEM
 	RSMI_CLK_TYPE_PCIE RSMIClkType = C.RSMI_CLK_TYPE_PCIE
@@ -578,8 +580,12 @@ type MonitorInfo struct {
 	UtilizationRate float64
 	//  PcieBwMb pcie流量信息
 	PcieBwMb float64
-	// Clk 备系统时钟速度列表
+	// Clk 备系统时钟速度
 	Clk float64
+	// Socclk socclk时钟
+	Socclk float64
+	// PerfLevel 性能水平
+	PerfLevel string
 }
 
 // DeviceInfo 设备信息结构体
@@ -1010,19 +1016,4 @@ const (
 	LinkTypePCIE    = "PCIE"
 	LinkTypeXGMI    = "XGMI"
 	LinkTypeUnknown = "XXXX"
-)
-
-const (
-	Freq600Mhz  = 1    // 0b000000000001
-	Freq700Mhz  = 2    // 0b000000000010
-	Freq750Mhz  = 4    // 0b000000000100
-	Freq800Mhz  = 8    // 0b000000001000
-	Freq900Mhz  = 16   // 0b000000010000
-	Freq1000Mhz = 32   // 0b000000100000
-	Freq1106Mhz = 64   // 0b000001000000
-	Freq1200Mhz = 128  // 0b000010000000
-	Freq1270Mhz = 256  // 0b000100000000
-	Freq1319Mhz = 512  // 0b001000000000
-	Freq1400Mhz = 1024 // 0b010000000000
-	Freq1600Mhz = 2048 // 0b100000000000
 )

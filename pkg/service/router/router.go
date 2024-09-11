@@ -44,6 +44,7 @@ func InitRouter() *gin.Engine {
 	// 路由注册
 	router.GET("/Power/:dvInd", Power)
 
+	//设置 GPU 时钟频率
 	router.POST("/DevGpuClkFreqSet", DevGpuClkFreqSet)
 	// 路由注册
 	router.GET("/EccStatus/:dvInd", EccStatus)
@@ -141,5 +142,7 @@ func InitRouter() *gin.Engine {
 	// 打印设备的事件列表
 	router.GET("/PrintEventList/:device", PrintEventList)
 	router.GET("/device/info/:dvInd", GetDeviceInfo)
+	// 路由
+	router.POST("/device/control", DeviceControl)
 	return router
 }

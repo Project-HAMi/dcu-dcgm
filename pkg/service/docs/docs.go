@@ -249,6 +249,54 @@ const docTemplate = `{
                 }
             }
         },
+        "/DevGpuClkFreqSet": {
+            "post": {
+                "description": "设置 GPU 上指定时钟的允许频率。clkType 设置为默认值，无需传递。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "GPU"
+                ],
+                "summary": "设置 GPU 时钟频率",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "设备索引",
+                        "name": "dvInd",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "频率掩码",
+                        "name": "freqBitmask",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/DevGpuMetricsInfo/{dvInd}": {
             "get": {
                 "description": "根据设备 ID 获取 GPU 的度量信息。",
@@ -341,6 +389,51 @@ const docTemplate = `{
                     "404": {
                         "description": "设备未找到",
                         "schema": {}
+                    }
+                }
+            }
+        },
+        "/DevPciBandwidthSet": {
+            "post": {
+                "description": "根据设备索引和带宽掩码限制设备允许的 PCIe 带宽",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "设置设备允许的 PCIe 带宽",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "设备索引",
+                        "name": "dvInd",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "带宽掩码",
+                        "name": "bwBitmask",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "操作成功",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "type": "string"
+                        }
                     }
                 }
             }
@@ -1902,6 +1995,49 @@ const docTemplate = `{
                 }
             }
         },
+        "/device/control": {
+            "post": {
+                "description": "根据传入的设备控制信息，设置设备的性能级别、时钟频率，并可选择性重置风扇",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "控制设备的性能级别、时钟频率和风扇重置",
+                "parameters": [
+                    {
+                        "description": "设备控制信息",
+                        "name": "deviceControl",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/router.DeviceControlInfo"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功返回操作结果",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "无效的请求参数或操作失败",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "内部服务器错误",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/device/info/{dvInd}": {
             "get": {
                 "description": "根据设备索引获取对应的设备信息",
@@ -3437,6 +3573,31 @@ const docTemplate = `{
                 "vdeviceCount": {
                     "description": "VDeviceCount 虚拟设备数量",
                     "type": "integer"
+                }
+            }
+        },
+        "router.DeviceControlInfo": {
+            "type": "object",
+            "properties": {
+                "dvInd": {
+                    "description": "DvInd 设备索引号",
+                    "type": "integer"
+                },
+                "perfLevel": {
+                    "description": "PerfLevel 性能水平",
+                    "type": "string"
+                },
+                "resetFan": {
+                    "description": "ResetFan 是否重置风扇控制",
+                    "type": "boolean"
+                },
+                "sclkClock": {
+                    "description": "SclkClock sclk时钟频率 600、700、750、800、900、1000、1106、1200、1270、1319、1400、1500、1600",
+                    "type": "string"
+                },
+                "socclkClock": {
+                    "description": "SocclkClock soclk时钟频率 309、523、566、618、680、755、850、971",
+                    "type": "string"
                 }
             }
         },

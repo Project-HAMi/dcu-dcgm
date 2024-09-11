@@ -112,6 +112,24 @@ definitions:
         description: VDeviceCount 虚拟设备数量
         type: integer
     type: object
+  router.DeviceControlInfo:
+    properties:
+      dvInd:
+        description: DvInd 设备索引号
+        type: integer
+      perfLevel:
+        description: PerfLevel 性能水平
+        type: string
+      resetFan:
+        description: ResetFan 是否重置风扇控制
+        type: boolean
+      sclkClock:
+        description: SclkClock sclk时钟频率 600、700、750、800、900、1000、1106、1200、1270、1319、1400、1500、1600
+        type: string
+      socclkClock:
+        description: SocclkClock soclk时钟频率 309、523、566、618、680、755、850、971
+        type: string
+    type: object
   router.DeviceInfo:
     properties:
       computeUnit:
@@ -688,6 +706,39 @@ paths:
           schema:
             type: string
       summary: 获取设备的风扇速度
+  /DevGpuClkFreqSet:
+    post:
+      consumes:
+      - application/json
+      description: 设置 GPU 上指定时钟的允许频率。clkType 设置为默认值，无需传递。
+      parameters:
+      - description: 设备索引
+        in: query
+        name: dvInd
+        required: true
+        type: integer
+      - description: 频率掩码
+        in: query
+        name: freqBitmask
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 请求参数错误
+          schema: {}
+        "500":
+          description: 服务器内部错误
+          schema: {}
+      summary: 设置 GPU 时钟频率
+      tags:
+      - GPU
   /DevGpuMetricsInfo/{dvInd}:
     get:
       description: 根据设备 ID 获取 GPU 的度量信息。
@@ -753,6 +804,36 @@ paths:
           description: 设备未找到
           schema: {}
       summary: 获取可用的 PCIe 带宽列表
+  /DevPciBandwidthSet:
+    post:
+      description: 根据设备索引和带宽掩码限制设备允许的 PCIe 带宽
+      parameters:
+      - description: 设备索引
+        in: query
+        name: dvInd
+        required: true
+        type: integer
+      - description: 带宽掩码
+        in: query
+        name: bwBitmask
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 操作成功
+          schema:
+            type: string
+        "400":
+          description: 请求参数错误
+          schema:
+            type: string
+        "500":
+          description: 服务器内部错误
+          schema:
+            type: string
+      summary: 设置设备允许的 PCIe 带宽
   /DevPerfLevelSet/{dvInd}:
     post:
       description: 根据设备 ID 设置 PowerPlay 性能级别。
@@ -1794,6 +1875,34 @@ paths:
           schema:
             type: int64
       summary: 获取指定设备的XGMI hive id
+  /device/control:
+    post:
+      consumes:
+      - application/json
+      description: 根据传入的设备控制信息，设置设备的性能级别、时钟频率，并可选择性重置风扇
+      parameters:
+      - description: 设备控制信息
+        in: body
+        name: deviceControl
+        required: true
+        schema:
+          $ref: '#/definitions/router.DeviceControlInfo'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功返回操作结果
+          schema:
+            type: string
+        "400":
+          description: 无效的请求参数或操作失败
+          schema:
+            type: string
+        "500":
+          description: 内部服务器错误
+          schema:
+            type: string
+      summary: 控制设备的性能级别、时钟频率和风扇重置
   /device/info/{dvInd}:
     get:
       description: 根据设备索引获取对应的设备信息
