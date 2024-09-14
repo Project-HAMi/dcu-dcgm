@@ -137,6 +137,7 @@ func rsmiDevGpuClkFreqGet(dvInd int, clkType RSMIClkType) (frequencies RSMIFrequ
 		Current:      uint32(cfrequencies.current),
 		Frequency:    *(*[32]uint64)(unsafe.Pointer(&cfrequencies.frequency)),
 	}
+	glog.Infof("rsmi_dev_gpu_clk_freq_get:%v", dataToJson(frequencies))
 	return
 }
 

@@ -1951,8 +1951,8 @@ func DeviceCount(c *gin.Context) {
 // @Router /VDeviceSingleInfo [get]
 func VDeviceSingleInfo(c *gin.Context) {
 	var vDvInd int
-	if err := c.ShouldBindQuery(&vDvInd); err != nil {
-		c.JSON(http.StatusBadRequest, "请求参数错误")
+	if err := c.BindQuery(&vDvInd); err != nil {
+		c.JSON(http.StatusBadRequest, "虚拟设备销毁失败")
 		return
 	}
 	vDeviceInfo, err := dcgm.VDeviceSingleInfo(vDvInd)
@@ -2019,36 +2019,59 @@ func DeviceRemainingInfo(c *gin.Context) {
 // @Description 在指定的物理设备上创建指定数量的虚拟设备，返回创建的虚拟设备ID集合
 // @Param dvInd query int true "物理设备的索引"
 // @Param vDevCount query int true "要创建的虚拟设备数量"
-// @Param vDevCUs query []int true "每个虚拟设备的计算单元数量"
-// @Param vDevMemSize query []int true "每个虚拟设备的内存大小"
-// @Success 200 {array} int "虚拟设备创建成功，返回虚拟设备ID集合"
-// @Failure 400 {string} string "创建虚拟设备失败"
+// @Param vDevCUs query []int true "每个虚拟设备的计算单元数量，多个值使用多个 vDevCUs 参数传递，例如：vDevCUs=10&vDevCUs=20"
+// @Param vDevMemSize query []int true "每个虚拟设备的内存大小，多个值使用多个 vDevMemSize 参数传递，例如：vDevMemSize=1024&vDevMemSize=2048"
+// @Success 200 {object} map[string]interface{} "虚拟设备创建成功，返回包含虚拟设备ID集合的对象"
+// @Failure 400 {string} string "请求参数无效"
+// @Failure 500 {string} string "创建虚拟设备失败"
 // @Router /CreateVDevices [post]
 func CreateVDevices(c *gin.Context) {
-	var dvInd, vDevCount int
-	var vDevCUs, vDevMemSize []int
+	var err error
+	// 获取单个整数参数
+	dvInd, err := strconv.Atoi(c.Query("dvInd"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, "无效的物理设备索引")
+		return
+	}
 
-	if err := c.ShouldBindQuery(&dvInd); err != nil {
-		c.JSON(http.StatusBadRequest, "创建虚拟设备失败")
+	vDevCount, err := strconv.Atoi(c.Query("vDevCount"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, "无效的虚拟设备数量")
 		return
 	}
-	if err := c.ShouldBindQuery(&vDevCount); err != nil {
-		c.JSON(http.StatusBadRequest, "创建虚拟设备失败")
-		return
+
+	// 获取切片参数
+	vDevCUsStr := c.QueryArray("vDevCUs")
+	vDevMemSizeStr := c.QueryArray("vDevMemSize")
+
+	// 将字符串切片转换为整数切片
+	vDevCUs := make([]int, len(vDevCUsStr))
+	vDevMemSize := make([]int, len(vDevMemSizeStr))
+
+	for i, v := range vDevCUsStr {
+		vDevCUs[i], err = strconv.Atoi(v)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, "无效的计算单元数量")
+			return
+		}
 	}
-	if err := c.ShouldBindQuery(&vDevCUs); err != nil {
-		c.JSON(http.StatusBadRequest, "创建虚拟设备失败")
-		return
+
+	for i, v := range vDevMemSizeStr {
+		vDevMemSize[i], err = strconv.Atoi(v)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, "无效的内存大小")
+			return
+		}
 	}
-	if err := c.ShouldBindQuery(&vDevMemSize); err != nil {
-		c.JSON(http.StatusBadRequest, "创建虚拟设备失败")
-		return
-	}
+
+	// 调用业务逻辑层的函数
 	vdevIDs, err := dcgm.CreateVDevices(dvInd, vDevCount, vDevCUs, vDevMemSize)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, "创建虚拟设备失败")
 		return
 	}
+
+	// 成功响应
 	response := map[string]interface{}{
 		"vdevIDs": vdevIDs,
 	}

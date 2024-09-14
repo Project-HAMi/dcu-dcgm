@@ -29,9 +29,13 @@ func main() {
 	//dcgm.DevGpuClkFreqSet(0, dcgm.RSMI_CLK_TYPE_SYS, 4096)
 	//dcgm.DevOverdriveLevelSet(0, 5)
 	//dcgm.DevOverdriveLevelGet(0)
-	dcgm.EccStatus(0, dcgm.RSMIGpuBlockDF)
-	dcgm.EccCount(0, dcgm.RSMIGpuBlockDF)
-
-	dcgm.EccStatus(0, dcgm.RSMIGpuBlockPCIEBIF)
-	dcgm.EccCount(0, dcgm.RSMIGpuBlockPCIEBIF)
+	//dcgm.EccStatus(0, dcgm.RSMIGpuBlockDF)
+	//dcgm.EccCount(0, dcgm.RSMIGpuBlockDF)
+	//
+	//dcgm.EccStatus(0, dcgm.RSMIGpuBlockPCIEBIF)
+	//dcgm.EccCount(0, dcgm.RSMIGpuBlockPCIEBIF)
+	//dcgm.CollectDeviceMetrics()
+	//dcgm.EccBlocksInfo(0)
+	dcgm.VDeviceSingleInfo(0)
+	dcgm.VDeviceSingleInfo(1)
 }
