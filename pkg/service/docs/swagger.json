@@ -82,7 +82,7 @@
                             "type": "integer"
                         },
                         "collectionFormat": "csv",
-                        "description": "每个虚拟设备的计算单元数量",
+                        "description": "每个虚拟设备的计算单元数量，多个值使用多个 vDevCUs 参数传递，例如：vDevCUs=10\u0026vDevCUs=20",
                         "name": "vDevCUs",
                         "in": "query",
                         "required": true
@@ -93,7 +93,7 @@
                             "type": "integer"
                         },
                         "collectionFormat": "csv",
-                        "description": "每个虚拟设备的内存大小",
+                        "description": "每个虚拟设备的内存大小，多个值使用多个 vDevMemSize 参数传递，例如：vDevMemSize=1024\u0026vDevMemSize=2048",
                         "name": "vDevMemSize",
                         "in": "query",
                         "required": true
@@ -101,15 +101,19 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "虚拟设备创建成功，返回虚拟设备ID集合",
+                        "description": "虚拟设备创建成功，返回包含虚拟设备ID集合的对象",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "integer"
-                            }
+                            "type": "object",
+                            "additionalProperties": true
                         }
                     },
                     "400": {
+                        "description": "请求参数无效",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
                         "description": "创建虚拟设备失败",
                         "schema": {
                             "type": "string"

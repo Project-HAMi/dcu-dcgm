@@ -580,10 +580,14 @@ type MonitorInfo struct {
 	UtilizationRate float64
 	//  PcieBwMb pcie流量信息
 	PcieBwMb float64
-	// Clk 备系统时钟速度
+	// Clk 系统时钟速度
 	Clk float64
+	// SclkFrequency 系统时钟频率列表
+	SclkFrequency []string
 	// Socclk socclk时钟
 	Socclk float64
+	// SocclkFrequency Soc时钟频率列表
+	SocclkFrequency []string
 	// PerfLevel 性能水平
 	PerfLevel string
 }
@@ -1017,3 +1021,10 @@ const (
 	LinkTypeXGMI    = "XGMI"
 	LinkTypeUnknown = "XXXX"
 )
+
+type BlocksInfo struct {
+	Block string
+	State string
+	CE    int64
+	UE    int64
+}
