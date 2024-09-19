@@ -20,6 +20,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"unsafe"
 )
 
@@ -330,3 +331,57 @@ func parseConfigFile(filePath string) (map[string]string, error) {
 	}
 	return config, nil
 }
+
+// 执行并行任务
+func executeInParallel(wg *sync.WaitGroup, task func()) {
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		task()
+	}()
+}
+
+// 用安全锁更新monitorInfo的字段值
+func updateMonitorInfo(mu *sync.Mutex, updateFunc func()) {
+	mu.Lock()
+	defer mu.Unlock()
+	updateFunc()
+}
+
+// Helper function to perform a task and update monitorInfo
+func fetchAndUpdate[T any](mu *sync.Mutex, wg *sync.WaitGroup, fetchFunc func() T, updateFunc func(T)) {
+	executeInParallel(wg, func() {
+		result := fetchFunc()
+		updateMonitorInfo(mu, func() {
+			updateFunc(result)
+		})
+	})
+}
+
+var blockToStringMap = map[RSMIGpuBlock]string{
+	RSMIGpuBlockInvalid:  "INVALID",
+	RSMIGpuBlockUMC:      "UMC",
+	RSMIGpuBlockSDMA:     "SDMA",
+	RSMIGpuBlockGFX:      "GFX",
+	RSMIGpuBlockMMHUB:    "MMHUB",
+	RSMIGpuBlockATHUB:    "ATHUB",
+	RSMIGpuBlockPCIEBIF:  "PCIEBIF",
+	RSMIGpuBlockHDP:      "HDP",
+	RSMIGpuBlockXGMIWAFL: "XGMIWAFL",
+	RSMIGpuBlockDF:       "DF",
+	RSMIGpuBlockSMN:      "SMN",
+	RSMIGpuBlockSEM:      "SEM",
+	RSMIGpuBlockMP0:      "MP0",
+	RSMIGpuBlockMP1:      "MP1",
+	RSMIGpuBlockFuse:     "FUSE",
+	RSMIGpuBlockMCA:      "MCA",
+	RSMIGpuBlockReserved: "RESERVED",
+}
+
+func ConvertFromRSMIGpuBlock(block RSMIGpuBlock) string {
+	if str, exists := blockToStringMap[block]; exists {
+		return str
+	}
+	return "UNKNOWN"
+}
+

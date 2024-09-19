@@ -143,9 +143,11 @@ type RSMIUtilizationCounter struct {
 type RSMIClkType C.rsmi_clk_type_t
 
 const (
+	// sclk clock level
 	RSMI_CLK_TYPE_SYS  RSMIClkType = C.RSMI_CLK_TYPE_SYS
 	RSMI_CLK_TYPE_DF   RSMIClkType = C.RSMI_CLK_TYPE_DF
 	RSMI_CLK_TYPE_DCEF RSMIClkType = C.RSMI_CLK_TYPE_DCEF
+	// socclk clock level
 	RSMI_CLK_TYPE_SOC  RSMIClkType = C.RSMI_CLK_TYPE_SOC
 	RSMI_CLK_TYPE_MEM  RSMIClkType = C.RSMI_CLK_TYPE_MEM
 	RSMI_CLK_TYPE_PCIE RSMIClkType = C.RSMI_CLK_TYPE_PCIE
@@ -578,8 +580,16 @@ type MonitorInfo struct {
 	UtilizationRate float64
 	//  PcieBwMb pcie流量信息
 	PcieBwMb float64
-	// Clk 备系统时钟速度列表
+	// Clk 系统时钟速度
 	Clk float64
+	// SclkFrequency 系统时钟频率列表
+	SclkFrequency []string
+	// Socclk socclk时钟
+	Socclk float64
+	// SocclkFrequency Soc时钟频率列表
+	SocclkFrequency []string
+	// PerfLevel 性能水平
+	PerfLevel string
 }
 
 // DeviceInfo 设备信息结构体
@@ -775,15 +785,18 @@ type Device struct {
 	ComputeUnitCount float64
 
 	// ComputeUnitRemainingCount 设备剩余可用的计算单元数量
-	ComputeUnitRemainingCount uintptr
+	ComputeUnitRemainingCount uint64
 
 	// MemoryRemaining 设备剩余可用的内存量
-	MemoryRemaining uintptr
+	MemoryRemaining uint64
 
 	// MaxVDeviceCount 物理设备上支持的最大虚拟设备数量
 	MaxVDeviceCount int
 	// VDeviceCount 虚拟设备数量
 	VDeviceCount int
+
+	// BlocksInfo 设备的block信息
+	BlocksInfos []BlocksInfo
 }
 
 // PhysicalDeviceInfo 物理设备信息
@@ -1011,3 +1024,10 @@ const (
 	LinkTypeXGMI    = "XGMI"
 	LinkTypeUnknown = "XXXX"
 )
+
+type BlocksInfo struct {
+	Block string
+	State string
+	CE    int64
+	UE    int64
+}

@@ -22,7 +22,7 @@ func rsmiInit() (err error) {
 	if err = errorString(ret); err != nil {
 		return fmt.Errorf("Error go_rsmi_init: %s", err)
 	}
-	return nil
+	return
 }
 
 // rsmiShutdown 关闭rocm_smi
@@ -32,5 +32,5 @@ func rsmiShutdown() (err error) {
 	if err = errorString(ret); err != nil {
 		return fmt.Errorf("Error rsmi_shutdown: %s", err)
 	}
-	return nil
+	return
 }

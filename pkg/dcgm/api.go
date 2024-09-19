@@ -22,8 +22,30 @@ import (
 // @Success 200 {object} string "成功初始化"
 // @Failure 500 {object} error "初始化失败"
 // @Router /Init [post]
-func Init() error {
-	return rsmiInit()
+func Init() (err error) {
+	err = rsmiInit()
+	//maxRetries := 12 // 最大重试次数（2分钟 / 10秒 = 12次）
+	//restartTimeout := 10 * time.Second
+	//retryInterval := 10 * time.Second // 每次重试间隔10秒
+	//for i := 0; i < maxRetries; i++ {
+	//	err = rsmiInit()
+	//	if err == nil {
+	//		ShutDown()
+	//		// err 为空，表示成功，继续往下执行
+	//		time.Sleep(retryInterval) // 等待60秒
+	//		glog.Infof("rsmi init successful Retrying in %v seconds...\n", retryInterval)
+	//		glog.Infof("rsmi init successful Second start...\n")
+	//		err := rsmiInit()
+	//		if err != nil {
+	//			return err
+	//		}
+	//		return nil
+	//	}
+	//	fmt.Printf("Initialization failed: %v. Retrying in 10 seconds...\n", err)
+	//	time.Sleep(restartTimeout) // 等待10秒
+	//}
+	//// 超过最大重试次数，仍然失败，返回错误
+	return
 }
 
 // @Summary 关闭 DCGM
@@ -125,7 +147,10 @@ func DevVramVendor(dvInd int) (name string, err error) {
 // @Router /DevPciBandwidth [get]
 func DevPciBandwidth(dvInd int) (rsmiPcieBandwidth RSMIPcieBandwidth, err error) {
 	return rsmiDevPciBandwidthGet(dvInd)
+}
 
+func DevPciBandwidthSet(dvInd int, bwBitmask int64) (err error) {
+	return rsmiDevPciBandwidthSet(dvInd, bwBitmask)
 }
 
 // @Summary 获取内存使用百分比
@@ -171,6 +196,10 @@ func DevGpuMetricsInfo(dvInd int) (gpuMetrics RSMIGPUMetrics, err error) {
 	return rsmiDevGpuMetricsInfoGet(dvInd)
 }
 
+func DevPowerCapRange(dvInd int, senserId int) (max, min int64, err error) {
+	return rsmiDevPowerCapRangeGet(dvInd, senserId)
+}
+
 // @Summary 获取设备监控中的指标
 // @Description 收集所有设备的监控指标信息。
 // @Produce json
@@ -183,82 +212,214 @@ func CollectDeviceMetrics() (monitorInfos []MonitorInfo, err error) {
 	if err != nil {
 		return nil, err
 	}
+	var wg sync.WaitGroup
+	monitorInfos = make([]MonitorInfo, numMonitorDevices)
+	deviceResults := make(chan MonitorInfo, numMonitorDevices) // Create a channel to collect results
+
 	for i := 0; i < numMonitorDevices; i++ {
-		bdfid, err := rsmiDevPciIdGet(i)
-		if err != nil {
-			return nil, err
-		}
-		// 解析BDFID
-		domain := (bdfid >> 32) & 0xffffffff
-		bus := (bdfid >> 8) & 0xff
-		dev := (bdfid >> 3) & 0x1f
-		function := bdfid & 0x7
-		// 格式化PCI ID
-		pciBusNumber := fmt.Sprintf("%04x:%02x:%02x.%x", domain, bus, dev, function)
-		//设备序列号
-		deviceId, _ := rsmiDevSerialNumberGet(i)
-		//获取设备类型标识id
-		devTypeId, _ := rsmiDevIdGet(i)
-		//型号名称
-		devTypeName := type2name[fmt.Sprintf("%x", devTypeId)]
-		//设备温度
-		temperature, _ := rsmiDevTempMetricGet(i, 0, RSMI_TEMP_CURRENT)
-		t, err := strconv.ParseFloat(fmt.Sprintf("%.2f", float64(temperature)/1000.0), 64)
-		if err != nil {
-			return nil, err
-		}
-		//设备平均功耗
-		powerUsage, _ := rsmiDevPowerAveGet(i, 0)
-		pu, _ := strconv.ParseFloat(fmt.Sprintf("%.2f", float64(powerUsage)/1000000.0), 64)
-		glog.Infof("\U0001FAAB DCU[%v] power usage : %.0f", i, pu)
-		//获取设备功率上限
-		powerCap, _ := rsmiDevPowerCapGet(i, 0)
-		pc, _ := strconv.ParseFloat(fmt.Sprintf("%.2f", float64(powerCap)/1000000.0), 64)
-		glog.Infof("🔋 DCU[%v] power cap : %.0f", i, pc)
-		//获取设备内存总量
-		memoryCap, _ := rsmiDevMemoryTotalGet(i, RSMI_MEM_TYPE_FIRST)
-		mc, _ := strconv.ParseFloat(fmt.Sprintf("%f", float64(memoryCap)/1.0), 64)
-		glog.Infof("DCU[%v] memory total: %.0f", i, mc)
-		//获取设备内存使用量
-		memoryUsed, _ := rsmiDevMemoryUsageGet(i, RSMI_MEM_TYPE_FIRST)
-		mu, _ := strconv.ParseFloat(fmt.Sprintf("%f", float64(memoryUsed)/1.0), 64)
-		glog.Infof(" DCU[%v] memory used : %.0f ", i, mu)
-		//获取设备忙碌时间百分比
-		utilizationRate, _ := rsmiDevBusyPercentGet(i)
-		ur, _ := strconv.ParseFloat(fmt.Sprintf("%.2f", float64(utilizationRate)/1.0), 64)
-		glog.Infof(" DCU[%v] utilization rate : %.0f", i, ur)
-		//获取pcie流量信息
-		sent, received, maxPktSz, _ := rsmiDevPciThroughputGet(i)
-		pcieBwMb, _ := strconv.ParseFloat(fmt.Sprintf("%.3f", float64(received+sent)*float64(maxPktSz)/1024.0/1024.0), 64)
-		glog.Infof(" DCU[%v] PCIE  bandwidth : %.0f", i, pcieBwMb)
-		//获取设备系统时钟速度列表
-		clk, _ := rsmiDevGpuClkFreqGet(i, RSMI_CLK_TYPE_SYS)
-		sclk, _ := strconv.ParseFloat(fmt.Sprintf("%.2f", float64(clk.Frequency[clk.Current])/1000000.0), 64)
-		glog.Infof(" DCU[%v] SCLK : %.0f", i, sclk)
-		monitorInfo := MonitorInfo{
-			MinorNumber:     i,
-			PciBusNumber:    pciBusNumber,
-			DeviceId:        deviceId,
-			SubSystemName:   devTypeName,
-			Temperature:     t,
-			PowerUsage:      pu,
-			PowerCap:        pc,
-			MemoryCap:       mc,
-			MemoryUsed:      mu,
-			UtilizationRate: ur,
-			PcieBwMb:        pcieBwMb,
-			Clk:             sclk,
-		}
-		monitorInfos = append(monitorInfos, monitorInfo)
+		wg.Add(1)
+		go func(deviceIndex int) {
+			defer wg.Done()
+
+			var wgDevice sync.WaitGroup
+			var muDevice sync.Mutex
+			monitorInfo := MonitorInfo{MinorNumber: deviceIndex}
+
+			// Collect PCI ID
+			wgDevice.Add(1)
+			go func() {
+				defer wgDevice.Done()
+				bdfid, err := rsmiDevPciIdGet(deviceIndex)
+				if err != nil {
+					glog.Errorf("Failed to get PCI ID for device %d: %v", deviceIndex, err)
+					return
+				}
+				domain := (bdfid >> 32) & 0xffffffff
+				bus := (bdfid >> 8) & 0xff
+				dev := (bdfid >> 3) & 0x1f
+				function := bdfid & 0x7
+				pciBusNumber := fmt.Sprintf("%04x:%02x:%02x.%x", domain, bus, dev, function)
+				muDevice.Lock()
+				monitorInfo.PciBusNumber = pciBusNumber
+				muDevice.Unlock()
+			}()
+
+			// Collect Device Serial Number
+			wgDevice.Add(1)
+			go func() {
+				defer wgDevice.Done()
+				deviceId, _ := rsmiDevSerialNumberGet(deviceIndex)
+				muDevice.Lock()
+				monitorInfo.DeviceId = deviceId
+				muDevice.Unlock()
+			}()
+
+			// Collect Device Type ID
+			wgDevice.Add(1)
+			go func() {
+				defer wgDevice.Done()
+				devTypeId, _ := rsmiDevIdGet(deviceIndex)
+				devTypeName := type2name[fmt.Sprintf("%x", devTypeId)]
+				muDevice.Lock()
+				monitorInfo.SubSystemName = devTypeName
+				muDevice.Unlock()
+			}()
+
+			// Collect Temperature
+			wgDevice.Add(1)
+			go func() {
+				defer wgDevice.Done()
+				temperature, _ := rsmiDevTempMetricGet(deviceIndex, 0, RSMI_TEMP_CURRENT)
+				t, _ := strconv.ParseFloat(fmt.Sprintf("%.2f", float64(temperature)/1000.0), 64)
+				muDevice.Lock()
+				monitorInfo.Temperature = t
+				muDevice.Unlock()
+			}()
+
+			// Collect Power Usage
+			wgDevice.Add(1)
+			go func() {
+				defer wgDevice.Done()
+				powerUsage, _ := rsmiDevPowerAveGet(deviceIndex, 0)
+				pu, _ := strconv.ParseFloat(fmt.Sprintf("%.2f", float64(powerUsage)/1000000.0), 64)
+				muDevice.Lock()
+				monitorInfo.PowerUsage = pu
+				muDevice.Unlock()
+			}()
+
+			// Collect Power Cap
+			wgDevice.Add(1)
+			go func() {
+				defer wgDevice.Done()
+				powerCap, _ := rsmiDevPowerCapGet(deviceIndex, 0)
+				pc, _ := strconv.ParseFloat(fmt.Sprintf("%.2f", float64(powerCap)/1000000.0), 64)
+				muDevice.Lock()
+				monitorInfo.PowerCap = pc
+				muDevice.Unlock()
+			}()
+
+			// Collect Memory Capacity
+			wgDevice.Add(1)
+			go func() {
+				defer wgDevice.Done()
+				memoryCap, _ := rsmiDevMemoryTotalGet(deviceIndex, RSMI_MEM_TYPE_FIRST)
+				mc, _ := strconv.ParseFloat(fmt.Sprintf("%f", float64(memoryCap)/1.0), 64)
+				muDevice.Lock()
+				monitorInfo.MemoryCap = mc
+				muDevice.Unlock()
+			}()
+
+			// Collect Memory Usage
+			wgDevice.Add(1)
+			go func() {
+				defer wgDevice.Done()
+				memoryUsed, _ := rsmiDevMemoryUsageGet(deviceIndex, RSMI_MEM_TYPE_FIRST)
+				mu, _ := strconv.ParseFloat(fmt.Sprintf("%f", float64(memoryUsed)/1.0), 64)
+				muDevice.Lock()
+				monitorInfo.MemoryUsed = mu
+				muDevice.Unlock()
+			}()
+
+			// Collect Utilization Rate
+			wgDevice.Add(1)
+			go func() {
+				defer wgDevice.Done()
+				utilizationRate, _ := rsmiDevBusyPercentGet(deviceIndex)
+				ur, _ := strconv.ParseFloat(fmt.Sprintf("%.2f", float64(utilizationRate)/1.0), 64)
+				muDevice.Lock()
+				monitorInfo.UtilizationRate = ur
+				muDevice.Unlock()
+			}()
+
+			// Collect PCIe Throughput
+			wgDevice.Add(1)
+			go func() {
+				defer wgDevice.Done()
+				sent, received, maxPktSz, _ := rsmiDevPciThroughputGet(deviceIndex)
+				pcieBwMb, _ := strconv.ParseFloat(fmt.Sprintf("%.3f", float64(received+sent)*float64(maxPktSz)/1024.0/1024.0), 64)
+				muDevice.Lock()
+				monitorInfo.PcieBwMb = pcieBwMb
+				muDevice.Unlock()
+			}()
+
+			// Collect GPU Clock Frequencies
+			wgDevice.Add(1)
+			go func() {
+				defer wgDevice.Done()
+				clk, _ := rsmiDevGpuClkFreqGet(deviceIndex, RSMI_CLK_TYPE_SYS)
+				sclk, _ := strconv.ParseFloat(fmt.Sprintf("%.2f", float64(clk.Frequency[clk.Current])/1000000.0), 64)
+				supported := clk.NumSupported
+				var sclkFrequency []string
+				for i := 0; i < int(supported); i++ {
+					freq := fmt.Sprintf("%d", int(clk.Frequency[i]/1000000))
+					sclkFrequency = append(sclkFrequency, freq)
+				}
+				muDevice.Lock()
+				monitorInfo.Clk = sclk
+				monitorInfo.SclkFrequency = sclkFrequency
+				muDevice.Unlock()
+			}()
+
+			wgDevice.Add(1)
+			go func() {
+				defer wgDevice.Done()
+				soc, _ := rsmiDevGpuClkFreqGet(deviceIndex, RSMI_CLK_TYPE_SOC)
+				socclk, _ := strconv.ParseFloat(fmt.Sprintf("%.2f", float64(soc.Frequency[soc.Current])/1000000.0), 64)
+				supported := soc.NumSupported
+				var socclkFrequency []string
+				for i := 0; i < int(supported); i++ {
+					freq := fmt.Sprintf("%d", int(soc.Frequency[i]/1000000))
+					socclkFrequency = append(socclkFrequency, freq)
+				}
+
+				muDevice.Lock()
+				monitorInfo.Socclk = socclk
+				monitorInfo.SocclkFrequency = socclkFrequency
+				muDevice.Unlock()
+			}()
+
+			// Collect Performance Level
+			wgDevice.Add(1)
+			go func() {
+				defer wgDevice.Done()
+				perf, err := PerfLevel(deviceIndex)
+				if err != nil {
+					glog.Errorf("Failed to get performance level for device %d: %v", deviceIndex, err)
+					return
+				}
+				muDevice.Lock()
+				monitorInfo.PerfLevel = perf
+				muDevice.Unlock()
+			}()
+
+			wgDevice.Wait()
+
+			deviceResults <- monitorInfo // Send result to channel
+		}(i)
 	}
+
+	// Close the channel once all Goroutines are done
+	go func() {
+		wg.Wait()
+		close(deviceResults)
+	}()
+
+	// Collect results from channel
+	for monitorInfo := range deviceResults {
+		monitorInfos[monitorInfo.MinorNumber] = monitorInfo
+	}
+
 	glog.Info("monitorInfos: ", dataToJson(monitorInfos))
 	return
 }
 
 /*func CollectVDeviceMetrics() (devices []PhysicalDeviceInfo, err error) {
 
-
 }*/
+
+func DevGpuClkFreqSet(dvInd int, clkType RSMIClkType, freqBitmask int64) (err error) {
+	return rsmiDevGpuClkFreqSet(dvInd, clkType, freqBitmask)
+}
 
 // GetDeviceByDvInd 根据设备的 dvInd 获取物理设备信息
 // @Summary 获取物理设备信息
@@ -355,22 +516,28 @@ func AllDeviceInfos() ([]PhysicalDeviceInfo, error) {
 		sclk, _ := strconv.ParseFloat(fmt.Sprintf("%.2f", float64(clk.Frequency[clk.Current])/1000000.0), 64)
 		//glog.Infof(" DCU[%v] SCLK : %.0f", i, sclk)
 		computeUnit := computeUnitType[devTypeName]
+		blockInfos, err := EccBlocksInfo(i)
+		//cus, memories, _ := DeviceRemainingInfo(i)
 		device := Device{
-			MinorNumber:      i,
-			PciBusNumber:     pciBusNumber,
-			DeviceId:         deviceId,
-			SubSystemName:    devTypeName,
-			Temperature:      t,
-			PowerUsage:       pu,
-			PowerCap:         pc,
-			MemoryCap:        mc,
-			MemoryUsed:       mu,
-			UtilizationRate:  ur,
-			PcieBwMb:         pcieBwMb,
-			Clk:              sclk,
+			MinorNumber:     i,
+			PciBusNumber:    pciBusNumber,
+			DeviceId:        deviceId,
+			SubSystemName:   devTypeName,
+			Temperature:     t,
+			PowerUsage:      pu,
+			PowerCap:        pc,
+			MemoryCap:       mc,
+			MemoryUsed:      mu,
+			UtilizationRate: ur,
+			PcieBwMb:        pcieBwMb,
+			Clk:             sclk,
+			//ComputeUnitRemainingCount: cus,
+			//MemoryRemaining:           memories,
 			ComputeUnitCount: computeUnit,
 			MaxVDeviceCount:  maxVDeviceCount,
 			VDeviceCount:     0,
+
+			BlocksInfos: blockInfos,
 		} // 创建PhysicalDeviceInfo并存入map
 		pdi := PhysicalDeviceInfo{
 			Device:         device,
@@ -414,7 +581,7 @@ func AllDeviceInfos() ([]PhysicalDeviceInfo, error) {
 	// 逐个读取并解析每个文件的内容
 	for _, file := range files {
 		// 确保是文件而不是子目录
-		if !file.IsDir() {
+		if !file.IsDir() && strings.HasPrefix(file.Name(), "vdev") && strings.HasSuffix(file.Name(), ".conf") {
 			filePath := filepath.Join(dirPath, file.Name())
 			config, err := parseConfig(filePath)
 			if err != nil {
@@ -426,9 +593,23 @@ func AllDeviceInfos() ([]PhysicalDeviceInfo, error) {
 			if pdi, exists := deviceMap[config.DeviceID]; exists {
 				pdi.VirtualDevices = append(pdi.VirtualDevices, *config)
 				pdi.Device.VDeviceCount = len(pdi.VirtualDevices) // 更新 VDeviceCount
+				// 计算虚拟设备总的计算单元和内存使用
+				var totalVDeviceComputeUnits int
+				var totalVDeviceMemory uint64
+
+				for _, vDevice := range pdi.VirtualDevices {
+					totalVDeviceComputeUnits += vDevice.ComputeUnitCount
+					totalVDeviceMemory += uint64(vDevice.GlobalMemSize)
+				}
+				// 计算物理设备剩余的计算单元数量和内存
+				pdi.Device.ComputeUnitRemainingCount = uint64(pdi.Device.ComputeUnitCount) - uint64(totalVDeviceComputeUnits)
+				pdi.Device.MemoryRemaining = uint64(pdi.Device.MemoryCap) - totalVDeviceMemory
+
 			}
+
 		}
 	}
+
 	// 将map中的所有PhysicalDeviceInfo转为slice
 	for _, pdi := range deviceMap {
 		allDevices = append(allDevices, *pdi)
@@ -736,8 +917,70 @@ func EccCount(dvInd int, block RSMIGpuBlock) (errorCount RSMIErrorCount, err err
 	return
 }
 
+func EccBlocksInfo(dvInd int) (blocksInfos []BlocksInfo, err error) {
+	// 定义所有的RSMIGpuBlock值
+	blocks := []RSMIGpuBlock{
+		RSMIGpuBlockATHUB,
+		RSMIGpuBlockDF,
+		RSMIGpuBlockFuse,
+		RSMIGpuBlockGFX,
+		RSMIGpuBlockHDP,
+		RSMIGpuBlockMMHUB,
+		RSMIGpuBlockMP0,
+		RSMIGpuBlockMP1,
+		RSMIGpuBlockPCIEBIF,
+		RSMIGpuBlockSDMA,
+		RSMIGpuBlockSEM,
+		RSMIGpuBlockSMN,
+		RSMIGpuBlockUMC,
+		RSMIGpuBlockXGMIWAFL,
+	}
+
+	// 遍历所有的block，分别调用EccStatus和EccCount
+	for _, block := range blocks {
+		state, err := EccStatus(dvInd, block)
+		if err != nil {
+			glog.Errorf("EccStatus 调用错误: block: %v, 错误: %v\n", block, err)
+			continue
+		}
+		glog.Infof("EccStatus - block: %v, state: %v\n", block, state)
+
+		// 当状态是“ENABLED”时，调用EccCount接口获取错误计数
+		if state == "ENABLED" {
+			errorCount, err := EccCount(dvInd, block)
+			if err != nil {
+				glog.Errorf("EccCount 调用错误: block: %v, 错误: %v\n", block, err)
+				continue
+			}
+			glog.Infof("EccCount - block: %v, CorrectableErr: %v, UncorrectableErr: %v\n", block, errorCount.CorrectableErr, errorCount.UncorrectableErr)
+			// 将block信息添加到结果集中
+			blocksInfos = append(blocksInfos, BlocksInfo{
+				Block: ConvertFromRSMIGpuBlock(block),
+				State: state,
+				CE:    int64(errorCount.CorrectableErr),
+				UE:    int64(errorCount.UncorrectableErr),
+			})
+		} else {
+			// 状态不是ENABLED时，只添加状态信息，不获取错误计数
+			blocksInfos = append(blocksInfos, BlocksInfo{
+				Block: ConvertFromRSMIGpuBlock(block),
+				State: state,
+				CE:    0,
+				UE:    0,
+			})
+		}
+	}
+	glog.Infof("blocksInfos:%v", dataToJson(blocksInfos))
+	return
+}
+
 func EccEnabled(dvInd int) (enabledBlocks int64, err error) {
 	return rsmiDevEccEnabledGet(dvInd)
+}
+
+// 设置设备的性能确定性模式(K100 AI不支持)
+func PerfDeterminismMode(dvInd int, clkValue int64) (err error) {
+	return rsmiPerfDeterminismModeSet(dvInd, clkValue)
 }
 
 // Temperature 获取设备温度
@@ -785,6 +1028,16 @@ func Version(component RSMISwComponent) (varStr string, err error) {
 	varStr, err = rsmiVersionStrGet(component, 256)
 	glog.Infof("component; Version:%v,%v", component, varStr)
 	return
+}
+
+// 设置设备超速百分比
+func DevOverdriveLevelSet(dvInd, od int) (err error) {
+	return rsmiDevOverdriveLevelSet(dvInd, od)
+}
+
+// 获取设备的超速百分比
+func DevOverdriveLevelGet(dvInd int) (od int, err error) {
+	return rsmiDevOverdriveLevelGet(dvInd)
 }
 
 // ResetClocks 将设备的时钟重置为默认值
@@ -973,6 +1226,10 @@ func SetClockRange(dvIdList []int, clkType string, minvalue string, maxvalue str
 }
 
 // 设置电压曲线
+func DevOdVoltInfoSet(dvInd, vPoint, clkValue, voltValue int) (err error) {
+	return rsmiDevOdVoltInfoSet(dvInd, vPoint, clkValue, voltValue)
+}
+
 // SetPowerPlayTableLevel 设置 PowerPlay 级别
 // @Summary 设置设备的 PowerPlay 表级别
 // @Description 该函数为设备列表设置 PowerPlay 表级别。它会检查输入值的有效性并相应地调整电压设置。
@@ -1970,6 +2227,12 @@ func ShowPower(dvIdList []int) (devicePowerInfos []DevicePowerInfo, err error) {
 	return
 }
 
+// 获取设备电压/频率曲线信息(K100 AI不支持)
+func DevOdVoltInfoGet(deInd int) (odv RSMIOdVoltFreqData, err error) {
+	odv, err = rsmiDevOdVoltInfoGet(deInd)
+	return
+}
+
 // ShowPowerPlayTable 展示设备的GPU内存时钟频率和电压
 // @Summary 展示设备的GPU内存时钟频率和电压
 // @Description 获取并展示指定设备的GPU内存时钟频率和电压表。
@@ -2689,6 +2952,7 @@ func DeviceCount() (count int, err error) {
 // @Failure 500 {string} string "内部服务器错误"
 // @Router /VDeviceSingleInfo [get]
 func VDeviceSingleInfo(vDvInd int) (vDeviceInfo DMIVDeviceInfo, err error) {
+	glog.Infof("VDeviceSingleInfo vDvInd:%v", vDvInd)
 	return dmiGetVDeviceInfo(vDvInd)
 }
 
