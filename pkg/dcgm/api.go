@@ -519,20 +519,18 @@ func AllDeviceInfos() ([]PhysicalDeviceInfo, error) {
 		blockInfos, err := EccBlocksInfo(i)
 		//cus, memories, _ := DeviceRemainingInfo(i)
 		device := Device{
-			MinorNumber:     i,
-			PciBusNumber:    pciBusNumber,
-			DeviceId:        deviceId,
-			SubSystemName:   devTypeName,
-			Temperature:     t,
-			PowerUsage:      pu,
-			PowerCap:        pc,
-			MemoryCap:       mc,
-			MemoryUsed:      mu,
-			UtilizationRate: ur,
-			PcieBwMb:        pcieBwMb,
-			Clk:             sclk,
-			//ComputeUnitRemainingCount: cus,
-			//MemoryRemaining:           memories,
+			MinorNumber:      i,
+			PciBusNumber:     pciBusNumber,
+			DeviceId:         deviceId,
+			SubSystemName:    devTypeName,
+			Temperature:      t,
+			PowerUsage:       pu,
+			PowerCap:         pc,
+			MemoryCap:        mc,
+			MemoryUsed:       mu,
+			UtilizationRate:  ur,
+			PcieBwMb:         pcieBwMb,
+			Clk:              sclk,
 			ComputeUnitCount: computeUnit,
 			MaxVDeviceCount:  maxVDeviceCount,
 			VDeviceCount:     0,
@@ -593,26 +591,28 @@ func AllDeviceInfos() ([]PhysicalDeviceInfo, error) {
 			if pdi, exists := deviceMap[config.DeviceID]; exists {
 				pdi.VirtualDevices = append(pdi.VirtualDevices, *config)
 				pdi.Device.VDeviceCount = len(pdi.VirtualDevices) // 更新 VDeviceCount
-				// 计算虚拟设备总的计算单元和内存使用
-				var totalVDeviceComputeUnits int
-				var totalVDeviceMemory uint64
-
-				for _, vDevice := range pdi.VirtualDevices {
-					totalVDeviceComputeUnits += vDevice.ComputeUnitCount
-					totalVDeviceMemory += uint64(vDevice.GlobalMemSize)
-				}
-				// 计算物理设备剩余的计算单元数量和内存
-				pdi.Device.ComputeUnitRemainingCount = uint64(pdi.Device.ComputeUnitCount) - uint64(totalVDeviceComputeUnits)
-				pdi.Device.MemoryRemaining = uint64(pdi.Device.MemoryCap) - totalVDeviceMemory
-
 			}
-
 		}
 	}
 
 	// 将map中的所有PhysicalDeviceInfo转为slice
 	for _, pdi := range deviceMap {
 		allDevices = append(allDevices, *pdi)
+	}
+	for i := range allDevices {
+		device := &allDevices[i]
+		var computeUnitCountTotal = 0
+		var memoryTotal = 0
+		for _, virtualDevice := range device.VirtualDevices {
+			computeUnitCountTotal += virtualDevice.ComputeUnitCount
+			memoryTotal += int(virtualDevice.GlobalMemSize)
+		}
+		glog.Infof("VirtualDevice computeUnitCountTotal:%v  MemoryTotal:%v", computeUnitCountTotal, memoryTotal)
+		glog.Infof("VirtualDevice device.Device.ComputeUnitCount:%v", device.Device.ComputeUnitCount)
+		glog.Infof("VirtualDevice float64(computeUnitCountTotal):%v ", float64(computeUnitCountTotal))
+		device.Device.ComputeUnitRemainingCount = uint64(device.Device.ComputeUnitCount - float64(computeUnitCountTotal))
+		glog.Infof("device.Device.ComputeUnitRemainingCount:%v", device.Device.ComputeUnitRemainingCount)
+		device.Device.MemoryRemaining = uint64(device.Device.MemoryCap - float64(memoryTotal))
 	}
 	glog.Infof("allDevices:%v", dataToJson(allDevices))
 	return allDevices, nil
