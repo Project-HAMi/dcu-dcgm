@@ -785,15 +785,18 @@ type Device struct {
 	ComputeUnitCount float64
 
 	// ComputeUnitRemainingCount 设备剩余可用的计算单元数量
-	ComputeUnitRemainingCount uintptr
+	ComputeUnitRemainingCount uint64
 
 	// MemoryRemaining 设备剩余可用的内存量
-	MemoryRemaining uintptr
+	MemoryRemaining uint64
 
 	// MaxVDeviceCount 物理设备上支持的最大虚拟设备数量
 	MaxVDeviceCount int
 	// VDeviceCount 虚拟设备数量
 	VDeviceCount int
+
+	// BlocksInfo 设备的block信息
+	BlocksInfos []BlocksInfo
 }
 
 // PhysicalDeviceInfo 物理设备信息

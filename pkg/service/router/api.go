@@ -2386,3 +2386,35 @@ func DeviceControl(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, SuccessResponse(nil))
 }
+
+// EccBlocksInfo 处理设备控制
+// @Summary 获取 ECC block 信息
+// @Description 根据设备索引获取 ECC block 信息
+// @Accept json
+// @Produce json
+// @Param dvInd query int true "设备索引"
+// @Success 200 {array} BlocksInfo "ECC block 信息"
+// @Failure 400 {string} string "请求参数错误"
+// @Failure 500 {string} string "内部服务器错误"
+// @Router /EccBlocksInfo [get]
+func EccBlocksInfo(c *gin.Context) {
+	// 获取请求中的 dvInd 参数
+	var dvInd int
+	if err := c.BindQuery(&dvInd); err != nil {
+		c.JSON(http.StatusBadRequest, "虚拟设备销毁失败")
+		return
+	}
+
+	// 调用 EccBlocksInfo 函数
+	blocksInfos, err := dcgm.EccBlocksInfo(dvInd)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, ErrorResponse(err.Error()))
+		return
+	}
+
+	// 返回成功响应
+	response := map[string]interface{}{
+		"blocksInfos": blocksInfos,
+	}
+	c.JSON(http.StatusOK, SuccessResponse(response))
+}

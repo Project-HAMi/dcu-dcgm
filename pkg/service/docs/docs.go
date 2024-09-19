@@ -634,6 +634,50 @@ const docTemplate = `{
                 }
             }
         },
+        "/EccBlocksInfo": {
+            "get": {
+                "description": "根据设备索引获取 ECC block 信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "获取 ECC block 信息",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "设备索引",
+                        "name": "dvInd",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ECC block 信息",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/router.BlocksInfo"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "内部服务器错误",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/EccStatus/{dvInd}": {
             "get": {
                 "description": "返回指定GPU块的ECC状态",
@@ -3430,6 +3474,27 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "router.BlocksInfo": {
+            "type": "object",
+            "properties": {
+                "block": {
+                    "description": "Block block",
+                    "type": "string"
+                },
+                "ce": {
+                    "description": "CE CE",
+                    "type": "integer"
+                },
+                "state": {
+                    "description": "State 状态",
+                    "type": "string"
+                },
+                "ue": {
+                    "description": "UE UE",
+                    "type": "integer"
+                }
+            }
+        },
         "router.DMIDeviceInfo": {
             "type": "object",
             "properties": {

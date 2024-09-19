@@ -1,4 +1,19 @@
 definitions:
+  router.BlocksInfo:
+    properties:
+      block:
+        description: Block block
+        type: string
+      ce:
+        description: CE CE
+        type: integer
+      state:
+        description: State 状态
+        type: string
+      ue:
+        description: UE UE
+        type: integer
+    type: object
   router.DMIDeviceInfo:
     properties:
       computeUnitCount:
@@ -966,6 +981,35 @@ paths:
           description: 服务器内部错误
           schema: {}
       summary: 获取设备信息列表
+  /EccBlocksInfo:
+    get:
+      consumes:
+      - application/json
+      description: 根据设备索引获取 ECC block 信息
+      parameters:
+      - description: 设备索引
+        in: query
+        name: dvInd
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ECC block 信息
+          schema:
+            items:
+              $ref: '#/definitions/router.BlocksInfo'
+            type: array
+        "400":
+          description: 请求参数错误
+          schema:
+            type: string
+        "500":
+          description: 内部服务器错误
+          schema:
+            type: string
+      summary: 获取 ECC block 信息
   /EccStatus/{dvInd}:
     get:
       description: 返回指定GPU块的ECC状态

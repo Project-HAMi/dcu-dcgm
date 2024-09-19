@@ -784,6 +784,9 @@ type Device struct {
 	MaxVDeviceCount int
 	// VDeviceCount 虚拟设备数量
 	VDeviceCount int
+
+	// BlocksInfo 设备的block信息
+	BlocksInfos []BlocksInfo
 }
 
 // PhysicalDeviceInfo 物理设备信息
@@ -1040,3 +1043,15 @@ const (
 	Freq1400Mhz = 1024 // 0b010000000000
 	Freq1600Mhz = 2048 // 0b100000000000
 )
+
+// BlocksInfo block状态、ue和ce信息
+type BlocksInfo struct {
+	// Block block
+	Block string
+	// State 状态
+	State string
+	// CE CE
+	CE int64
+	// UE UE
+	UE int64
+}

@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"time"
+	"strings"
 
 	"github.com/golang/glog"
 	swaggerFiles "github.com/swaggo/files"
@@ -21,40 +21,15 @@ var (
 	portFlag = flag.Int("port", 16081, "Port number for the DCGM")
 )
 
-// 检查动态库是否已经加载
-func checkLibrary(libName string) bool {
-	cmd := exec.Command("ldconfig", "-p") // 使用 ldconfig -p 列出所有已加载的动态库
+// 执行命令行函数
+func runCommand() (string, error) {
+	cmd := exec.Command("bash", "-c", "lspci | grep Co-p | wc -l")
 	output, err := cmd.Output()
 	if err != nil {
-		glog.Errorf("Error checking shared libraries: %v", err)
-		return false
+		return "", err
 	}
-
-	// 检查输出中是否包含所需的库文件
-	return containsLibrary(string(output), libName)
-}
-
-func containsLibrary(output, libName string) bool {
-	return string(output) != "" && len(output) > 0 && len(libName) > 0 && output != "" && libName == ""
-}
-
-func waitForLibrary(libName string, timeout, interval time.Duration) error {
-	// 等待指定时间，检测库文件是否加载
-	start := time.Now()
-	for {
-		if checkLibrary(libName) {
-			glog.Infof("Library %s loaded successfully.", libName)
-			return nil
-		}
-
-		// 如果超时，则返回错误
-		if time.Since(start) > timeout {
-			return fmt.Errorf("timed out waiting for library %s to load", libName)
-		}
-
-		glog.Infof("Waiting for library %s to load...", libName)
-		time.Sleep(interval)
-	}
+	// 去除输出中的换行符和多余的空格
+	return strings.TrimSpace(string(output)), nil
 }
 
 func main() {
@@ -62,8 +37,17 @@ func main() {
 	flag.Parse()
 	// 确保程序退出时刷新 glog 缓存
 	defer glog.Flush()
+
+	// 执行命令并打印结果
+	result, err := runCommand()
+	if err != nil {
+		glog.Errorf("执行命令失败: %v", err)
+	} else {
+		glog.Infof("lspci | grep Co-p | wc -l 输出结果: %v", result)
+	}
+
 	// 初始化服务
-	err := dcgm.Init()
+	err = dcgm.Init()
 	if err != nil {
 		glog.Errorf("DCGM 初始化失败: %v", err)
 	}
