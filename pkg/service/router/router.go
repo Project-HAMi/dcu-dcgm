@@ -144,5 +144,7 @@ func InitRouter() *gin.Engine {
 	router.GET("/device/info/:dvInd", GetDeviceInfo)
 	// 路由
 	router.POST("/device/control", DeviceControl)
+	// 在初始化路由的函数中添加这一行
+	router.GET("/EccBlocksInfo", EccBlocksInfo)
 	return router
 }

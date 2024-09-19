@@ -35,7 +35,7 @@ func main() {
 	//dcgm.EccStatus(0, dcgm.RSMIGpuBlockPCIEBIF)
 	//dcgm.EccCount(0, dcgm.RSMIGpuBlockPCIEBIF)
 	//dcgm.CollectDeviceMetrics()
-	//dcgm.EccBlocksInfo(0)
-	dcgm.VDeviceSingleInfo(0)
-	dcgm.VDeviceSingleInfo(1)
+	dcgm.EccBlocksInfo(0)
+	//dcgm.VDeviceSingleInfo(0)
+	//dcgm.VDeviceSingleInfo(1)
 }

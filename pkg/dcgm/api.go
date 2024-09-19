@@ -516,6 +516,8 @@ func AllDeviceInfos() ([]PhysicalDeviceInfo, error) {
 		sclk, _ := strconv.ParseFloat(fmt.Sprintf("%.2f", float64(clk.Frequency[clk.Current])/1000000.0), 64)
 		//glog.Infof(" DCU[%v] SCLK : %.0f", i, sclk)
 		computeUnit := computeUnitType[devTypeName]
+		blockInfos, err := EccBlocksInfo(i)
+		//cus, memories, _ := DeviceRemainingInfo(i)
 		device := Device{
 			MinorNumber:     i,
 			PciBusNumber:    pciBusNumber,
@@ -529,10 +531,13 @@ func AllDeviceInfos() ([]PhysicalDeviceInfo, error) {
 			UtilizationRate: ur,
 			PcieBwMb:        pcieBwMb,
 			Clk:             sclk,
-
+			//ComputeUnitRemainingCount: cus,
+			//MemoryRemaining:           memories,
 			ComputeUnitCount: computeUnit,
 			MaxVDeviceCount:  maxVDeviceCount,
 			VDeviceCount:     0,
+
+			BlocksInfos: blockInfos,
 		} // 创建PhysicalDeviceInfo并存入map
 		pdi := PhysicalDeviceInfo{
 			Device:         device,
@@ -588,9 +593,23 @@ func AllDeviceInfos() ([]PhysicalDeviceInfo, error) {
 			if pdi, exists := deviceMap[config.DeviceID]; exists {
 				pdi.VirtualDevices = append(pdi.VirtualDevices, *config)
 				pdi.Device.VDeviceCount = len(pdi.VirtualDevices) // 更新 VDeviceCount
+				// 计算虚拟设备总的计算单元和内存使用
+				var totalVDeviceComputeUnits int
+				var totalVDeviceMemory uint64
+
+				for _, vDevice := range pdi.VirtualDevices {
+					totalVDeviceComputeUnits += vDevice.ComputeUnitCount
+					totalVDeviceMemory += uint64(vDevice.GlobalMemSize)
+				}
+				// 计算物理设备剩余的计算单元数量和内存
+				pdi.Device.ComputeUnitRemainingCount = uint64(pdi.Device.ComputeUnitCount) - uint64(totalVDeviceComputeUnits)
+				pdi.Device.MemoryRemaining = uint64(pdi.Device.MemoryCap) - totalVDeviceMemory
+
 			}
+
 		}
 	}
+
 	// 将map中的所有PhysicalDeviceInfo转为slice
 	for _, pdi := range deviceMap {
 		allDevices = append(allDevices, *pdi)
@@ -901,24 +920,20 @@ func EccCount(dvInd int, block RSMIGpuBlock) (errorCount RSMIErrorCount, err err
 func EccBlocksInfo(dvInd int) (blocksInfos []BlocksInfo, err error) {
 	// 定义所有的RSMIGpuBlock值
 	blocks := []RSMIGpuBlock{
-		RSMIGpuBlockFirst,
-		RSMIGpuBlockUMC,
-		RSMIGpuBlockSDMA,
-		RSMIGpuBlockGFX,
-		RSMIGpuBlockMMHUB,
 		RSMIGpuBlockATHUB,
-		RSMIGpuBlockPCIEBIF,
-		RSMIGpuBlockHDP,
-		RSMIGpuBlockXGMIWAFL,
 		RSMIGpuBlockDF,
-		RSMIGpuBlockSMN,
-		RSMIGpuBlockSEM,
+		RSMIGpuBlockFuse,
+		RSMIGpuBlockGFX,
+		RSMIGpuBlockHDP,
+		RSMIGpuBlockMMHUB,
 		RSMIGpuBlockMP0,
 		RSMIGpuBlockMP1,
-		RSMIGpuBlockFuse,
-		RSMIGpuBlockMCA,
-		RSMIGpuBlockLast,
-		RSMIGpuBlockReserved,
+		RSMIGpuBlockPCIEBIF,
+		RSMIGpuBlockSDMA,
+		RSMIGpuBlockSEM,
+		RSMIGpuBlockSMN,
+		RSMIGpuBlockUMC,
+		RSMIGpuBlockXGMIWAFL,
 	}
 
 	// 遍历所有的block，分别调用EccStatus和EccCount
