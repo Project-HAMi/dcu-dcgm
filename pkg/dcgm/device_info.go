@@ -64,8 +64,9 @@ func rsmiDevIdGet(dvInd int) (id int, err error) {
 		glog.Errorf("Error rsmiDevIdGet:%v,retStr:%v", err, errorString(ret))
 		return 0, fmt.Errorf("Error rsmiDevIdGet:%v", err)
 	}
+	glog.Infof("rsmiDevIdGet cid:%v", cid)
 	id = int(cid)
-	glog.Info("rsmiDevIdGet:", id, fmt.Sprintf("%v", id))
+	glog.Infof("rsmiDevIdGet: %v", id)
 	return
 }
 
