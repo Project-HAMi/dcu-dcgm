@@ -23,29 +23,44 @@ import (
 // @Failure 500 {object} error "初始化失败"
 // @Router /Init [post]
 func Init() (err error) {
-	err = rsmiInit()
-	//maxRetries := 12 // 最大重试次数（2分钟 / 10秒 = 12次）
-	//restartTimeout := 10 * time.Second
-	//retryInterval := 10 * time.Second // 每次重试间隔10秒
-	//for i := 0; i < maxRetries; i++ {
-	//	err = rsmiInit()
-	//	if err == nil {
-	//		ShutDown()
-	//		// err 为空，表示成功，继续往下执行
-	//		time.Sleep(retryInterval) // 等待60秒
-	//		glog.Infof("rsmi init successful Retrying in %v seconds...\n", retryInterval)
-	//		glog.Infof("rsmi init successful Second start...\n")
-	//		err := rsmiInit()
-	//		if err != nil {
-	//			return err
-	//		}
-	//		return nil
-	//	}
-	//	fmt.Printf("Initialization failed: %v. Retrying in 10 seconds...\n", err)
-	//	time.Sleep(restartTimeout) // 等待10秒
-	//}
-	//// 超过最大重试次数，仍然失败，返回错误
-	return
+	devCount := listFilesInDevDri()
+	maxRetries := 12                   // 最大重试次数
+	retryCount := 0                    // 记录连续返回相同设备数量的次数
+	lastNumDevices := -1               // 记录上一次获取的设备数量
+	restartTimeout := 10 * time.Second // 每次重试等待10秒
+
+	for {
+		err = rsmiInit() // 初始化rsmi
+		if err == nil {
+			ShutDown()
+			for retryCount < maxRetries {
+				rsmiInit()
+				numDevices, _ := NumMonitorDevices() // 获取GPU设备数量
+				if numDevices == devCount {
+					glog.Infof("DCU initialization is complete:%v", numDevices)
+					return nil // 数量相等，初始化成功，结束函数
+				} else {
+					if numDevices == lastNumDevices {
+						retryCount++ // 记录连续返回相同设备数量的次数
+					} else {
+						retryCount = 0 // 数量变化时重置计数
+					}
+
+					glog.Infof("retryCount:%v", retryCount)
+					if retryCount >= maxRetries {
+						glog.Infof("设备数量连续 %d 次相同但与 devCount 不相等，初始化失败", maxRetries)
+						return
+					}
+					lastNumDevices = numDevices // 更新记录的设备数量
+					ShutDown()                  // 数量不相等，执行关机操作
+				}
+				time.Sleep(restartTimeout) // 等待10秒
+			}
+		}
+
+		glog.Infof("初始化失败: %v. 10秒后重试...\n", err)
+		time.Sleep(restartTimeout) // 等待10秒后再次重试
+	}
 }
 
 // @Summary 关闭 DCGM
@@ -479,6 +494,8 @@ func AllDeviceInfos() ([]PhysicalDeviceInfo, error) {
 		deviceId, _ := rsmiDevSerialNumberGet(i)
 		//获取设备类型标识id
 		devTypeId, _ := rsmiDevIdGet(i)
+		glog.Infof("devTypeId: %v", devTypeId)
+		glog.Infof("十六进制:%v", fmt.Sprintf("%x", devTypeId))
 		//型号名称
 		devTypeName := type2name[fmt.Sprintf("%x", devTypeId)]
 		//设备温度
