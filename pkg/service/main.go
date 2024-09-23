@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"os/exec"
-	"strings"
 
 	"github.com/golang/glog"
 	swaggerFiles "github.com/swaggo/files"
@@ -21,33 +19,13 @@ var (
 	portFlag = flag.Int("port", 16081, "Port number for the DCGM")
 )
 
-// 执行命令行函数
-func runCommand() (string, error) {
-	cmd := exec.Command("bash", "-c", "lspci | grep Co-p | wc -l")
-	output, err := cmd.Output()
-	if err != nil {
-		return "", err
-	}
-	// 去除输出中的换行符和多余的空格
-	return strings.TrimSpace(string(output)), nil
-}
-
 func main() {
 	// 解析命令行标志
 	flag.Parse()
 	// 确保程序退出时刷新 glog 缓存
 	defer glog.Flush()
-
-	// 执行命令并打印结果
-	result, err := runCommand()
-	if err != nil {
-		glog.Errorf("执行命令失败: %v", err)
-	} else {
-		glog.Infof("lspci | grep Co-p | wc -l 输出结果: %v", result)
-	}
-
 	// 初始化服务
-	err = dcgm.Init()
+	err := dcgm.Init()
 	if err != nil {
 		glog.Errorf("DCGM 初始化失败: %v", err)
 	}
