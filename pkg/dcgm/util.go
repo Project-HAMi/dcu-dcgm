@@ -54,7 +54,7 @@ func dmiErrorString(result C.dmiStatus) error {
 }
 
 func dataToJson(data any) string {
-	jsonData, err := json.MarshalIndent(data, "", "  ")
+	jsonData, err := json.Marshal(data)
 	if err != nil {
 		fmt.Println("Error serializing to JSON:", err)
 	}
