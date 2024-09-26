@@ -232,15 +232,15 @@ func rsmiDevGpuMetricsInfoGet(dvInd int) (gpuMetrics RSMIGPUMetrics, err error) 
 
 // rsmiDevEccStatusGet 获取GPU块的ECC状态
 func rsmiDevEccStatusGet(dvInd int, block RSMIGpuBlock) (state RSMIRasErrState, err error) {
-	glog.Infof("rsmiDevEccStatusGet: %d,%d", dvInd, block)
+	//glog.Infof("rsmiDevEccStatusGet: %d,%d", dvInd, block)
 	var sstate C.rsmi_ras_err_state_t
 	ret := C.rsmi_dev_ecc_status_get(C.uint32_t(dvInd), C.rsmi_gpu_block_t(block), &sstate)
-	glog.Infof("rsmi_dev_ecc_status_get ret:%v", ret)
+	//glog.Infof("rsmi_dev_ecc_status_get ret:%v", ret)
 	if err = errorString(ret); err != nil {
 		return state, fmt.Errorf("Error rsmi_dev_ecc_status_get:%s", err)
 	}
 	state = RSMIRasErrState(sstate)
-	glog.Infof("rsmiDevEccStatusGet:%v", sstate)
+	//glog.Infof("rsmiDevEccStatusGet:%v", sstate)
 	return
 }
 
@@ -248,7 +248,7 @@ func rsmiDevEccStatusGet(dvInd int, block RSMIGpuBlock) (state RSMIRasErrState, 
 func rsmiDevEccCountGet(dvInd int, gpuBlock RSMIGpuBlock) (errorCount RSMIErrorCount, err error) {
 	var cerrorCount C.rsmi_error_count_t
 	ret := C.rsmi_dev_ecc_count_get(C.uint32_t(dvInd), C.rsmi_gpu_block_t(gpuBlock), &cerrorCount)
-	glog.Infof("rsmiDevEccCountGet:%v,ret retstr:%v", ret, errorString(ret))
+	//glog.Infof("rsmiDevEccCountGet:%v,ret retstr:%v", ret, errorString(ret))
 	if err = errorString(ret); err != nil {
 		return errorCount, fmt.Errorf("Error rsmi_dev_ecc_count_get:%s", err)
 	}
@@ -256,7 +256,7 @@ func rsmiDevEccCountGet(dvInd int, gpuBlock RSMIGpuBlock) (errorCount RSMIErrorC
 		CorrectableErr:   uint64(cerrorCount.correctable_err),
 		UncorrectableErr: uint64(cerrorCount.uncorrectable_err),
 	}
-	glog.Infof("DCUBlockType:%v, DevEccCount:%v", gpuBlock, dataToJson(errorCount))
+	//glog.Infof("DCUBlockType:%v, DevEccCount:%v", gpuBlock, dataToJson(errorCount))
 	return
 }
 

@@ -495,8 +495,6 @@ func AllDeviceInfos() ([]PhysicalDeviceInfo, error) {
 		deviceId, _ := rsmiDevSerialNumberGet(i)
 		//获取设备类型标识id
 		devTypeId, _ := rsmiDevIdGet(i)
-		glog.Infof("devTypeId: %v", devTypeId)
-		glog.Infof("十六进制:%v", fmt.Sprintf("%x", devTypeId))
 		//型号名称
 		devTypeName := type2name[fmt.Sprintf("%x", devTypeId)]
 		//设备温度
