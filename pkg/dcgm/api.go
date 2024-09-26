@@ -24,6 +24,7 @@ import (
 // @Router /Init [post]
 func Init() (err error) {
 	devCount := listFilesInDevDri()
+	glog.Infof("devCount:%v", devCount)
 	maxRetries := 12                   // 最大重试次数
 	retryCount := 0                    // 记录连续返回相同设备数量的次数
 	lastNumDevices := -1               // 记录上一次获取的设备数量
@@ -494,8 +495,6 @@ func AllDeviceInfos() ([]PhysicalDeviceInfo, error) {
 		deviceId, _ := rsmiDevSerialNumberGet(i)
 		//获取设备类型标识id
 		devTypeId, _ := rsmiDevIdGet(i)
-		glog.Infof("devTypeId: %v", devTypeId)
-		glog.Infof("十六进制:%v", fmt.Sprintf("%x", devTypeId))
 		//型号名称
 		devTypeName := type2name[fmt.Sprintf("%x", devTypeId)]
 		//设备温度
@@ -591,10 +590,13 @@ func AllDeviceInfos() ([]PhysicalDeviceInfo, error) {
 	if err != nil {
 		glog.Errorf("无法读取目录: %v", err)
 	}
+
 	// 打印文件数量
 	//fmt.Printf("文件数量: %d\n", len(files))
+
 	// 逐个读取并解析每个文件的内容
 	for _, file := range files {
+		//glog.Infof("/etc/vdev/file：%v", file)
 		// 确保是文件而不是子目录
 		if !file.IsDir() && strings.HasPrefix(file.Name(), "vdev") && strings.HasSuffix(file.Name(), ".conf") {
 			filePath := filepath.Join(dirPath, file.Name())
@@ -624,11 +626,11 @@ func AllDeviceInfos() ([]PhysicalDeviceInfo, error) {
 			computeUnitCountTotal += virtualDevice.ComputeUnitCount
 			memoryTotal += int(virtualDevice.GlobalMemSize)
 		}
-		glog.Infof("VirtualDevice computeUnitCountTotal:%v  MemoryTotal:%v", computeUnitCountTotal, memoryTotal)
-		glog.Infof("VirtualDevice device.Device.ComputeUnitCount:%v", device.Device.ComputeUnitCount)
-		glog.Infof("VirtualDevice float64(computeUnitCountTotal):%v ", float64(computeUnitCountTotal))
+		//glog.Infof("VirtualDevice computeUnitCountTotal:%v  MemoryTotal:%v", computeUnitCountTotal, memoryTotal)
+		//glog.Infof("VirtualDevice device.Device.ComputeUnitCount:%v", device.Device.ComputeUnitCount)
+		//glog.Infof("VirtualDevice float64(computeUnitCountTotal):%v ", float64(computeUnitCountTotal))
 		device.Device.ComputeUnitRemainingCount = uint64(device.Device.ComputeUnitCount - float64(computeUnitCountTotal))
-		glog.Infof("device.Device.ComputeUnitRemainingCount:%v", device.Device.ComputeUnitRemainingCount)
+		//glog.Infof("device.Device.ComputeUnitRemainingCount:%v", device.Device.ComputeUnitRemainingCount)
 		device.Device.MemoryRemaining = uint64(device.Device.MemoryCap - float64(memoryTotal))
 	}
 	glog.Infof("allDevices:%v", dataToJson(allDevices))
@@ -960,7 +962,7 @@ func EccBlocksInfo(dvInd int) (blocksInfos []BlocksInfo, err error) {
 			glog.Errorf("EccStatus 调用错误: block: %v, 错误: %v\n", block, err)
 			continue
 		}
-		glog.Infof("EccStatus - block: %v, state: %v\n", block, state)
+		//glog.Infof("EccStatus - block: %v, state: %v\n", block, state)
 
 		// 当状态是“ENABLED”时，调用EccCount接口获取错误计数
 		if state == "ENABLED" {
@@ -969,7 +971,7 @@ func EccBlocksInfo(dvInd int) (blocksInfos []BlocksInfo, err error) {
 				glog.Errorf("EccCount 调用错误: block: %v, 错误: %v\n", block, err)
 				continue
 			}
-			glog.Infof("EccCount - block: %v, CorrectableErr: %v, UncorrectableErr: %v\n", block, errorCount.CorrectableErr, errorCount.UncorrectableErr)
+			//glog.Infof("EccCount - block: %v, CorrectableErr: %v, UncorrectableErr: %v\n", block, errorCount.CorrectableErr, errorCount.UncorrectableErr)
 			// 将block信息添加到结果集中
 			blocksInfos = append(blocksInfos, BlocksInfo{
 				Block: ConvertFromRSMIGpuBlock(block),
@@ -987,7 +989,7 @@ func EccBlocksInfo(dvInd int) (blocksInfos []BlocksInfo, err error) {
 			})
 		}
 	}
-	glog.Infof("blocksInfos:%v", dataToJson(blocksInfos))
+	//glog.Infof("blocksInfos:%v", dataToJson(blocksInfos))
 	return
 }
 
