@@ -20,7 +20,7 @@ import (
 func rsmiDevTempMetricGet(dvInd int, sensorType int, metric RSMITemperatureMetric) (temp int64, err error) {
 	var temperature C.int64_t
 	ret := C.rsmi_dev_temp_metric_get(C.uint32_t(dvInd), C.uint32_t(sensorType), C.rsmi_temperature_metric_t(metric), &temperature)
-	glog.Infof("rsmi_dev_temp_metric_get ret:%v, retStr:%v", ret, errorString(ret))
+	//glog.Infof("rsmi_dev_temp_metric_get ret:%v, retStr:%v", ret, errorString(ret))
 	if err = errorString(ret); err != nil {
 		return 0, fmt.Errorf("rsmiDevTempMetricGet:%s", err)
 	}
@@ -49,7 +49,7 @@ func rsmiDevFanSpeedSet(dvInd, sensorInd int, speed int64) (err error) {
 func rsmiDevBusyPercentGet(dvInd int) (busyPercent int, err error) {
 	var cbusyPercent C.uint32_t
 	ret := C.rsmi_dev_busy_percent_get(C.uint32_t(dvInd), &cbusyPercent)
-	glog.Infof("rsmi_dev_busy_percent_get ret:%v ,retstr:%v", ret, errorString(ret))
+	//glog.Infof("rsmi_dev_busy_percent_get ret:%v ,retstr:%v", ret, errorString(ret))
 	if err = errorString(ret); err != nil {
 		return 0, fmt.Errorf("Error rsmi_dev_busy_percent_get:%s", err)
 	}
@@ -128,7 +128,7 @@ func rsmiDevOverdriveLevelGet(dvInd int) (od int, err error) {
 func rsmiDevGpuClkFreqGet(dvInd int, clkType RSMIClkType) (frequencies RSMIFrequencies, err error) {
 	var cfrequencies C.rsmi_frequencies_t
 	ret := C.rsmi_dev_gpu_clk_freq_get(C.uint32_t(dvInd), C.rsmi_clk_type_t(clkType), &cfrequencies)
-	glog.Infof("rsmi_dev_gpu_clk_freq_get ret:%v ,retstr:%v", ret, errorString(ret))
+	//glog.Infof("rsmi_dev_gpu_clk_freq_get ret:%v ,retstr:%v", ret, errorString(ret))
 	if err = errorString(ret); err != nil {
 		return frequencies, fmt.Errorf("Error rsmi_dev_gpu_clk_freq_get:%s", err)
 	}
@@ -137,7 +137,7 @@ func rsmiDevGpuClkFreqGet(dvInd int, clkType RSMIClkType) (frequencies RSMIFrequ
 		Current:      uint32(cfrequencies.current),
 		Frequency:    *(*[32]uint64)(unsafe.Pointer(&cfrequencies.frequency)),
 	}
-	glog.Infof("rsmi_dev_gpu_clk_freq_get:%v", dataToJson(frequencies))
+	//glog.Infof("rsmi_dev_gpu_clk_freq_get:%v", dataToJson(frequencies))
 	return
 }
 
