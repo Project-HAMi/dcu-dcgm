@@ -38,4 +38,5 @@ func main() {
 	dcgm.EccBlocksInfo(0)
 	//dcgm.VDeviceSingleInfo(0)
 	//dcgm.VDeviceSingleInfo(1)
+	dcgm.AllDeviceInfos()
 }
