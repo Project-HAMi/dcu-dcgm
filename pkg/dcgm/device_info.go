@@ -585,8 +585,8 @@ func dmiGetVDeviceCount() (count int, err error) {
 func dmiGetVDeviceInfo(vDvInd int) (vDeviceInfo DMIVDeviceInfo, err error) {
 	var cvDeviceInfo C.dmiDeviceInfo
 	ret := C.dmiGetVDeviceInfo(C.int(vDvInd), &cvDeviceInfo)
-	glog.Infof("dmiGetVDeviceInfo ret:%v", ret)
-	glog.Infof("cgo cvDeviceInfo:%v", dataToJson(cvDeviceInfo))
+	//glog.Infof("dmiGetVDeviceInfo ret:%v", ret)
+	//glog.Infof("cgo cvDeviceInfo:%v", dataToJson(cvDeviceInfo))
 	if err = dmiErrorString(ret); err != nil {
 		return vDeviceInfo, fmt.Errorf("Error dmiGetVDeviceInfo:%s", err)
 	}
@@ -783,6 +783,7 @@ func dmiGetDevBusyPercent(dvInd int) (percent int, err error) {
 		return percent, fmt.Errorf("Error dmiGetDevBusyPercent:%s", err)
 	}
 	percent = int(cpercent)
+	glog.Infof("dmiGetDevBusyPercent: %v", percent)
 	return
 }
 
@@ -794,6 +795,7 @@ func dmiGetVDevBusyPercent(vDvInd int) (percent int, err error) {
 		return percent, fmt.Errorf("Error dmiGetVDevBusyPercent:%s", err)
 	}
 	percent = int(cpercent)
+	glog.Infof("dmiGetVDevBusyPercent: %v", percent)
 	return
 }
 

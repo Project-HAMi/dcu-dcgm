@@ -7,7 +7,6 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
@@ -482,10 +481,8 @@ func AllDeviceInfos() ([]PhysicalDeviceInfo, error) {
 	for i := 0; i < deviceCount; i++ {
 		//物理设备支持最大虚拟化设备数量
 		maxVDeviceCount, _ := dmiGetMaxVDeviceCount()
-
 		//物理设备使用百分比
-		//devPercent, _ := dmiGetDevBusyPercent(i)
-		//deviceInfo.Percent = devPercent
+		devPercent, _ := dmiGetDevBusyPercent(i)
 
 		bdfid, err := rsmiDevPciIdGet(i)
 		if err != nil {
@@ -540,25 +537,27 @@ func AllDeviceInfos() ([]PhysicalDeviceInfo, error) {
 		//glog.Infof(" DCU[%v] SCLK : %.0f", i, sclk)
 		computeUnit := computeUnitType[devTypeName]
 		blockInfos, err := EccBlocksInfo(i)
-		//cus, memories, _ := DeviceRemainingInfo(i)
+		cus, memories, _ := DeviceRemainingInfo(i)
 		device := Device{
-			MinorNumber:      i,
-			PciBusNumber:     pciBusNumber,
-			DeviceId:         deviceId,
-			SubSystemName:    devTypeName,
-			Temperature:      t,
-			PowerUsage:       pu,
-			PowerCap:         pc,
-			MemoryCap:        mc,
-			MemoryUsed:       mu,
-			UtilizationRate:  ur,
-			PcieBwMb:         pcieBwMb,
-			Clk:              sclk,
-			ComputeUnitCount: computeUnit,
-			MaxVDeviceCount:  maxVDeviceCount,
-			VDeviceCount:     0,
-
-			BlocksInfos: blockInfos,
+			MinorNumber:               i,
+			PciBusNumber:              pciBusNumber,
+			DeviceId:                  deviceId,
+			SubSystemName:             devTypeName,
+			Temperature:               t,
+			PowerUsage:                pu,
+			PowerCap:                  pc,
+			MemoryCap:                 mc,
+			MemoryUsed:                mu,
+			UtilizationRate:           ur,
+			PcieBwMb:                  pcieBwMb,
+			Clk:                       sclk,
+			ComputeUnitCount:          computeUnit,
+			MaxVDeviceCount:           maxVDeviceCount,
+			Percent:                   devPercent,
+			VDeviceCount:              0,
+			ComputeUnitRemainingCount: cus,
+			MemoryRemaining:           memories,
+			BlocksInfos:               blockInfos,
 		} // 创建PhysicalDeviceInfo并存入map
 		pdi := PhysicalDeviceInfo{
 			Device:         device,
@@ -569,77 +568,82 @@ func AllDeviceInfos() ([]PhysicalDeviceInfo, error) {
 
 	// 获取虚拟设备数量
 	//vDeviceCount, err := dmiGetVDeviceCount()
-	//vDeviceCount := deviceCount * 4
-	//if err != nil {
-	//	return nil, err
-	//}
-	//// 获取所有虚拟设备信息并关联到对应的物理设备
-	//for j := 0; j < vDeviceCount; j++ {
-	//	vDeviceInfo, err := dmiGetVDeviceInfo(j)
-	//	glog.Infof("vDeviceInfo error: %v", err)
-	//	if err == nil {
-	//		vDevPercent, _ := dmiGetVDevBusyPercent(j)
-	//		vDeviceInfo.Percent = vDevPercent
-	//		vDeviceInfo.VMinorNumber = j
-	//		// 找到对应的物理设备并将虚拟设备添加到其VirtualDevices中
-	//		if pdi, exists := deviceMap[vDeviceInfo.DeviceID]; exists {
-	//			pdi.VirtualDevices = append(pdi.VirtualDevices, vDeviceInfo)
-	//		}
-	//	}
-	//	if err != nil {
-	//		return nil, fmt.Errorf("Error getting virtual device info for virtual device %d: %s", j, err)
-	//	}
-	//}
-
-	dirPath := "/etc/vdev"
-	// 读取目录中的文件列表
-	files, err := os.ReadDir(dirPath)
+	vDeviceCount := deviceCount * 4
 	if err != nil {
-		glog.Errorf("无法读取目录: %v", err)
+		return nil, err
 	}
-
-	// 打印文件数量
-	//fmt.Printf("文件数量: %d\n", len(files))
-
-	// 逐个读取并解析每个文件的内容
-	for _, file := range files {
-		//glog.Infof("/etc/vdev/file：%v", file)
-		// 确保是文件而不是子目录
-		if !file.IsDir() && strings.HasPrefix(file.Name(), "vdev") && strings.HasSuffix(file.Name(), ".conf") {
-			filePath := filepath.Join(dirPath, file.Name())
-			config, err := parseConfig(filePath)
-			if err != nil {
-				glog.Errorf("无法解析文件 %s: %v", filePath, err)
-				continue
-			}
-			//glog.Infof("文件: %s\n配置: %+v\n", filePath, config)
+	// 获取所有虚拟设备信息并关联到对应的物理设备
+	for j := 0; j < vDeviceCount; j++ {
+		vDeviceInfo, err := dmiGetVDeviceInfo(j)
+		glog.Infof("vDeviceInfo error: %v", err)
+		if err == nil {
+			vDevPercent, _ := dmiGetVDevBusyPercent(j)
+			vDeviceInfo.Percent = vDevPercent
+			vDeviceInfo.VMinorNumber = j
 			// 找到对应的物理设备并将虚拟设备添加到其VirtualDevices中
-			if pdi, exists := deviceMap[config.DeviceID]; exists {
-				pdi.VirtualDevices = append(pdi.VirtualDevices, *config)
-				pdi.Device.VDeviceCount = len(pdi.VirtualDevices) // 更新 VDeviceCount
+			if pdi, exists := deviceMap[vDeviceInfo.DeviceID]; exists {
+				// 更新虚拟设备的 PciBusNumber，使用物理设备的 pciBusNumber
+				vDeviceInfo.PciBusNumber = pdi.Device.PciBusNumber
+				// 将虚拟设备添加到物理设备的 VirtualDevices 列表中
+				pdi.VirtualDevices = append(pdi.VirtualDevices, vDeviceInfo)
+				// 更新物理设备的 VDeviceCount，等于当前虚拟设备的数量
+				pdi.Device.VDeviceCount = len(pdi.VirtualDevices)
 			}
 		}
+		if err != nil {
+			glog.Errorf("Error getting virtual device info for virtual device %d: %s", j, err)
+		}
 	}
+
+	//dirPath := "/etc/vdev"
+	//// 读取目录中的文件列表
+	//files, err := os.ReadDir(dirPath)
+	//if err != nil {
+	//	glog.Errorf("无法读取目录: %v", err)
+	//}
+	//
+	//// 打印文件数量
+	////fmt.Printf("文件数量: %d\n", len(files))
+	//
+	//// 逐个读取并解析每个文件的内容
+	//for _, file := range files {
+	//	//glog.Infof("/etc/vdev/file：%v", file)
+	//	// 确保是文件而不是子目录
+	//	if !file.IsDir() && strings.HasPrefix(file.Name(), "vdev") && strings.HasSuffix(file.Name(), ".conf") {
+	//		filePath := filepath.Join(dirPath, file.Name())
+	//		config, err := parseConfig(filePath)
+	//		if err != nil {
+	//			glog.Errorf("无法解析文件 %s: %v", filePath, err)
+	//			continue
+	//		}
+	//		//glog.Infof("文件: %s\n配置: %+v\n", filePath, config)
+	//		// 找到对应的物理设备并将虚拟设备添加到其VirtualDevices中
+	//		if pdi, exists := deviceMap[config.DeviceID]; exists {
+	//			pdi.VirtualDevices = append(pdi.VirtualDevices, *config)
+	//			pdi.Device.VDeviceCount = len(pdi.VirtualDevices) // 更新 VDeviceCount
+	//		}
+	//	}
+	//}
 
 	// 将map中的所有PhysicalDeviceInfo转为slice
 	for _, pdi := range deviceMap {
 		allDevices = append(allDevices, *pdi)
 	}
-	for i := range allDevices {
-		device := &allDevices[i]
-		var computeUnitCountTotal = 0
-		var memoryTotal = 0
-		for _, virtualDevice := range device.VirtualDevices {
-			computeUnitCountTotal += virtualDevice.ComputeUnitCount
-			memoryTotal += int(virtualDevice.GlobalMemSize)
-		}
-		//glog.Infof("VirtualDevice computeUnitCountTotal:%v  MemoryTotal:%v", computeUnitCountTotal, memoryTotal)
-		//glog.Infof("VirtualDevice device.Device.ComputeUnitCount:%v", device.Device.ComputeUnitCount)
-		//glog.Infof("VirtualDevice float64(computeUnitCountTotal):%v ", float64(computeUnitCountTotal))
-		device.Device.ComputeUnitRemainingCount = uint64(device.Device.ComputeUnitCount - float64(computeUnitCountTotal))
-		//glog.Infof("device.Device.ComputeUnitRemainingCount:%v", device.Device.ComputeUnitRemainingCount)
-		device.Device.MemoryRemaining = uint64(device.Device.MemoryCap - float64(memoryTotal))
-	}
+	//for i := range allDevices {
+	//	device := &allDevices[i]
+	//	var computeUnitCountTotal = 0
+	//	var memoryTotal = 0
+	//	for _, virtualDevice := range device.VirtualDevices {
+	//		computeUnitCountTotal += virtualDevice.ComputeUnitCount
+	//		memoryTotal += int(virtualDevice.GlobalMemSize)
+	//	}
+	//	//glog.Infof("VirtualDevice computeUnitCountTotal:%v  MemoryTotal:%v", computeUnitCountTotal, memoryTotal)
+	//	//glog.Infof("VirtualDevice device.Device.ComputeUnitCount:%v", device.Device.ComputeUnitCount)
+	//	//glog.Infof("VirtualDevice float64(computeUnitCountTotal):%v ", float64(computeUnitCountTotal))
+	//	device.Device.ComputeUnitRemainingCount = uint64(device.Device.ComputeUnitCount - float64(computeUnitCountTotal))
+	//	//glog.Infof("device.Device.ComputeUnitRemainingCount:%v", device.Device.ComputeUnitRemainingCount)
+	//	device.Device.MemoryRemaining = uint64(device.Device.MemoryCap - float64(memoryTotal))
+	//}
 	glog.Infof("allDevices:%v", dataToJson(allDevices))
 	return allDevices, nil
 }
@@ -3078,6 +3082,14 @@ func UpdateSingleVDevice(vDvInd int, vDevCUs int, vDevMemSize int) (err error) {
 // @Router /StartVDevice/{vDvInd} [get]
 func StartVDevice(vDvInd int) (err error) {
 	return dmiStartVDevice(vDvInd)
+}
+
+func DevBusyPercent(dvInd int) (percent int, err error) {
+	return dmiGetDevBusyPercent(dvInd)
+}
+
+func VDevBusyPercent(vDvInd int) (percent int, err error) {
+	return dmiGetDevBusyPercent(vDvInd)
 }
 
 // StopVDevice 停止虚拟设备

@@ -58,16 +58,31 @@ func main() {
 		select {
 		case <-ticker.C:
 			// 调用设备1的剩余资源
+			glog.Infof("==================start==============================")
 			glog.Info("Calling DeviceRemainingInfo for device 1")
 			dcgm.DeviceRemainingInfo(1)
 			// 调用设备0的剩余资源
 			glog.Info("Calling DeviceRemainingInfo for device 0")
 			dcgm.DeviceRemainingInfo(0)
+			glog.Info("-----------------------------------------")
 			//虚拟设备数量
 			glog.Info("Calling dmiGetVDeviceCount for device")
 			dcgm.VDeviceCount()
+			glog.Info("-----------------------------------------")
 			//虚拟设备信息
-			//dcgm.VDeviceSingleInfo()
+			glog.Info("Calling VDeviceSingleInfo for vdevice 1")
+			dcgm.VDeviceSingleInfo(1)
+			glog.Info("-----------------------------------------")
+			//物理设备百分比
+			glog.Info("Calling DevBusyPercent for device 1")
+			dcgm.DevBusyPercent(1)
+			glog.Info("Calling DevBusyPercent for device 0")
+			dcgm.DevBusyPercent(0)
+			glog.Info("-----------------------------------------")
+			//虚拟设备百分比
+			glog.Info("Calling VDevBusyPercent for vdevice 1")
+			dcgm.VDevBusyPercent(1)
+			glog.Infof("==================end==============================")
 
 		case <-stopChan:
 			// 收到中断信号，停止程序
