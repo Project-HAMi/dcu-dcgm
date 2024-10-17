@@ -1902,8 +1902,11 @@ func ShowNumaTopology(c *gin.Context) {
 		return
 	}
 
-	dcgm.ShowNumaTopology(dvIdList)
-	c.String(http.StatusOK, "操作成功")
+	infos, _ := dcgm.ShowNumaTopology(dvIdList)
+	response := map[string]interface{}{
+		"infos": infos,
+	}
+	c.JSON(http.StatusOK, SuccessResponse(response))
 }
 
 // ShowHwTopology 显示指定设备的完整硬件拓扑信息。
