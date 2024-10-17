@@ -29,7 +29,8 @@ func Init() (err error) {
 	retryCount := 0                    // 记录连续返回相同设备数量的次数
 	lastNumDevices := -1               // 记录上一次获取的设备数量
 	restartTimeout := 10 * time.Second // 每次重试等待10秒
-
+	initFailCount := 0                 // rsmiInit 连续失败的计数
+	maxInitFails := 6                  // 连续失败最大次数
 	for {
 		err = rsmiInit() // 初始化rsmi
 		if err == nil {
@@ -57,9 +58,15 @@ func Init() (err error) {
 				}
 				time.Sleep(restartTimeout) // 等待10秒
 			}
-		}
+		} else {
+			initFailCount++ // 初始化失败，计数加一
+			glog.Infof("初始化失败: %v. 10秒后重试...\n", err)
 
-		glog.Infof("初始化失败: %v. 10秒后重试...\n", err)
+			if initFailCount >= maxInitFails {
+				glog.Errorf("rsmiInit 连续 %d 次失败，终止初始化: %v", maxInitFails, err)
+				return err // 连续6次失败，返回错误信息
+			}
+		}
 		time.Sleep(restartTimeout) // 等待10秒后再次重试
 	}
 }
@@ -2905,12 +2912,12 @@ func ShowTypeTopology(dvIdList []int, printJSON bool) {
 
 // ShowNumaTopology 显示指定设备的 NUMA 节点信息。
 // @Summary 显示 NUMA 节点信息
-// @Description 显示一组 GPU 设备的 NUMA 节点和关联信息。
+// @Description 显示一组 DCU 设备的 NUMA 节点和关联信息。
 // @Tags Topology
 // @Param dvIdList query []int true "设备 ID 列表"
 // @Success 200 {string} string "NUMA 节点信息"
 // @Router /showNumaTopology [get]
-func ShowNumaTopology(dvIdList []int) {
+func ShowNumaTopology(dvIdList []int) (numaInfos []NumaInfo, err error) {
 	fmt.Println("---------- Numa Nodes ----------")
 
 	for _, device := range dvIdList {
@@ -2929,7 +2936,17 @@ func ShowNumaTopology(dvIdList []int) {
 		} else {
 			glog.Errorf("device:%v Cannot read Numa Affinity", device)
 		}
+		// 将设备和 NUMA 信息存储在结构体中并添加到切片中
+		numaInfo := NumaInfo{
+			DeviceID:     device,
+			NumaNode:     numaNode,
+			NumaAffinity: numaAffinity,
+		}
+		numaInfos = append(numaInfos, numaInfo)
+
+		glog.Infof("Device %d: Numa Node: %d, Numa Affinity: %d\n", device, numaNode, numaAffinity)
 	}
+	return
 }
 
 // ShowHwTopology 显示指定设备的完整硬件拓扑信息。

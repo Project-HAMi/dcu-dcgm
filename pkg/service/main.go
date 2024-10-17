@@ -28,6 +28,7 @@ func main() {
 	err := dcgm.Init()
 	if err != nil {
 		glog.Errorf("DCGM 初始化失败: %v", err)
+		return
 	}
 	defer dcgm.ShutDown()
 	log.Println("服务启动中...")

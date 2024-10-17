@@ -1031,3 +1031,13 @@ type BlocksInfo struct {
 	CE    int64
 	UE    int64
 }
+
+// NumaInfo 设备的Numa信息
+type NumaInfo struct {
+	// DeviceID 设备索引号
+	DeviceID int
+	// NumaNode numaNode值
+	NumaNode int
+	// NumaAffinity 关联信息
+	NumaAffinity int
+}

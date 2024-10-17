@@ -230,9 +230,10 @@ func rsmiDevPciThroughputGet(dvInd int) (sent int64, received int64, maxPktSz in
 	if err = errorString(ret); err != nil {
 		return 0, 0, 0, fmt.Errorf("Error rsmi_dev_pci_throughput_get:%s", err)
 	}
-	sent = int64(cmaxpktsz)
-	received = int64(csent)
-	maxPktSz = int64(creceived)
+	//glog.Infof("csent: %v, creceived: %v, cmaxpktsz: %v", csent, creceived, cmaxpktsz)
+	sent = int64(csent)
+	received = int64(creceived)
+	maxPktSz = int64(cmaxpktsz)
 	//glog.Infof("sent: %v, received: %v, maxPktSz: %v", sent, received, maxPktSz)
 	return
 }
@@ -610,7 +611,7 @@ func dmiGetVDeviceInfo(vDvInd int) (vDeviceInfo DMIVDeviceInfo, err error) {
 func dmiGetDeviceRemainingInfo(dvInd int) (cus, memories uint64, err error) {
 	var ccus, cmemories C.size_t
 	ret := C.dmiGetDeviceRemainingInfo(C.int(dvInd), &ccus, &cmemories)
-	glog.Infof("dmiGetDeviceRemainingInfo ret:%v", ret)
+	glog.Infof("dmiGetDeviceRemainingInfo ret:%v, retstr:%v", ret, dmiErrorString(ret))
 	if err = dmiErrorString(ret); err != nil {
 		return cus, memories, fmt.Errorf("Error dmiGetDeviceRemainingInfo:%s", err)
 	}
