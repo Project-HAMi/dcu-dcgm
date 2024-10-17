@@ -67,7 +67,7 @@ func main() {
 			glog.Info("Calling dmiGetVDeviceCount for device")
 			dcgm.VDeviceCount()
 			//虚拟设备信息
-			dcgm.VDeviceSingleInfo()
+			//dcgm.VDeviceSingleInfo()
 
 		case <-stopChan:
 			// 收到中断信号，停止程序
