@@ -790,6 +790,9 @@ type Device struct {
 	// MemoryRemaining 设备剩余可用的内存量
 	MemoryRemaining uint64
 
+	// Percent 物理设备使用百分比
+	Percent int
+
 	// MaxVDeviceCount 物理设备上支持的最大虚拟设备数量
 	MaxVDeviceCount int
 	// VDeviceCount 虚拟设备数量
