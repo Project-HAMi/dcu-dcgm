@@ -1,8 +1,8 @@
-package dcgm
+package router
 
 /*
-#cgo CFLAGS: -Wall -I./include
-#cgo LDFLAGS: -L./lib -lrocm_smi64 -lhydmi -Wl,--unresolved-symbols=ignore-in-object-files
+#cgo CFLAGS: -Wall -I../../dcgm/include
+#cgo LDFLAGS: -L../../dcgm/lib -lrocm_smi64 -lhydmi -Wl,--unresolved-symbols=ignore-in-object-files
 #include <stdint.h>
 #include <kfd_ioctl.h>
 #include <rocm_smi64Config.h>
@@ -121,7 +121,7 @@ const (
 	RSMI_VOLT_LAST                       = C.RSMI_VOLT_LAST
 )
 
-type RSMIUtilizationCounterType C.RSMI_UTILIZATION_COUNTER_TYPE
+type RSMIUtilizationCounterType uint32
 
 const (
 	RSMI_UTILIZATION_COUNTER_FIRST RSMIUtilizationCounterType = C.RSMI_UTILIZATION_COUNTER_FIRST
@@ -143,11 +143,9 @@ type RSMIUtilizationCounter struct {
 type RSMIClkType C.rsmi_clk_type_t
 
 const (
-	// sclk clock level
 	RSMI_CLK_TYPE_SYS  RSMIClkType = C.RSMI_CLK_TYPE_SYS
 	RSMI_CLK_TYPE_DF   RSMIClkType = C.RSMI_CLK_TYPE_DF
 	RSMI_CLK_TYPE_DCEF RSMIClkType = C.RSMI_CLK_TYPE_DCEF
-	// socclk clock level
 	RSMI_CLK_TYPE_SOC  RSMIClkType = C.RSMI_CLK_TYPE_SOC
 	RSMI_CLK_TYPE_MEM  RSMIClkType = C.RSMI_CLK_TYPE_MEM
 	RSMI_CLK_TYPE_PCIE RSMIClkType = C.RSMI_CLK_TYPE_PCIE
@@ -580,16 +578,8 @@ type MonitorInfo struct {
 	UtilizationRate float64
 	//  PcieBwMb pcie流量信息
 	PcieBwMb float64
-	// Clk 系统时钟速度
+	// Clk 备系统时钟速度列表
 	Clk float64
-	// SclkFrequency 系统时钟频率列表
-	SclkFrequency []string
-	// Socclk socclk时钟
-	Socclk float64
-	// SocclkFrequency Soc时钟频率列表
-	SocclkFrequency []string
-	// PerfLevel 性能水平
-	PerfLevel string
 }
 
 // DeviceInfo 设备信息结构体
@@ -661,13 +651,13 @@ type DMIDeviceInfo struct {
 	Name             string
 	ComputeUnitCount int
 	// @swagignore
-	ComputeUnitRemainingCount uintptr
+	ComputeUnitRemainingCount uint64
 	// @swagignore
-	MemoryRemaining uintptr
+	MemoryRemaining uint64
 	// @swagignore
-	GlobalMemSize uintptr
+	GlobalMemSize uint64
 	// @swagignore
-	UsageMemSize    uintptr
+	UsageMemSize    uint64
 	DeviceID        int
 	Percent         int
 	MaxVDeviceCount int
@@ -683,11 +673,11 @@ type DMIVDeviceInfo struct {
 
 	// GlobalMemSize 虚拟设备的全局内存大小
 	// @swagignore
-	GlobalMemSize uintptr
+	GlobalMemSize uint64
 
 	// UsageMemSize 虚拟设备的已使用内存大小
 	// @swagignore
-	UsageMemSize uintptr
+	UsageMemSize uint64
 
 	// ContainerID 虚拟设备的容器ID
 	ContainerID uint64
@@ -789,9 +779,6 @@ type Device struct {
 
 	// MemoryRemaining 设备剩余可用的内存量
 	MemoryRemaining uint64
-
-	// Percent 物理设备使用百分比
-	Percent int
 
 	// MaxVDeviceCount 物理设备上支持的最大虚拟设备数量
 	MaxVDeviceCount int
@@ -1028,19 +1015,43 @@ const (
 	LinkTypeUnknown = "XXXX"
 )
 
-type BlocksInfo struct {
-	Block string
-	State string
-	CE    int64
-	UE    int64
+// DeviceControlInfo 控制设备信息
+type DeviceControlInfo struct {
+	// DvInd 设备索引号
+	DvInd int
+	// PerfLevel 性能水平
+	PerfLevel string
+	// SclkClock sclk时钟频率 600、700、750、800、900、1000、1106、1200、1270、1319、1400、1500、1600
+	SclkClock string
+	// SocclkClock soclk时钟频率 309、523、566、618、680、755、850、971
+	SocclkClock string
+	// ResetFan 是否重置风扇控制
+	ResetFan bool
 }
 
-// NumaInfo 设备的Numa信息
-type NumaInfo struct {
-	// DeviceID 设备索引号
-	DeviceID int
-	// NumaNode numaNode值
-	NumaNode int
-	// NumaAffinity 关联信息
-	NumaAffinity int
+const (
+	Freq600Mhz  = 1    // 0b000000000001
+	Freq700Mhz  = 2    // 0b000000000010
+	Freq750Mhz  = 4    // 0b000000000100
+	Freq800Mhz  = 8    // 0b000000001000
+	Freq900Mhz  = 16   // 0b000000010000
+	Freq1000Mhz = 32   // 0b000000100000
+	Freq1106Mhz = 64   // 0b000001000000
+	Freq1200Mhz = 128  // 0b000010000000
+	Freq1270Mhz = 256  // 0b000100000000
+	Freq1319Mhz = 512  // 0b001000000000
+	Freq1400Mhz = 1024 // 0b010000000000
+	Freq1600Mhz = 2048 // 0b100000000000
+)
+
+// BlocksInfo block状态、ue和ce信息
+type BlocksInfo struct {
+	// Block block
+	Block string
+	// State 状态
+	State string
+	// CE CE
+	CE int64
+	// UE UE
+	UE int64
 }

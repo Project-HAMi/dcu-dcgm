@@ -1,0 +1,4252 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "contact": {}
+    },
+    "paths": {
+        "/AllDeviceInfos": {
+            "get": {
+                "description": "该接口返回所有物理设备的详细信息。",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "获取所有物理设备信息",
+                "responses": {
+                    "200": {
+                        "description": "所有设备的详细信息",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/router.PhysicalDeviceInfo"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "无效的请求参数",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/CollectDeviceMetrics": {
+            "get": {
+                "description": "收集所有设备的监控指标信息。",
+                "summary": "获取设备监控中的指标",
+                "responses": {
+                    "200": {
+                        "description": "设备监控指标信息列表",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/router.MonitorInfo"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "请求错误",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "设备未找到",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/CreateVDevices": {
+            "post": {
+                "description": "在指定的物理设备上创建指定数量的虚拟设备，返回创建的虚拟设备ID集合",
+                "summary": "创建虚拟设备",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "物理设备的索引",
+                        "name": "dvInd",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "要创建的虚拟设备数量",
+                        "name": "vDevCount",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "每个虚拟设备的计算单元数量，多个值使用多个 vDevCUs 参数传递，例如：vDevCUs=10\u0026vDevCUs=20",
+                        "name": "vDevCUs",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "每个虚拟设备的内存大小，多个值使用多个 vDevMemSize 参数传递，例如：vDevMemSize=1024\u0026vDevMemSize=2048",
+                        "name": "vDevMemSize",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "虚拟设备创建成功，返回包含虚拟设备ID集合的对象",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数无效",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "创建虚拟设备失败",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/DestroySingleVDevice": {
+            "delete": {
+                "description": "销毁指定索引的虚拟设备",
+                "summary": "销毁单个虚拟设备",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "虚拟设备的索引",
+                        "name": "vDvInd",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "虚拟设备销毁成功",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "虚拟设备销毁失败",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/DestroyVDevice": {
+            "delete": {
+                "description": "销毁指定物理设备上的所有虚拟设备",
+                "summary": "销毁所有虚拟设备",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "物理设备的索引",
+                        "name": "dvInd",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "虚拟设备销毁成功",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "虚拟设备销毁失败",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/DevBrand/{dvInd}": {
+            "get": {
+                "description": "根据设备索引获取品牌名称",
+                "summary": "获取设备品牌名称",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "设备索引",
+                        "name": "dvInd",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设备品牌名称",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "请求失败",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/DevFanRpms/{dvInd}": {
+            "get": {
+                "description": "获取指定设备的风扇速度（RPM）",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "获取设备的风扇速度",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "设备索引",
+                        "name": "dvInd",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "风扇速度 (RPM)",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    "400": {
+                        "description": "失败信息",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/DevGpuClkFreqSet": {
+            "post": {
+                "description": "设置 GPU 上指定时钟的允许频率。clkType 设置为默认值，无需传递。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "GPU"
+                ],
+                "summary": "设置 GPU 时钟频率",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "设备索引",
+                        "name": "dvInd",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "频率掩码",
+                        "name": "freqBitmask",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/DevGpuMetricsInfo/{dvInd}": {
+            "get": {
+                "description": "根据设备 ID 获取 GPU 的度量信息。",
+                "summary": "获取 GPU 度量信息",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "设备 ID",
+                        "name": "dvInd",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "GPU 度量信息",
+                        "schema": {
+                            "$ref": "#/definitions/router.RSMIGPUMetrics"
+                        }
+                    },
+                    "400": {
+                        "description": "请求错误",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "设备未找到",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/DevID": {
+            "get": {
+                "description": "根据设备索引返回设备ID的十六进制值",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "获取设备ID的十六进制值",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "设备索引",
+                        "name": "dvInd",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回设备ID的十六进制值",
+                        "schema": {
+                            "type": "int"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/DevPciBandwidth/{dvInd}": {
+            "get": {
+                "description": "根据设备 ID 获取设备的可用 PCIe 带宽列表。",
+                "summary": "获取可用的 PCIe 带宽列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "设备 ID",
+                        "name": "dvInd",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "PCIe 带宽列表",
+                        "schema": {
+                            "$ref": "#/definitions/router.RSMIPcieBandwidth"
+                        }
+                    },
+                    "400": {
+                        "description": "请求错误",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "设备未找到",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/DevPciBandwidthSet": {
+            "post": {
+                "description": "根据设备索引和带宽掩码限制设备允许的 PCIe 带宽",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "设置设备允许的 PCIe 带宽",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "设备索引",
+                        "name": "dvInd",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "带宽掩码",
+                        "name": "bwBitmask",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "操作成功",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/DevPerfLevelSet/{dvInd}": {
+            "post": {
+                "description": "根据设备 ID 设置 PowerPlay 性能级别。",
+                "summary": "设置设备 PowerPlay 性能级别",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "设备 ID",
+                        "name": "dvInd",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "要设置的性能级别",
+                        "name": "level",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "操作成功",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "请求错误",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "设备未找到",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/DevPowerProfileSet": {
+            "post": {
+                "description": "设置指定设备的功率配置文件",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "设置设备功率配置文件",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "设备索引",
+                        "name": "dvInd",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "保留参数，通常为0",
+                        "name": "reserved",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "功率配置文件的枚举值",
+                        "name": "profile",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功信息",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "失败信息",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/DevSku/{dvInd}": {
+            "get": {
+                "description": "根据设备索引获取SKU",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "获取设备SKU",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "设备索引",
+                        "name": "dvInd",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回设备SKU",
+                        "schema": {
+                            "type": "int"
+                        }
+                    },
+                    "400": {
+                        "description": "获取设备SKU失败",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/DevVendorName/{dvInd}": {
+            "get": {
+                "description": "根据设备索引获取供应商名称",
+                "summary": "获取设备供应商名称",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "设备索引",
+                        "name": "dvInd",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回设备供应商名称",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "请求失败",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/DevVramVendor/{dvInd}": {
+            "get": {
+                "description": "根据设备索引获取显存供应商名称",
+                "summary": "获取设备显存供应商名称",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "设备索引",
+                        "name": "dvInd",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回显存供应商名称",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "请求失败",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/DeviceInfos": {
+            "get": {
+                "description": "返回所有设备的详细信息列表",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "获取设备信息列表",
+                "responses": {
+                    "200": {
+                        "description": "返回设备信息列表",
+                        "schema": {
+                            "$ref": "#/definitions/router.DeviceInfo"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/EccBlocksInfo": {
+            "get": {
+                "description": "根据设备索引获取 ECC block 信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "获取 ECC block 信息",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "设备索引",
+                        "name": "dvInd",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ECC block 信息",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/router.BlocksInfo"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "内部服务器错误",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/EccStatus/{dvInd}": {
+            "get": {
+                "description": "返回指定GPU块的ECC状态",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "获取GPU块的ECC状态",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "设备索引",
+                        "name": "dvInd",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "GPU块",
+                        "name": "block",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回ECC状态",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/EncryptionVMStatus": {
+            "get": {
+                "description": "返回虚拟机是否处于加密状态",
+                "summary": "获取当前虚拟机的加密状态",
+                "responses": {
+                    "200": {
+                        "description": "加密状态",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    "400": {
+                        "description": "操作失败",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/GetBus/{device}": {
+            "get": {
+                "description": "获取指定设备的总线信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "获取设备总线信息",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "设备索引",
+                        "name": "dvInd",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设备总线ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "失败信息",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/MaxPower": {
+            "get": {
+                "description": "根据设备索引返回设备的最大功率（以瓦特为单位）",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "获取设备的最大功率",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "设备索引",
+                        "name": "dvInd",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回设备的最大功率",
+                        "schema": {
+                            "type": "int64"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/MemInfo": {
+            "get": {
+                "description": "根据设备索引和内存类型返回内存的使用量和总量",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "获取设备的指定内存使用情况",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "设备索引",
+                        "name": "dvInd",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "内存类型（可选值: vram, vis_vram, gtt）",
+                        "name": "memType",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回指定内存类型的使用量和总量",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/MemoryPercent/{dvInd}": {
+            "get": {
+                "description": "根据设备 ID 获取设备内存的使用百分比。",
+                "summary": "获取内存使用百分比",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "设备 ID",
+                        "name": "dvInd",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "内存使用百分比",
+                        "schema": {
+                            "type": "int"
+                        }
+                    },
+                    "400": {
+                        "description": "请求错误",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "设备未找到",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/NumMonitorDevices": {
+            "get": {
+                "description": "获取监视的 GPU 数量",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "获取 GPU 数量",
+                "responses": {
+                    "200": {
+                        "description": "GPU 数量",
+                        "schema": {
+                            "type": "int"
+                        }
+                    },
+                    "500": {
+                        "description": "获取 GPU 数量失败",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/PerfLevel/{dvInd}": {
+            "get": {
+                "description": "返回指定设备的当前性能等级",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "获取设备的当前性能水平",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "设备索引",
+                        "name": "dvInd",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回当前性能水平",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/Power/{dvInd}": {
+            "get": {
+                "description": "返回指定设备的平均功耗",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "获取设备的平均功耗",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "设备索引",
+                        "name": "dvInd",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回平均功耗（瓦特）",
+                        "schema": {
+                            "type": "int64"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/PrintEventList/{device}": {
+            "get": {
+                "description": "打印指定设备的事件列表，并设置延迟",
+                "summary": "打印设备的事件列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "设备索引",
+                        "name": "device",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "延迟时间（秒）",
+                        "name": "delay",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "事件列表",
+                        "name": "eventList",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "操作成功",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "操作失败",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/ProcessName": {
+            "get": {
+                "description": "根据进程ID（PID）返回对应的进程名称",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "获取指定PID的进程名",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "进程ID",
+                        "name": "pid",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回进程名称",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/ResetClocks": {
+            "post": {
+                "description": "重置指定设备的时钟和性能等级为默认值",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "重置设备时钟",
+                "parameters": [
+                    {
+                        "description": "设备ID列表",
+                        "name": "dvIdList",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回失败消息列表",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/router.FailedMessage"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/ResetFans": {
+            "post": {
+                "description": "重置指定设备的风扇控制为默认值",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "复位风扇控制",
+                "parameters": [
+                    {
+                        "description": "设备ID列表",
+                        "name": "dvIdList",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "复位成功",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/ResetPerfDeterminism": {
+            "post": {
+                "description": "该接口用于重置指定设备的性能决定性设置。请求体中需要包含设备ID列表。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "重置Performance Determinism",
+                "parameters": [
+                    {
+                        "description": "设备ID列表",
+                        "name": "dvIdList",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回失败的设备及其错误信息",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/router.FailedMessage"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "无效的请求体",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/ResetProfile": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "重置指定设备的电源配置文件和性能级别",
+                "parameters": [
+                    {
+                        "description": "设备ID列表",
+                        "name": "dvIdList",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回失败的设备及其错误信息",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/router.FailedMessage"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/ResetXGMIErr": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "重置指定设备的XGMI错误状态",
+                "parameters": [
+                    {
+                        "description": "设备ID列表",
+                        "name": "dvIdList",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回失败的设备及其错误信息",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/router.FailedMessage"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/SetClockOverDrive": {
+            "post": {
+                "description": "设置设备的时钟OverDrive",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "设置设备的时钟OverDrive",
+                "parameters": [
+                    {
+                        "description": "设备ID列表",
+                        "name": "dvIdList",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "时钟类型（sclk 或 mclk）",
+                        "name": "clktype",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "OverDrive值，表示为百分比（0-20%）",
+                        "name": "value",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "自动响应超出规格的警告",
+                        "name": "autoRespond",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功设置时钟OverDrive",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "无效的请求参数或无法设置时钟OverDrive",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/SetClockRange": {
+            "post": {
+                "description": "设置设备的时钟频率范围（sclk 或 mclk）",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "设置设备的时钟频率范围",
+                "parameters": [
+                    {
+                        "description": "设备ID列表",
+                        "name": "dvIdList",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "时钟类型（sclk 或 mclk）",
+                        "name": "clkType",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "最小值（MHz）",
+                        "name": "minvalue",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "最大值（MHz）",
+                        "name": "maxvalue",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "自动响应超出规格的警告",
+                        "name": "autoRespond",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "时钟范围设置成功",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "无效的请求参数或无法设置时钟范围",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/SetEncryptionVMStatus": {
+            "post": {
+                "description": "根据提供的状态开启或关闭虚拟机加密",
+                "summary": "设置虚拟机加密状态",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "加密状态",
+                        "name": "status",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "操作成功",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "操作失败",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/SetFanSpeed": {
+            "post": {
+                "description": "根据设备ID列表和给定的风扇速度，设置设备的风扇速度",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "设置风扇转速",
+                "parameters": [
+                    {
+                        "description": "设备 ID 列表",
+                        "name": "dvIdList",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "风扇速度值（0-255,单位:RPM）",
+                        "name": "fan",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功信息",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "失败信息",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/SetPerfDeterminism": {
+            "post": {
+                "description": "设置设备的性能确定性",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "设置设备的性能确定性",
+                "parameters": [
+                    {
+                        "description": "设备ID列表",
+                        "name": "dvIdList",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "时钟频率值",
+                        "name": "clkvalue",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回失败的设备及其错误信息",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/router.FailedMessage"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "无效的请求体或无法设置性能确定性",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/SetPerformanceLevel": {
+            "post": {
+                "description": "根据设备ID列表和给定的性能等级，设置设备的性能等级",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "设置设备性能等级",
+                "parameters": [
+                    {
+                        "description": "设备 ID 列表",
+                        "name": "deviceList",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "性能等级 (auto, low, high, normal)",
+                        "name": "level",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/router.FailedMessage"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/router.FailedMessage"
+                        }
+                    }
+                }
+            }
+        },
+        "/SetPowerPlayTableLevel": {
+            "post": {
+                "description": "设置设备的PowerPlay表级别",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "设置设备的PowerPlay表级别",
+                "parameters": [
+                    {
+                        "description": "设备ID列表",
+                        "name": "dvIdList",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "时钟类型（sclk 或 mclk）",
+                        "name": "clkType",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "电压点",
+                        "name": "point",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "时钟值（MHz）",
+                        "name": "clk",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "电压值（mV）",
+                        "name": "volt",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "自动响应超出规格的警告",
+                        "name": "autoRespond",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功设置PowerPlay表级别",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "无效的请求参数或无法设置PowerPlay表级别，返回失败消息列表",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/SetProfile": {
+            "post": {
+                "description": "根据设备ID列表和给定的功率配置文件，设置设备的功率配置",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "设置功率配置",
+                "parameters": [
+                    {
+                        "description": "设备 ID 列表",
+                        "name": "dvIdList",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "功率配置文件名称:CUSTOM、VIDEO、POWER SAVING、COMPUTE、VR、3D FULL SCREEN、BOOTUP DEFAULT",
+                        "name": "profile",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置成功的消息列表",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/router.FailedMessage"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "失败的消息列表",
+                        "schema": {
+                            "$ref": "#/definitions/router.FailedMessage"
+                        }
+                    }
+                }
+            }
+        },
+        "/ShowAllConciseHw": {
+            "post": {
+                "description": "显示指定设备列表的简要硬件信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "显示设备硬件信息",
+                "parameters": [
+                    {
+                        "description": "设备 ID 列表",
+                        "name": "dvIdList",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功信息",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "失败信息",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/ShowClocks": {
+            "post": {
+                "description": "显示指定设备的时钟信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "显示时钟信息",
+                "parameters": [
+                    {
+                        "description": "设备 ID 列表",
+                        "name": "dvIdList",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功信息",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "失败信息",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/StartVDevice/{vDvInd}": {
+            "get": {
+                "description": "启动虚拟设备，指定设备索引",
+                "summary": "启动指定的虚拟设备",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "虚拟设备索引",
+                        "name": "vDvInd",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "操作成功",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "操作失败",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/StopVDevice/{vDvInd}": {
+            "get": {
+                "description": "停止虚拟设备，指定设备索引",
+                "summary": "停止指定的虚拟设备",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "虚拟设备索引",
+                        "name": "vDvInd",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "操作成功",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "操作失败",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/Temperature/{dvInd}": {
+            "get": {
+                "description": "返回指定设备的当前温度",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "获取设备温度",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "设备索引",
+                        "name": "dvInd",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "传感器类型:0：Edge GPU temperature; 1:Junction/hotspot temperature;2:VRAM temperature",
+                        "name": "sensorType",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回温度（摄氏度）",
+                        "schema": {
+                            "type": "float64"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/UpdateSingleVDevice": {
+            "put": {
+                "description": "更新指定虚拟设备的计算单元和内存大小",
+                "summary": "更新虚拟设备资源",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "虚拟设备的索引",
+                        "name": "vDvInd",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "更新后的计算单元数量",
+                        "name": "vDevCUs",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "更新后的内存大小",
+                        "name": "vDevMemSize",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "虚拟设备更新成功",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "虚拟设备更新失败",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/VDeviceSingleInfo": {
+            "get": {
+                "description": "根据设备索引获取对应的虚拟设备信息",
+                "summary": "获取单个虚拟设备的信息",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "设备索引",
+                        "name": "vDvInd",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "虚拟设备信息",
+                        "schema": {
+                            "$ref": "#/definitions/router.DMIVDeviceInfo"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "内部服务器错误",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/VbiosVersion/{dvInd}": {
+            "get": {
+                "description": "返回指定设备的VBIOS版本",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "获取设备的VBIOS版本",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "设备索引",
+                        "name": "dvInd",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回VBIOS版本",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/Version": {
+            "get": {
+                "description": "返回指定组件的驱动程序版本",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "获取当前系统的驱动程序版本",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "驱动组件:FIRST、DRIVER、LAST",
+                        "name": "component",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回驱动程序版本",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/XGMIErrorStatus": {
+            "get": {
+                "description": "获取指定物理设备的XGMI（高速互连链路）错误状态。",
+                "summary": "获取XGMI错误状态",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "物理设备的索引",
+                        "name": "dvInd",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回XGMI错误状态码",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    "400": {
+                        "description": "获取XGMI错误状态失败",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/XGMIHiveIdGet": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "获取指定设备的XGMI hive id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "设备索引",
+                        "name": "dvInd",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回设备的XGMI hive id",
+                        "schema": {
+                            "type": "int64"
+                        }
+                    }
+                }
+            }
+        },
+        "/device/control": {
+            "post": {
+                "description": "根据传入的设备控制信息，设置设备的性能级别、时钟频率，并可选择性重置风扇",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "控制设备的性能级别、时钟频率和风扇重置",
+                "parameters": [
+                    {
+                        "description": "设备控制信息",
+                        "name": "deviceControl",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/router.DeviceControlInfo"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功返回操作结果",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "无效的请求参数或操作失败",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "内部服务器错误",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/device/info/{dvInd}": {
+            "get": {
+                "description": "根据设备索引获取对应的设备信息",
+                "summary": "获取设备信息",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "设备索引",
+                        "name": "dvInd",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设备信息",
+                        "schema": {
+                            "$ref": "#/definitions/router.DMIDeviceInfo"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "内部服务器错误",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/device/power": {
+            "post": {
+                "description": "获取并展示指定设备的平均图形功率消耗",
+                "summary": "展示设备的平均功率消耗",
+                "parameters": [
+                    {
+                        "description": "设备 ID 列表",
+                        "name": "dvIdList",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设备的功率信息",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/router.DevicePowerInfo"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/device/powerplay": {
+            "post": {
+                "description": "获取并展示指定设备的GPU内存时钟频率和电压表",
+                "summary": "展示设备的GPU内存时钟频率和电压",
+                "parameters": [
+                    {
+                        "description": "设备 ID 列表",
+                        "name": "dvIdList",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设备的GPU时钟频率和电压信息",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/router.DevicePowerPlayInfo"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/device/product": {
+            "post": {
+                "description": "获取并显示指定设备的产品名称、供应商、系列、型号和SKU信息",
+                "summary": "显示设备的产品名称",
+                "parameters": [
+                    {
+                        "description": "设备 ID 列表",
+                        "name": "dvIdList",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设备的产品信息列表",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/router.DeviceproductInfo"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/device/profile": {
+            "post": {
+                "description": "获取并显示指定设备的电源配置文件，包括可用的电源配置选项",
+                "summary": "显示设备的电源配置文件",
+                "parameters": [
+                    {
+                        "description": "设备 ID 列表",
+                        "name": "dvIdList",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设备的电源配置文件信息列表",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/router.DeviceProfile"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/device/range": {
+            "post": {
+                "description": "获取并显示指定设备的有效电流或电压范围",
+                "summary": "显示设备的电流或电压范围（K100_AI卡不支持该操作）",
+                "parameters": [
+                    {
+                        "description": "设备ID列表",
+                        "name": "dvIdList",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    },
+                    {
+                        "description": "范围类型 (sclk, mclk, voltage)",
+                        "name": "rangeType",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设备的电流或电压范围信息",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/device/retiredpages": {
+            "post": {
+                "description": "获取并显示指定设备的退役内存页信息",
+                "summary": "显示设备的退役页信息",
+                "parameters": [
+                    {
+                        "description": "设备ID列表",
+                        "name": "dvIdList",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    },
+                    {
+                        "description": "退役类型 (默认为'all')",
+                        "name": "retiredType",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设备的退役页信息",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/device/serialnumber": {
+            "post": {
+                "description": "获取并显示指定设备的序列号信息",
+                "summary": "显示设备的序列号",
+                "parameters": [
+                    {
+                        "description": "设备ID列表",
+                        "name": "dvIdList",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设备的序列号信息列表",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/router.DeviceSerialInfo"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/deviceCount": {
+            "get": {
+                "description": "获取当前系统中的设备数量",
+                "summary": "获取设备数量",
+                "responses": {
+                    "200": {
+                        "description": "设备数量",
+                        "schema": {
+                            "type": "int"
+                        }
+                    },
+                    "500": {
+                        "description": "内部服务器错误",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/deviceRemainingInfo/{dvInd}": {
+            "get": {
+                "description": "获取指定设备的剩余计算单元和内存信息",
+                "summary": "获取设备剩余信息",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "物理设备索引",
+                        "name": "dvInd",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "剩余的内存信息",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "无效的设备索引",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "内部服务器错误",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/deviceinfo/{dvInd}": {
+            "get": {
+                "description": "根据设备 ID 获取物理设备的详细信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "获取设备信息",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Device ID",
+                        "name": "dvInd",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设备信息",
+                        "schema": {
+                            "$ref": "#/definitions/router.PhysicalDeviceInfo"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid device ID",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/devicename/{dvInd}": {
+            "get": {
+                "description": "根据设备 ID 获取设备名称",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "获取设备名称",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Device ID",
+                        "name": "dvInd",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设备名称",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid device ID",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/energy": {
+            "post": {
+                "description": "获取并展示指定设备的能量消耗情况。",
+                "summary": "展示设备的能量消耗",
+                "parameters": [
+                    {
+                        "description": "设备 ID 列表",
+                        "name": "dvIdList",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功返回设备的能量消耗信息",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/fans/current": {
+            "post": {
+                "description": "显示指定设备的当前风扇转速和风扇级别",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "展示风扇转速和风扇级别",
+                "parameters": [
+                    {
+                        "description": "设备 ID 列表",
+                        "name": "dvIdList",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功信息",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "失败信息",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/fanspeedinfo/{dvInd}": {
+            "get": {
+                "description": "获取指定设备的风扇转速及其占最大转速的百分比",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "获取风扇转速",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Device ID",
+                        "name": "dvInd",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "风扇转速信息",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "integer"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid device ID",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/firmware/info": {
+            "get": {
+                "summary": "显示设备固件版本信息",
+                "parameters": [
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "设备 ID 列表",
+                        "name": "dvIdList",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "固件类型列表",
+                        "name": "fwType",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "固件版本信息列表",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/router.FirmwareInfo"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "错误信息",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/gpu/use": {
+            "post": {
+                "summary": "显示设备的 DCU 使用率",
+                "parameters": [
+                    {
+                        "description": "设备 ID 列表",
+                        "name": "dvIdList",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设备使用信息列表",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/router.DeviceUseInfo"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "错误信息",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/gpuuse/{dvInd}": {
+            "get": {
+                "description": "获取指定设备的DCU当前使用百分比",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "获取DCU使用率",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Device ID",
+                        "name": "dvInd",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "GPU使用百分比",
+                        "schema": {
+                            "type": "int"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid device ID",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/memory/info": {
+            "post": {
+                "description": "获取并展示指定设备的内存使用情况，包括不同类型的内存。",
+                "summary": "展示设备内存信息",
+                "parameters": [
+                    {
+                        "description": "设备 ID 列表",
+                        "name": "dvIdList",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    },
+                    {
+                        "description": "内存类型列表，如 'all' 或指定类型",
+                        "name": "memTypes",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功返回设备的内存信息",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/memory/use": {
+            "post": {
+                "description": "获取并展示指定设备的当前内存使用百分比和其他相关的利用率数据。",
+                "summary": "展示设备内存使用情况",
+                "parameters": [
+                    {
+                        "description": "设备 ID 列表",
+                        "name": "dvIdList",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功返回设备的内存使用信息",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/memory/vendor": {
+            "post": {
+                "description": "获取并展示指定设备的内存供应商信息。",
+                "summary": "展示设备的内存供应商信息",
+                "parameters": [
+                    {
+                        "description": "设备 ID 列表",
+                        "name": "dvIdList",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功返回设备的内存供应商信息",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/router.DeviceMemVendorInfo"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/pcie/bandwidth": {
+            "post": {
+                "description": "获取并展示指定设备的PCIe带宽使用情况，包括发送和接收的带宽。",
+                "summary": "展示设备的PCIe带宽使用情况",
+                "parameters": [
+                    {
+                        "description": "设备 ID 列表",
+                        "name": "dvIdList",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功返回设备的PCIe带宽使用信息",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/router.PcieBandwidthInfo"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/pcie/replaycount": {
+            "post": {
+                "description": "获取并展示指定设备的PCIe重放计数。",
+                "summary": "展示设备的PCIe重放计数",
+                "parameters": [
+                    {
+                        "description": "设备 ID 列表",
+                        "name": "dvIdList",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设备的PCIe重放计数信息",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/router.PcieReplayCountInfo"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/picbusinfo/{dvInd}": {
+            "get": {
+                "description": "获取设备的总线信息 (BDF格式)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "获取总线信息",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Device ID",
+                        "name": "dvInd",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "总线信息",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid device ID",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/pids": {
+            "get": {
+                "description": "获取并展示当前系统中运行的KFD进程的详细信息。",
+                "summary": "展示系统中正在运行的KFD进程信息",
+                "responses": {
+                    "200": {
+                        "description": "成功返回进程信息",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "请求错误",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/process/list": {
+            "get": {
+                "summary": "获取计算进程列表",
+                "responses": {
+                    "200": {
+                        "description": "进程 ID 列表",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "错误信息",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/showEvents": {
+            "post": {
+                "description": "获取并显示指定设备的事件信息。",
+                "summary": "显示设备的事件",
+                "parameters": [
+                    {
+                        "description": "设备ID列表",
+                        "name": "dvIdList",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    },
+                    {
+                        "description": "事件类型列表",
+                        "name": "eventTypes",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功返回设备的事件信息",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/showHopsTopology": {
+            "post": {
+                "description": "显示 GPU 设备之间的跳数信息。",
+                "summary": "显示 GPU 拓扑跳数",
+                "parameters": [
+                    {
+                        "description": "设备 ID 列表",
+                        "name": "dvIdList",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "GPU 拓扑跳数信息",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/showHwTopology": {
+            "post": {
+                "description": "显示一组 GPU 设备的权重、跳数、链接类型和 NUMA 节点信息。",
+                "summary": "显示完整的硬件拓扑信息",
+                "parameters": [
+                    {
+                        "description": "设备 ID 列表",
+                        "name": "dvIdList",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "完整的硬件拓扑信息",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/showNumaTopology": {
+            "post": {
+                "description": "显示一组 GPU 设备的 NUMA 节点和关联信息。",
+                "summary": "显示 NUMA 节点信息",
+                "parameters": [
+                    {
+                        "description": "设备 ID 列表",
+                        "name": "dvIdList",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "NUMA 节点信息",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/showTypeTopology": {
+            "post": {
+                "description": "显示 GPU 设备之间的链接类型信息。",
+                "summary": "显示 GPU 拓扑链接类型",
+                "parameters": [
+                    {
+                        "description": "设备 ID 列表",
+                        "name": "dvIdList",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "GPU 拓扑链接类型信息",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/showUId": {
+            "post": {
+                "description": "获取并显示指定设备的唯一ID信息。",
+                "summary": "显示设备的唯一ID",
+                "parameters": [
+                    {
+                        "description": "设备ID列表",
+                        "name": "dvIdList",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设备的唯一ID信息列表",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/router.DeviceUIdInfo"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/showVbiosVersion": {
+            "post": {
+                "description": "获取并显示指定设备的VBIOS版本信息。",
+                "summary": "显示设备的VBIOS版本",
+                "parameters": [
+                    {
+                        "description": "设备ID列表",
+                        "name": "dvIdList",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设备的VBIOS版本信息列表",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/router.DeviceVBIOSInfo"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/showVoltage": {
+            "post": {
+                "description": "获取并显示指定设备的当前电压信息。",
+                "summary": "显示设备的电压信息",
+                "parameters": [
+                    {
+                        "description": "设备ID列表",
+                        "name": "dvIdList",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设备的电压信息列表",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/router.DeviceVoltageInfo"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/showVoltageCurve": {
+            "post": {
+                "description": "获取并显示指定设备的电压曲线点信息。",
+                "summary": "显示设备的电压曲线点",
+                "parameters": [
+                    {
+                        "description": "设备ID列表",
+                        "name": "dvIdList",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设备的电压曲线点信息",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/showWeightTopology": {
+            "post": {
+                "description": "显示 GPU 设备之间的权重信息。",
+                "summary": "显示 GPU 拓扑权重",
+                "parameters": [
+                    {
+                        "description": "设备 ID 列表",
+                        "name": "dvIdList",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "GPU 拓扑权重信息",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/showXgmiErr": {
+            "post": {
+                "description": "显示一组 GPU 设备的 XGMI 错误状态。",
+                "summary": "显示 XGMI 错误状态",
+                "parameters": [
+                    {
+                        "description": "设备 ID 列表",
+                        "name": "dvIdList",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "XGMI 错误状态信息",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/temps/current": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "显示设备温度传感器数据",
+                "parameters": [
+                    {
+                        "description": "设备 ID 列表",
+                        "name": "dvIdList",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "温度信息列表",
+                        "schema": {
+                            "$ref": "#/definitions/router.TemperatureInfo"
+                        }
+                    },
+                    "400": {
+                        "description": "错误信息",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/utilization/coarse": {
+            "post": {
+                "summary": "获取设备粗粒度利用率",
+                "parameters": [
+                    {
+                        "description": "设备 ID",
+                        "name": "device",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "利用率计数器类型名称",
+                        "name": "typeName",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "利用率计数器列表",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/router.RSMIUtilizationCounter"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "错误信息",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/vDeviceCount": {
+            "get": {
+                "description": "获取当前系统中的虚拟设备数量",
+                "summary": "获取虚拟设备数量",
+                "responses": {
+                    "200": {
+                        "description": "虚拟设备数量",
+                        "schema": {
+                            "type": "int"
+                        }
+                    },
+                    "500": {
+                        "description": "内部服务器错误",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "router.BlocksInfo": {
+            "type": "object",
+            "properties": {
+                "block": {
+                    "description": "Block block",
+                    "type": "string"
+                },
+                "ce": {
+                    "description": "CE CE",
+                    "type": "integer"
+                },
+                "state": {
+                    "description": "State 状态",
+                    "type": "string"
+                },
+                "ue": {
+                    "description": "UE UE",
+                    "type": "integer"
+                }
+            }
+        },
+        "router.DMIDeviceInfo": {
+            "type": "object",
+            "properties": {
+                "computeUnitCount": {
+                    "type": "integer"
+                },
+                "computeUnitRemainingCount": {
+                    "description": "@swagignore",
+                    "type": "integer"
+                },
+                "deviceID": {
+                    "type": "integer"
+                },
+                "globalMemSize": {
+                    "description": "@swagignore",
+                    "type": "integer"
+                },
+                "maxVDeviceCount": {
+                    "type": "integer"
+                },
+                "memoryRemaining": {
+                    "description": "@swagignore",
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "percent": {
+                    "type": "integer"
+                },
+                "usageMemSize": {
+                    "description": "@swagignore",
+                    "type": "integer"
+                }
+            }
+        },
+        "router.DMIVDeviceInfo": {
+            "type": "object",
+            "properties": {
+                "computeUnitCount": {
+                    "description": "ComputeUnitCount 虚拟设备的计算单元数量",
+                    "type": "integer"
+                },
+                "containerID": {
+                    "description": "ContainerID 虚拟设备的容器ID",
+                    "type": "integer"
+                },
+                "deviceID": {
+                    "description": "DeviceID 虚拟设备的设备ID",
+                    "type": "integer"
+                },
+                "globalMemSize": {
+                    "description": "GlobalMemSize 虚拟设备的全局内存大小\n@swagignore",
+                    "type": "integer"
+                },
+                "name": {
+                    "description": "Name 虚拟设备的名称",
+                    "type": "string"
+                },
+                "pciBusNumber": {
+                    "description": "PciBusNumber 虚拟设备的总线编号",
+                    "type": "string"
+                },
+                "percent": {
+                    "description": "Percent 虚拟设备的使用百分比",
+                    "type": "integer"
+                },
+                "usageMemSize": {
+                    "description": "UsageMemSize 虚拟设备的已使用内存大小\n@swagignore",
+                    "type": "integer"
+                },
+                "vminorNumber": {
+                    "description": "VMinorNumber 虚拟设备的索引号",
+                    "type": "integer"
+                }
+            }
+        },
+        "router.Device": {
+            "type": "object",
+            "properties": {
+                "clk": {
+                    "description": "Clk 设备的当前时钟频率",
+                    "type": "number"
+                },
+                "computeUnitCount": {
+                    "description": "ComputeUnitCount 设备的计算单元总数",
+                    "type": "number"
+                },
+                "computeUnitRemainingCount": {
+                    "description": "ComputeUnitRemainingCount 设备剩余可用的计算单元数量",
+                    "type": "integer"
+                },
+                "deviceId": {
+                    "description": "DeviceId 设备的唯一标识符",
+                    "type": "string"
+                },
+                "maxVDeviceCount": {
+                    "description": "MaxVDeviceCount 物理设备上支持的最大虚拟设备数量",
+                    "type": "integer"
+                },
+                "memoryCap": {
+                    "description": "MemoryCap 设备的内存容量",
+                    "type": "number"
+                },
+                "memoryRemaining": {
+                    "description": "MemoryRemaining 设备剩余可用的内存量",
+                    "type": "integer"
+                },
+                "memoryUsed": {
+                    "description": "MemoryUsed 设备已使用的内存",
+                    "type": "number"
+                },
+                "minorNumber": {
+                    "description": "MinorNumber 设备的索引号",
+                    "type": "integer"
+                },
+                "pciBusNumber": {
+                    "description": "PciBusNumber 设备的总线编号",
+                    "type": "string"
+                },
+                "pcieBwMb": {
+                    "description": "PcieBwMb 设备的PCIe带宽 (MB/s)",
+                    "type": "number"
+                },
+                "powerCap": {
+                    "description": "PowerCap 设备的功耗上限",
+                    "type": "number"
+                },
+                "powerUsage": {
+                    "description": "PowerUsage 设备当前的功耗",
+                    "type": "number"
+                },
+                "subSystemName": {
+                    "description": "SubSystemName 设备的子系统名称",
+                    "type": "string"
+                },
+                "temperature": {
+                    "description": "Temperature 设备当前的温度",
+                    "type": "number"
+                },
+                "utilizationRate": {
+                    "description": "UtilizationRate 设备的利用率",
+                    "type": "number"
+                },
+                "vdeviceCount": {
+                    "description": "VDeviceCount 虚拟设备数量",
+                    "type": "integer"
+                }
+            }
+        },
+        "router.DeviceControlInfo": {
+            "type": "object",
+            "properties": {
+                "dvInd": {
+                    "description": "DvInd 设备索引号",
+                    "type": "integer"
+                },
+                "perfLevel": {
+                    "description": "PerfLevel 性能水平",
+                    "type": "string"
+                },
+                "resetFan": {
+                    "description": "ResetFan 是否重置风扇控制",
+                    "type": "boolean"
+                },
+                "sclkClock": {
+                    "description": "SclkClock sclk时钟频率 600、700、750、800、900、1000、1106、1200、1270、1319、1400、1500、1600",
+                    "type": "string"
+                },
+                "socclkClock": {
+                    "description": "SocclkClock soclk时钟频率 309、523、566、618、680、755、850、971",
+                    "type": "string"
+                }
+            }
+        },
+        "router.DeviceInfo": {
+            "type": "object",
+            "properties": {
+                "computeUnit": {
+                    "description": "ComputeUnit 设备的计算单元数量",
+                    "type": "number"
+                },
+                "devType": {
+                    "description": "DevType 设备类型",
+                    "type": "string"
+                },
+                "devTypeName": {
+                    "description": "DevTypeName 设备类型名称",
+                    "type": "string"
+                },
+                "deviceId": {
+                    "description": "DeviceId 设备ID",
+                    "type": "string"
+                },
+                "dvInd": {
+                    "description": "DvInd 设备索引",
+                    "type": "integer"
+                },
+                "memoryTotal": {
+                    "description": "MemoryTotal 设备的内存总量",
+                    "type": "number"
+                },
+                "memoryUsed": {
+                    "description": "MemoryUsed 设备的已使用内存量",
+                    "type": "number"
+                },
+                "pciBusNumber": {
+                    "description": "PciBusNumber 设备的总线号",
+                    "type": "string"
+                }
+            }
+        },
+        "router.DeviceMemVendorInfo": {
+            "type": "object",
+            "properties": {
+                "deviceID": {
+                    "description": "DeviceID 设备索引号",
+                    "type": "integer"
+                },
+                "vendor": {
+                    "description": "Vendor 供应商信息",
+                    "type": "string"
+                }
+            }
+        },
+        "router.DevicePowerInfo": {
+            "type": "object",
+            "properties": {
+                "deviceID": {
+                    "description": "DeviceID 设备索引号",
+                    "type": "integer"
+                },
+                "power": {
+                    "description": "Power 设备功率",
+                    "type": "integer"
+                }
+            }
+        },
+        "router.DevicePowerPlayInfo": {
+            "type": "object",
+            "properties": {
+                "deviceID": {
+                    "description": "DeviceID 设备索引号",
+                    "type": "integer"
+                },
+                "od_MCLK": {
+                    "description": "OD_MCLK MCLK",
+                    "type": "string"
+                },
+                "od_RANGE": {
+                    "description": "OD_RANGE RANGE",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "od_SCLK": {
+                    "description": "OD_SCLK SCLK",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "od_VDDC_CURVE": {
+                    "description": "OD_VDDC_CURVE DDC_CURVE",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "router.DeviceProfile": {
+            "type": "object",
+            "properties": {
+                "deviceID": {
+                    "description": "DeviceID 设备索引号",
+                    "type": "integer"
+                },
+                "profiles": {
+                    "description": "Profiles 文件信息",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "router.DeviceSerialInfo": {
+            "type": "object",
+            "properties": {
+                "deviceID": {
+                    "description": "DeviceID 设备索引号",
+                    "type": "integer"
+                },
+                "serialNumber": {
+                    "description": "SerialNumber 设备序列号",
+                    "type": "string"
+                }
+            }
+        },
+        "router.DeviceUIdInfo": {
+            "type": "object",
+            "properties": {
+                "deviceID": {
+                    "description": "DeviceID 设备索引号",
+                    "type": "integer"
+                },
+                "uid": {
+                    "description": "UId 设备唯一id",
+                    "type": "string"
+                }
+            }
+        },
+        "router.DeviceUseInfo": {
+            "type": "object",
+            "properties": {
+                "deviceID": {
+                    "description": "DeviceID 设备索引号",
+                    "type": "integer"
+                },
+                "gpuusePercent": {
+                    "description": "GPUUsePercent 设备使用率",
+                    "type": "integer"
+                },
+                "utilization": {
+                    "description": "利用率",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "router.DeviceVBIOSInfo": {
+            "type": "object",
+            "properties": {
+                "deviceID": {
+                    "description": "DeviceID 设备索引号",
+                    "type": "integer"
+                },
+                "vbios": {
+                    "description": "VBIOS 版本信息",
+                    "type": "string"
+                }
+            }
+        },
+        "router.DeviceVoltageInfo": {
+            "type": "object",
+            "properties": {
+                "deviceID": {
+                    "description": "DeviceID 设备索引号",
+                    "type": "integer"
+                },
+                "voltage": {
+                    "description": "Voltage 电压信息",
+                    "type": "integer"
+                }
+            }
+        },
+        "router.DeviceproductInfo": {
+            "type": "object",
+            "properties": {
+                "cardModel": {
+                    "description": "CardModel 设备子系统名称",
+                    "type": "string"
+                },
+                "cardSKU": {
+                    "description": "CardSKU SKU",
+                    "type": "string"
+                },
+                "cardSeries": {
+                    "description": "CardSeries 设备名称",
+                    "type": "string"
+                },
+                "cardVendor": {
+                    "description": "CardVendor 设备供应商名称",
+                    "type": "string"
+                },
+                "deviceID": {
+                    "description": "DeviceID 设备索引号",
+                    "type": "integer"
+                }
+            }
+        },
+        "router.FailedMessage": {
+            "description": "包含重置clock操作失败时的设备ID和错误信息",
+            "type": "object",
+            "properties": {
+                "errorMsg": {
+                    "description": "ErrorMsg 错误信息",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "ID 设备ID",
+                    "type": "integer"
+                }
+            }
+        },
+        "router.FirmwareInfo": {
+            "type": "object",
+            "properties": {
+                "deviceID": {
+                    "description": "DeviceID 设备索引号",
+                    "type": "integer"
+                },
+                "firmwareVer": {
+                    "description": "FirmwareVer 固件块名称到版本信息的映射",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "router.MetricsTableHeader": {
+            "type": "object",
+            "properties": {
+                "contentRevision": {
+                    "description": "ContentRevision   内容版本",
+                    "type": "integer"
+                },
+                "formatRevision": {
+                    "description": "FormatRevision   格式版本",
+                    "type": "integer"
+                },
+                "structureSize": {
+                    "description": "StructureSize   结构体大小",
+                    "type": "integer"
+                }
+            }
+        },
+        "router.MonitorInfo": {
+            "type": "object",
+            "properties": {
+                "clk": {
+                    "description": "Clk 备系统时钟速度列表",
+                    "type": "number"
+                },
+                "deviceId": {
+                    "description": "DeviceId 设备序列号",
+                    "type": "string"
+                },
+                "memoryCap": {
+                    "description": "MemoryCap 设备内存总量",
+                    "type": "number"
+                },
+                "memoryUsed": {
+                    "description": "MemoryUsed 设备内存使用量",
+                    "type": "number"
+                },
+                "minorNumber": {
+                    "description": "MinorNumber 设备索引号",
+                    "type": "integer"
+                },
+                "pciBusNumber": {
+                    "description": "PciBusNumber PCI ID",
+                    "type": "string"
+                },
+                "pcieBwMb": {
+                    "description": "PcieBwMb pcie流量信息",
+                    "type": "number"
+                },
+                "powerCap": {
+                    "description": "PowerCap 设备功率上限",
+                    "type": "number"
+                },
+                "powerUsage": {
+                    "description": "PowerUsage 设备平均功耗",
+                    "type": "number"
+                },
+                "subSystemName": {
+                    "description": "SubSystemName 型号名称",
+                    "type": "string"
+                },
+                "temperature": {
+                    "description": "Temperature 设备温度",
+                    "type": "number"
+                },
+                "utilizationRate": {
+                    "description": "UtilizationRate 设备忙碌时间百分比",
+                    "type": "number"
+                }
+            }
+        },
+        "router.PcieBandwidthInfo": {
+            "type": "object",
+            "properties": {
+                "bw": {
+                    "description": "Bw bw",
+                    "type": "number"
+                },
+                "deviceID": {
+                    "description": "DeviceID 设备索引号",
+                    "type": "integer"
+                },
+                "maxPktSz": {
+                    "description": "MaxPktSz 最大PktSz",
+                    "type": "integer"
+                },
+                "received": {
+                    "description": "Received 接收",
+                    "type": "integer"
+                },
+                "sent": {
+                    "description": "Sent 发送",
+                    "type": "integer"
+                }
+            }
+        },
+        "router.PcieReplayCountInfo": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "description": "重放总数",
+                    "type": "integer"
+                },
+                "deviceID": {
+                    "description": "DeviceID 设备索引号",
+                    "type": "integer"
+                }
+            }
+        },
+        "router.PhysicalDeviceInfo": {
+            "type": "object",
+            "properties": {
+                "device": {
+                    "description": "Device 物理设备的详细信息",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/router.Device"
+                        }
+                    ]
+                },
+                "virtualDevices": {
+                    "description": "VirtualDevices 该物理设备上关联的虚拟设备信息列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/router.DMIVDeviceInfo"
+                    }
+                }
+            }
+        },
+        "router.RSMIFrequencies": {
+            "type": "object",
+            "properties": {
+                "current": {
+                    "description": "Current 表示当前使用的频率",
+                    "type": "integer"
+                },
+                "frequency": {
+                    "description": "Frequency 表示设备支持的频率列表",
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "numSupported": {
+                    "description": "NumSupported 表示设备支持的频率数量",
+                    "type": "integer"
+                }
+            }
+        },
+        "router.RSMIGPUMetrics": {
+            "type": "object",
+            "properties": {
+                "averageDclk0Frequency": {
+                    "description": "AverageDclk0Frequency   平均显示时钟0频率",
+                    "type": "integer"
+                },
+                "averageDclk1Frequency": {
+                    "description": "AverageDclk1Frequency   平均显示时钟1频率",
+                    "type": "integer"
+                },
+                "averageGfxActivity": {
+                    "description": "AverageGfxActivity   平均图形活动",
+                    "type": "integer"
+                },
+                "averageGfxclkFrequency": {
+                    "description": "AverageGfxclkFrequency   平均图形时钟频率",
+                    "type": "integer"
+                },
+                "averageMmActivity": {
+                    "description": "AverageMmActivity   平均多媒体活动",
+                    "type": "integer"
+                },
+                "averageSocclkFrequency": {
+                    "description": "AverageSocclkFrequency   平均SoC时钟频率",
+                    "type": "integer"
+                },
+                "averageSocketPower": {
+                    "description": "AverageSocketPower   平均插座功率",
+                    "type": "integer"
+                },
+                "averageUclkFrequency": {
+                    "description": "AverageUclkFrequency   平均内存时钟频率",
+                    "type": "integer"
+                },
+                "averageUmcActivity": {
+                    "description": "AverageUmcActivity   平均内存控制器活动",
+                    "type": "integer"
+                },
+                "averageVclk0Frequency": {
+                    "description": "AverageVclk0Frequency   平均视频时钟0频率",
+                    "type": "integer"
+                },
+                "averageVclk1Frequency": {
+                    "description": "AverageVclk1Frequency   平均视频时钟1频率",
+                    "type": "integer"
+                },
+                "commonHeader": {
+                    "description": "CommonHeader   公共表头",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/router.MetricsTableHeader"
+                        }
+                    ]
+                },
+                "currentDclk0": {
+                    "description": "CurrentDclk0   当前显示时钟0",
+                    "type": "integer"
+                },
+                "currentDclk1": {
+                    "description": "CurrentDclk1   当前显示时钟1",
+                    "type": "integer"
+                },
+                "currentFanSpeed": {
+                    "description": "CurrentFanSpeed   当前风扇速度",
+                    "type": "integer"
+                },
+                "currentGfxclk": {
+                    "description": "CurrentGfxclk   当前图形时钟",
+                    "type": "integer"
+                },
+                "currentSocclk": {
+                    "description": "CurrentSocclk   当前SoC时钟",
+                    "type": "integer"
+                },
+                "currentUclk": {
+                    "description": "CurrentUclk   当前内存时钟",
+                    "type": "integer"
+                },
+                "currentVclk0": {
+                    "description": "CurrentVclk0   当前视频时钟0",
+                    "type": "integer"
+                },
+                "currentVclk1": {
+                    "description": "CurrentVclk1   当前视频时钟1",
+                    "type": "integer"
+                },
+                "energyAccumulator": {
+                    "description": "EnergyAccumulator   能量累加器",
+                    "type": "integer"
+                },
+                "gfxActivityAcc": {
+                    "description": "GfxActivityAcc   图形活动累加器",
+                    "type": "integer"
+                },
+                "memActivityAcc": {
+                    "description": "MemActivityAcc   内存活动累加器",
+                    "type": "integer"
+                },
+                "padding": {
+                    "description": "Padding   填充",
+                    "type": "integer"
+                },
+                "pcieLinkSpeed": {
+                    "description": "PcieLinkSpeed   PCIe链路速度（0.1 GT/s）",
+                    "type": "integer"
+                },
+                "pcieLinkWidth": {
+                    "description": "PcieLinkWidth   PCIe链路宽度",
+                    "type": "integer"
+                },
+                "systemClockCounter": {
+                    "description": "SystemClockCounter   系统时钟计数器",
+                    "type": "integer"
+                },
+                "temperatureEdge": {
+                    "description": "TemperatureEdge   边缘温度",
+                    "type": "integer"
+                },
+                "temperatureHotspot": {
+                    "description": "TemperatureHotspot   热点温度",
+                    "type": "integer"
+                },
+                "temperatureMem": {
+                    "description": "TemperatureMem   内存温度",
+                    "type": "integer"
+                },
+                "temperatureVRGfx": {
+                    "description": "TemperatureVRGfx   VR图形温度",
+                    "type": "integer"
+                },
+                "temperatureVRMem": {
+                    "description": "TemperatureVRMem   VR内存温度",
+                    "type": "integer"
+                },
+                "temperatureVRSoc": {
+                    "description": "TemperatureVRSoc   VRSoC温度",
+                    "type": "integer"
+                },
+                "tempetureHBM": {
+                    "description": "TempetureHBM   高带宽内存温度",
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "throttleStatus": {
+                    "description": "ThrottleStatus   节流状态",
+                    "type": "integer"
+                }
+            }
+        },
+        "router.RSMIPcieBandwidth": {
+            "type": "object",
+            "properties": {
+                "lanes": {
+                    "description": "lanes 表示 PCIe 通道的配置",
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "transferRate": {
+                    "description": "TransferRate 表示传输速率的频率信息",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/router.RSMIFrequencies"
+                        }
+                    ]
+                }
+            }
+        },
+        "router.RSMIUtilizationCounter": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "description": "Type 表示利用率计数器的类型",
+                    "type": "integer"
+                },
+                "value": {
+                    "description": "Value 表示计数器的值",
+                    "type": "integer"
+                }
+            }
+        },
+        "router.TemperatureInfo": {
+            "type": "object",
+            "properties": {
+                "deviceID": {
+                    "description": "DeviceID 设备索引号",
+                    "type": "integer"
+                },
+                "sensorTemps": {
+                    "description": "SensorTemps 传感器名称到温度的映射",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "number"
+                    }
+                }
+            }
+        }
+    }
+}

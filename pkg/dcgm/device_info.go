@@ -18,6 +18,7 @@ import "C"
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"unsafe"
 
 	"github.com/golang/glog"
@@ -27,12 +28,12 @@ import (
 func rsmiNumMonitorDevices() (gpuNum int, err error) {
 	var p C.uint
 	ret := C.rsmi_num_monitor_devices(&p)
-	glog.Info("go_rsmi_num_monitor_devices_ret:", ret)
+	//glog.Info("go_rsmi_num_monitor_devices_ret:", ret)
 	if err = errorString(ret); err != nil {
 		return 0, fmt.Errorf("Error go_rsmi_num_monitor_devices_ret: %s", err)
 	}
 	gpuNum = int(p)
-	glog.Info("go_rsmi_num_monitor_devices:", gpuNum)
+	//glog.Info("go_rsmi_num_monitor_devices:", gpuNum)
 	return gpuNum, nil
 }
 
@@ -60,10 +61,12 @@ func rsmiDevIdGet(dvInd int) (id int, err error) {
 	var cid C.uint16_t
 	ret := C.rsmi_dev_id_get(C.uint32_t(dvInd), &cid)
 	if err = errorString(ret); err != nil {
-		return 0, fmt.Errorf("Error rsmiDevIdGet:%s", err)
+		glog.Errorf("Error rsmiDevIdGet:%v,retStr:%v", err, errorString(ret))
+		return 0, fmt.Errorf("Error rsmiDevIdGet:%v", err)
 	}
+	//glog.Infof("rsmiDevIdGet cid:%v", cid)
 	id = int(cid)
-	glog.Info("rsmiDevIdGet:", id, fmt.Sprintf("%x", id))
+	//glog.Infof("rsmiDevIdGet: %v", id)
 	return
 }
 
@@ -122,6 +125,7 @@ func rsmiDevSerialNumberGet(dvInd int) (serialNumber string, err error) {
 		return "", fmt.Errorf("Error rsmi_dev_serial_number_get:%s", err)
 	}
 	serialNumber = C.GoString(&cserialNumber[0])
+	//glog.Infof("Serial number: %v", serialNumber)
 	return
 }
 
@@ -186,7 +190,7 @@ func rsmiDevPciBandwidthGet(dvInd int) (rsmiPcieBandwidth RSMIPcieBandwidth, err
 			Current:      uint32(bandwidth.transfer_rate.current),
 			Frequency:    *(*[32]uint64)(unsafe.Pointer(&bandwidth.transfer_rate)),
 		},
-		lanes: *(*[32]uint32)(unsafe.Pointer(&bandwidth.lanes)),
+		Lanes: *(*[32]uint32)(unsafe.Pointer(&bandwidth.lanes)),
 	}
 	glog.Infof("RSMIPcieBandwidth:%v", dataToJson(rsmiPcieBandwidth))
 	return
@@ -196,10 +200,13 @@ func rsmiDevPciBandwidthGet(dvInd int) (rsmiPcieBandwidth RSMIPcieBandwidth, err
 func rsmiDevPciIdGet(dvInd int) (bdfid int64, err error) {
 	var cbdfid C.uint64_t
 	ret := C.rsmi_dev_pci_id_get(C.uint32_t(dvInd), &cbdfid)
+	//glog.Infof("rsmi_dev_pci_id_get ret:%v, retStr:%v", ret, errorString(ret))
 	if err = errorString(ret); err != nil {
+		glog.Errorf("rsmi_dev_pci_id_get err:%v", err.Error())
 		return bdfid, err
 	}
 	bdfid = int64(cbdfid)
+	//glog.Infof("rsmiDevPciIdGet bdfid:%v", bdfid)
 	return
 }
 
@@ -219,13 +226,15 @@ func rsmiTopoNumaAffinityGet(dvInd int) (namaNode int, err error) {
 func rsmiDevPciThroughputGet(dvInd int) (sent int64, received int64, maxPktSz int64, err error) {
 	var csent, creceived, cmaxpktsz C.uint64_t
 	ret := C.rsmi_dev_pci_throughput_get(C.uint32_t(dvInd), &csent, &creceived, &cmaxpktsz)
+	//glog.Infof("rsmi_dev_pci_throughput_get ret:%v ,retstr:%v", ret, errorString(ret))
 	if err = errorString(ret); err != nil {
 		return 0, 0, 0, fmt.Errorf("Error rsmi_dev_pci_throughput_get:%s", err)
 	}
-	sent = int64(cmaxpktsz)
-	received = int64(csent)
-	maxPktSz = int64(creceived)
-	glog.Infof("sent: %v, received: %v, maxPktSz: %v", sent, received, maxPktSz)
+	//glog.Infof("csent: %v, creceived: %v, cmaxpktsz: %v", csent, creceived, cmaxpktsz)
+	sent = int64(csent)
+	received = int64(creceived)
+	maxPktSz = int64(cmaxpktsz)
+	//glog.Infof("sent: %v, received: %v, maxPktSz: %v", sent, received, maxPktSz)
 	return
 }
 
@@ -242,8 +251,13 @@ func rsmiDevPciReplayCounterGet(dvInd int) (counter int64, err error) {
 }
 
 // rsmiDevPciBandwidthSet 设置可使用的pcie带宽集
-func rsmiDevPciBandwidthSet(dvInd int, bwBitmask int64) {
-	C.rsmi_dev_pci_bandwidth_set(C.uint32_t(dvInd), C.uint64_t(bwBitmask))
+func rsmiDevPciBandwidthSet(dvInd int, bwBitmask int64) (err error) {
+	ret := C.rsmi_dev_pci_bandwidth_set(C.uint32_t(dvInd), C.uint64_t(bwBitmask))
+	glog.Infof("rsmiDevPciBandwidthSet, ret:%v ,retStr:%v", ret, errorString(ret))
+	if err = errorString(ret); err != nil {
+		return fmt.Errorf("Error rsmiDevPciBandwidthSet:%v", err)
+	}
+	return
 }
 
 /****************************************** Power *********************************************/
@@ -252,6 +266,7 @@ func rsmiDevPciBandwidthSet(dvInd int, bwBitmask int64) {
 func rsmiDevPowerAveGet(dvInd int, senserId int) (power int64, err error) {
 	var cpower C.uint64_t
 	ret := C.rsmi_dev_power_ave_get(C.uint32_t(dvInd), C.uint32_t(senserId), &cpower)
+	//glog.Infof("rsmi_dev_power_ave_get, ret:%v, retStr:%v", ret, errorString(ret))
 	if err = errorString(ret); err != nil {
 		return power, fmt.Errorf("Error rsmiDevPowerAveGet:%v", err)
 	}
@@ -275,6 +290,7 @@ func rsmiDevEnergyCountGet(dvInd int) (power uint64, counterResolution float32, 
 func rsmiDevPowerCapGet(dvInd int, senserId int) (power int64, err error) {
 	var cpower C.uint64_t
 	ret := C.rsmi_dev_power_cap_get(C.uint32_t(dvInd), C.uint32_t(senserId), &cpower)
+	//glog.Infof("rsmi_dev_power_cap_get ret:%v, retstr:%v", ret, errorString(ret))
 	if err = errorString(ret); err != nil {
 		return power, fmt.Errorf("Error rsmiDevPowerCapGet:%s", err)
 	}
@@ -283,10 +299,15 @@ func rsmiDevPowerCapGet(dvInd int, senserId int) (power int64, err error) {
 }
 
 // rsmiDevPowerCapRangeGet 获取设备功率有效值范围
-func rsmiDevPowerCapRangeGet(dvInd int, senserId int) (max, min int64) {
+func rsmiDevPowerCapRangeGet(dvInd int, senserId int) (max, min int64, err error) {
 	var cmax, cmin C.uint64_t
-	C.rsmi_dev_power_cap_range_get(C.uint32_t(dvInd), C.uint32_t(senserId), &cmax, &cmin)
+	ret := C.rsmi_dev_power_cap_range_get(C.uint32_t(dvInd), C.uint32_t(senserId), &cmax, &cmin)
+	glog.Infof("rsmiDevPowerCapRangeGet ret:%v ,retstr:%v", ret, errorString(ret))
+	if err = errorString(ret); err != nil {
+		return max, min, fmt.Errorf("Error rsmiDevPowerCapRangeGet:%s", err)
+	}
 	max, min = int64(cmax), int64(cmin)
+	glog.Infof("rsmiDevPowerCapRangeGet max:%v, min:%v", max, min)
 	return
 }
 
@@ -296,6 +317,7 @@ func rsmiDevPowerCapRangeGet(dvInd int, senserId int) (max, min int64) {
 func rsmiDevMemoryTotalGet(dvInd int, memoryType RSMIMemoryType) (total int64, err error) {
 	var ctotal C.uint64_t
 	ret := C.rsmi_dev_memory_total_get(C.uint32_t(dvInd), C.rsmi_memory_type_t(memoryType), &ctotal)
+	//glog.Infof("rsmi_dev_memory_total_get ret:%v ,retstr:%v", ret, errorString(ret))
 	if err = errorString(ret); err != nil {
 		return total, fmt.Errorf("Error rsmiDevMemoryTotalGet:%s", err)
 	}
@@ -308,6 +330,7 @@ func rsmiDevMemoryTotalGet(dvInd int, memoryType RSMIMemoryType) (total int64, e
 func rsmiDevMemoryUsageGet(dvInd int, memoryType RSMIMemoryType) (used int64, err error) {
 	var cused C.uint64_t
 	ret := C.rsmi_dev_memory_usage_get(C.uint32_t(dvInd), C.rsmi_memory_type_t(memoryType), &cused)
+	//glog.Infof("rsmi_dev_memory_usage_get ret:%v ,retstr:%v", ret, errorString(ret))
 	if err = errorString(ret); err != nil {
 		return used, fmt.Errorf("Error rsmiDevMemoryUsageGet:%s", err)
 	}
@@ -364,6 +387,7 @@ func rsmiDevMemoryReservedPagesGet(dvInd int) (numPages int, records []RSMIRetir
 func rsmiDevFanRpmsGet(dvInd, sensorInd int) (speed int64, err error) {
 	var cspeed C.int64_t
 	ret := C.rsmi_dev_fan_rpms_get(C.uint32_t(dvInd), C.uint32_t(sensorInd), &cspeed)
+	glog.Infof("rsmi_dev_fan_rpms_get: ret:%v ,retstr:%v", ret, errorString(ret))
 	if err = errorString(ret); err != nil {
 		return speed, fmt.Errorf("Error rsmi_dev_fan_rpms_get:%s", err)
 	}
@@ -376,6 +400,7 @@ func rsmiDevFanRpmsGet(dvInd, sensorInd int) (speed int64, err error) {
 func rsmiDevFanSpeedGet(dvInd, sensorInd int) (speed int64, err error) {
 	var cspeed C.int64_t
 	ret := C.rsmi_dev_fan_speed_get(C.uint32_t(dvInd), C.uint32_t(sensorInd), &cspeed)
+	glog.Infof("rsmi_dev_fan_speed_get ret:%v ,retstr:%v", ret, errorString(ret))
 	if err = errorString(ret); err != nil {
 		return speed, fmt.Errorf("Error rsmiDevFanSpeedGet:%s", err)
 	}
@@ -387,6 +412,7 @@ func rsmiDevFanSpeedGet(dvInd, sensorInd int) (speed int64, err error) {
 func rsmiDevFanSpeedMaxGet(dvInd, sensorInd int) (maxSpeed int64, err error) {
 	var cmaxSpeed C.uint64_t
 	ret := C.rsmi_dev_fan_speed_max_get(C.uint32_t(dvInd), C.uint32_t(sensorInd), &cmaxSpeed)
+	glog.Infof("rsmi_dev_fan_speed_max_get ret:%v ,retstr:%v", ret, errorString(ret))
 	if err = errorString(ret); err != nil {
 		return maxSpeed, fmt.Errorf("Error rsmiDevFanSpeedMaxGet:%s", err)
 	}
@@ -492,31 +518,6 @@ func rsmiDevFirmwareVersionGet(dvInd int, fwBlock RSMIFwBlock) (fwVersion int64,
 	return
 }
 
-// rsmiDevEccCountGet 获取GPU块的错误计数
-func rsmiDevEccCountGet(dvInd int, gpuBlock RSMIGpuBlock) (errorCount RSMIErrorCount, err error) {
-	var cerrorCount C.rsmi_error_count_t
-	ret := C.rsmi_dev_ecc_count_get(C.uint32_t(dvInd), C.rsmi_gpu_block_t(gpuBlock), &cerrorCount)
-	if err = errorString(ret); err != nil {
-		return errorCount, fmt.Errorf("Error rsmi_dev_ecc_count_get:%s", err)
-	}
-	errorCount = RSMIErrorCount{
-		CorrectableErr:   uint64(cerrorCount.correctable_err),
-		UncorrectableErr: uint64(cerrorCount.uncorrectable_err),
-	}
-	return
-}
-
-// rsmiDevEccEnabledGet 获取已启用的ECC位掩码
-func rsmiDevEccEnabledGet(dvInd int) (enabledBlocks int64, err error) {
-	var cenabledBlocks C.uint64_t
-	ret := C.rsmi_dev_ecc_enabled_get(C.uint32_t(dvInd), &cenabledBlocks)
-	if err = errorString(ret); err != nil {
-		return enabledBlocks, fmt.Errorf("Error rsmi_dev_ecc_enabled_get:%s", err)
-	}
-	enabledBlocks = int64(cenabledBlocks)
-	return
-}
-
 /*************************************VDCU******************************************/
 // 设备数量
 func dmiGetDeviceCount() (count int, err error) {
@@ -535,7 +536,7 @@ func dmiGetDeviceCount() (count int, err error) {
 func dmiGetDeviceInfo(dvInd int) (deviceInfo DMIDeviceInfo, err error) {
 	var cdeviceInfo C.dmiDeviceInfo
 	ret := C.dmiGetDeviceInfo(C.int(dvInd), &cdeviceInfo)
-	glog.Infof("dmiDeviceInfo ret:%v", ret)
+	glog.Infof("dmiDeviceInfo ret:%v,cdeviceInfo:%v", ret, cdeviceInfo)
 	if err = dmiErrorString(ret); err != nil {
 		return deviceInfo, fmt.Errorf("Error dmiGetDeviceInfo:%s", err)
 	}
@@ -584,8 +585,8 @@ func dmiGetVDeviceCount() (count int, err error) {
 func dmiGetVDeviceInfo(vDvInd int) (vDeviceInfo DMIVDeviceInfo, err error) {
 	var cvDeviceInfo C.dmiDeviceInfo
 	ret := C.dmiGetVDeviceInfo(C.int(vDvInd), &cvDeviceInfo)
-	glog.Infof("dmiGetVDeviceInfo ret:%v", ret)
-	glog.Infof("cgo cvDeviceInfo:%v", dataToJson(cvDeviceInfo))
+	//glog.Infof("dmiGetVDeviceInfo ret:%v", ret)
+	//glog.Infof("cgo cvDeviceInfo:%v", dataToJson(cvDeviceInfo))
 	if err = dmiErrorString(ret); err != nil {
 		return vDeviceInfo, fmt.Errorf("Error dmiGetVDeviceInfo:%s", err)
 	}
@@ -610,7 +611,7 @@ func dmiGetVDeviceInfo(vDvInd int) (vDeviceInfo DMIVDeviceInfo, err error) {
 func dmiGetDeviceRemainingInfo(dvInd int) (cus, memories uint64, err error) {
 	var ccus, cmemories C.size_t
 	ret := C.dmiGetDeviceRemainingInfo(C.int(dvInd), &ccus, &cmemories)
-	glog.Infof("dmiGetDeviceRemainingInfo ret:%v", ret)
+	glog.Infof("dmiGetDeviceRemainingInfo ret:%v, retstr:%v", ret, dmiErrorString(ret))
 	if err = dmiErrorString(ret); err != nil {
 		return cus, memories, fmt.Errorf("Error dmiGetDeviceRemainingInfo:%s", err)
 	}
@@ -635,28 +636,39 @@ func dmiGetDeviceRemainingInfo(dvInd int) (cus, memories uint64, err error) {
 //	└── 虚拟设备 2
 //	     ├── 计算单元: 4
 //	     └── 内存大小: 2048 字节
-func dmiCreateVDevices(dvInd int, vDevCount int, vDevCUs []int, vDevMemSize []int) (err error) {
+func dmiCreateVDevices(dvInd int, vDevCount int, vDevCUs []int, vDevMemSize []int) (vdevIDs []int, err error) {
 	if len(vDevCUs) != vDevCount || len(vDevMemSize) != vDevCount {
-		return fmt.Errorf("Invalid args")
+		return vdevIDs, fmt.Errorf("Invalid args")
 	}
 
 	fmt.Printf("deviceID: %d, vDevCount: %d, vDevCUs: %v, vDevMemSize: %v\n", dvInd, vDevCount, vDevCUs, vDevMemSize)
-	// Allocate C arrays from Go slices
+
+	// 获取调用前的配置文件列表
+	beforeFiles, err := getConfigFiles("/etc/vdev")
+	if err != nil {
+		return vdevIDs, fmt.Errorf("Failed to get config files: %v", err)
+	}
+	fmt.Println("Before processing, the files in /etc/vdev are:")
+	for _, file := range beforeFiles {
+		fmt.Println(" -", file.Name())
+	}
+
+	// 分配C数组内存
 	cVdevCus := (*C.int)(C.malloc(C.size_t(len(vDevCUs)) * C.sizeof_int))
 	cVdevMemSize := (*C.int)(C.malloc(C.size_t(len(vDevMemSize)) * C.sizeof_int))
 
 	if cVdevCus == nil || cVdevMemSize == nil {
-		return fmt.Errorf("Memory allocation failed")
+		return vdevIDs, fmt.Errorf("Memory allocation failed")
 	}
 	defer C.free(unsafe.Pointer(cVdevCus))
 	defer C.free(unsafe.Pointer(cVdevMemSize))
 
-	// Copy values from Go slices to C arrays
+	// 将Go切片的值复制到C数组
 	for i := 0; i < len(vDevCUs); i++ {
 		*((*C.int)(unsafe.Pointer(uintptr(unsafe.Pointer(cVdevCus)) + uintptr(i)*unsafe.Sizeof(*cVdevCus)))) = C.int(vDevCUs[i])
 		*((*C.int)(unsafe.Pointer(uintptr(unsafe.Pointer(cVdevMemSize)) + uintptr(i)*unsafe.Sizeof(*cVdevMemSize)))) = C.int(vDevMemSize[i])
 	}
-	// Print first elements for verification
+
 	fmt.Printf("cVdevCus[0]: %d, cVdevCus[1]: %d, cVdevMemSize[0]: %d, cVdevMemSize[1]: %d\n",
 		*((*C.int)(unsafe.Pointer(cVdevCus))),
 		*((*C.int)(unsafe.Pointer(uintptr(unsafe.Pointer(cVdevCus)) + uintptr(1)*unsafe.Sizeof(*cVdevCus)))),
@@ -668,8 +680,48 @@ func dmiCreateVDevices(dvInd int, vDevCount int, vDevCUs []int, vDevMemSize []in
 		cVdevCus, cVdevMemSize)
 	glog.Infof("dmiCreateVDevices ret:%v ,err:%v", ret, dmiErrorString(ret))
 	if err = dmiErrorString(ret); err != nil {
-		return fmt.Errorf("Error dmiCreateVDevices:%s", err)
+		return vdevIDs, fmt.Errorf("Error dmiCreateVDevices:%s", err)
 	}
+
+	// 获取调用后的配置文件列表
+	afterFiles, err := getConfigFiles("/etc/vdev")
+	if err != nil {
+		return vdevIDs, fmt.Errorf("Failed to get config files: %v", err)
+	}
+	fmt.Println("After processing, the files in /etc/vdev are:")
+	for _, file := range afterFiles {
+		fmt.Println(" -", file.Name())
+	}
+	// 找出新增的配置文件
+	newFiles := map[string]os.DirEntry{}
+	for _, af := range afterFiles {
+		found := false
+		for _, bf := range beforeFiles {
+			if af.Name() == bf.Name() {
+				found = true
+				break
+			}
+		}
+		if !found {
+			newFiles[af.Name()] = af
+		}
+	}
+	// 处理新增的配置文件，提取vdev_id并返回
+	for fileName := range newFiles {
+		filePath := "/etc/vdev/" + fileName
+		config, err := parseConfigFile(filePath)
+		if err != nil {
+			return vdevIDs, fmt.Errorf("Failed to parse config file %s: %v", filePath, err)
+		}
+		fmt.Printf("New config file: %s, content: %v\n", fileName, config)
+
+		if vdevIDStr, ok := config["vdev_id"]; ok {
+			var vdevID int
+			fmt.Sscanf(vdevIDStr, "%d", &vdevID)
+			vdevIDs = append(vdevIDs, vdevID)
+		}
+	}
+	glog.Infof("vdevIDs:%v", dataToJson(vdevIDs))
 	return
 }
 
@@ -731,6 +783,7 @@ func dmiGetDevBusyPercent(dvInd int) (percent int, err error) {
 		return percent, fmt.Errorf("Error dmiGetDevBusyPercent:%s", err)
 	}
 	percent = int(cpercent)
+	glog.Infof("dmiGetDevBusyPercent: %v", percent)
 	return
 }
 
@@ -742,6 +795,7 @@ func dmiGetVDevBusyPercent(vDvInd int) (percent int, err error) {
 		return percent, fmt.Errorf("Error dmiGetVDevBusyPercent:%s", err)
 	}
 	percent = int(cpercent)
+	glog.Infof("dmiGetVDevBusyPercent: %v", percent)
 	return
 }
 

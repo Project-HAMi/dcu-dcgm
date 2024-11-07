@@ -18,9 +18,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 	"unsafe"
+
+	"github.com/golang/glog"
 )
 
 func errorString(result C.rsmi_status_t) error {
@@ -50,7 +54,7 @@ func dmiErrorString(result C.dmiStatus) error {
 }
 
 func dataToJson(data any) string {
-	jsonData, err := json.MarshalIndent(data, "", "  ")
+	jsonData, err := json.Marshal(data)
 	if err != nil {
 		fmt.Println("Error serializing to JSON:", err)
 	}
@@ -299,4 +303,195 @@ func printTableRow(format string, displayString interface{}) {
 		fmt.Print(displayString)
 	}
 	fmt.Print(" ")
+}
+
+// 获取指定目录下的文件列表，如果目录不存在或为空，返回空切片
+func getConfigFiles(dir string) ([]os.DirEntry, error) {
+	files, err := os.ReadDir(dir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			// 如果目录不存在，返回空切片
+			return []os.DirEntry{}, nil
+		}
+		return nil, err
+	}
+	return files, nil
+}
+
+// 解析配置文件内容
+func parseConfigFile(filePath string) (map[string]string, error) {
+	content, err := os.ReadFile(filePath)
+	if err != nil {
+		return nil, err
+	}
+	lines := strings.Split(string(content), "\n")
+	config := make(map[string]string)
+	for _, line := range lines {
+		parts := strings.Split(line, ":")
+		if len(parts) == 2 {
+			config[strings.TrimSpace(parts[0])] = strings.TrimSpace(parts[1])
+		}
+	}
+	return config, nil
+}
+
+// 执行并行任务
+func executeInParallel(wg *sync.WaitGroup, task func()) {
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		task()
+	}()
+}
+
+// 用安全锁更新monitorInfo的字段值
+func updateMonitorInfo(mu *sync.Mutex, updateFunc func()) {
+	mu.Lock()
+	defer mu.Unlock()
+	updateFunc()
+}
+
+// Helper function to perform a task and update monitorInfo
+func fetchAndUpdate[T any](mu *sync.Mutex, wg *sync.WaitGroup, fetchFunc func() T, updateFunc func(T)) {
+	executeInParallel(wg, func() {
+		result := fetchFunc()
+		updateMonitorInfo(mu, func() {
+			updateFunc(result)
+		})
+	})
+}
+
+var blockToStringMap = map[RSMIGpuBlock]string{
+	RSMIGpuBlockInvalid:  "INVALID",
+	RSMIGpuBlockUMC:      "UMC",
+	RSMIGpuBlockSDMA:     "SDMA",
+	RSMIGpuBlockGFX:      "GFX",
+	RSMIGpuBlockMMHUB:    "MMHUB",
+	RSMIGpuBlockATHUB:    "ATHUB",
+	RSMIGpuBlockPCIEBIF:  "PCIEBIF",
+	RSMIGpuBlockHDP:      "HDP",
+	RSMIGpuBlockXGMIWAFL: "XGMIWAFL",
+	RSMIGpuBlockDF:       "DF",
+	RSMIGpuBlockSMN:      "SMN",
+	RSMIGpuBlockSEM:      "SEM",
+	RSMIGpuBlockMP0:      "MP0",
+	RSMIGpuBlockMP1:      "MP1",
+	RSMIGpuBlockFuse:     "FUSE",
+	RSMIGpuBlockMCA:      "MCA",
+	RSMIGpuBlockReserved: "RESERVED",
+}
+
+func ConvertFromRSMIGpuBlock(block RSMIGpuBlock) string {
+	if str, exists := blockToStringMap[block]; exists {
+		return str
+	}
+	return "UNKNOWN"
+}
+
+func listFilesInDevDri() int {
+	foundCounter := 0
+	baseDir := "/sys/devices"
+
+	// 处理 /sys/devices 目录
+	err := processDir(baseDir, &foundCounter)
+	if err != nil {
+		glog.Errorf("处理目录失败: %v", err)
+	}
+
+	return foundCounter
+}
+
+func processDir(dirPath string, foundCounter *int) error {
+	dir, err := os.Open(dirPath)
+	if err != nil {
+		return fmt.Errorf("无法打开目录 %s: %v", dirPath, err)
+	}
+	defer dir.Close()
+
+	files, err := dir.Readdirnames(-1)
+	if err != nil {
+		return fmt.Errorf("读取目录 %s 文件失败: %v", dirPath, err)
+	}
+
+	for _, fileName := range files {
+		fullPath := filepath.Join(dirPath, fileName)
+
+		if len(fileName) >= 7 && fileName[:7] == "pci0000" {
+			// 处理 pci0000 开头的目录
+			err := processDir(fullPath, foundCounter)
+			if err != nil {
+				glog.Warningf("处理目录 %s 失败: %v", fullPath, err)
+			}
+		} else if len(fileName) >= 4 && fileName[:4] == "0000" {
+			// 处理 0000 开头的目录
+			err := process0000Dir(fullPath, foundCounter)
+			if err != nil {
+				glog.Warningf("处理目录 %s 失败: %v", fullPath, err)
+			}
+		}
+	}
+
+	return nil
+}
+
+func process0000Dir(dirPath string, foundCounter *int) error {
+	dir, err := os.Open(dirPath)
+	if err != nil {
+		return fmt.Errorf("无法打开目录 %s: %v", dirPath, err)
+	}
+	defer dir.Close()
+
+	files, err := dir.Readdirnames(-1)
+	if err != nil {
+		return fmt.Errorf("读取目录 %s 文件失败: %v", dirPath, err)
+	}
+
+	for _, fileName := range files {
+		fullPath := filepath.Join(dirPath, fileName)
+
+		if len(fileName) >= 4 && fileName[:4] == "0000" {
+			// 递归处理 0000 开头的子目录
+			err := process0000Dir(fullPath, foundCounter)
+			if err != nil {
+				glog.Warningf("处理目录 %s 失败: %v", fullPath, err)
+			}
+		} else if fileName == "device" {
+			// 处理 device 文件
+			deviceFilePath := fullPath
+			deviceFile, err := os.Open(deviceFilePath)
+			if err != nil {
+				glog.Warningf("无法打开文件 %s: %v", deviceFilePath, err)
+				continue
+			}
+			defer deviceFile.Close()
+
+			var deviceValue string
+			_, err = fmt.Fscanf(deviceFile, "%s", &deviceValue)
+			if err != nil {
+				glog.Warningf("读取文件 %s 内容失败: %v", deviceFilePath, err)
+				continue
+			}
+
+			// 移除 "0x" 前缀并尝试匹配
+			if len(deviceValue) > 2 && deviceValue[:2] == "0x" {
+				deviceValue = deviceValue[2:]
+			}
+
+			// 查找对应的设备型号
+			modelName, found := type2name[deviceValue]
+			if !found {
+				modelName = "未知型号"
+			}
+
+			// 输出 device 文件中的值及对应型号
+			glog.Infof("路径: %v, device 值: %s 型号: %v", deviceFilePath, deviceValue, modelName)
+
+			// 如果找到对应型号，计数器加 1
+			if modelName != "未知型号" {
+				*foundCounter++
+			}
+		}
+	}
+
+	return nil
 }
