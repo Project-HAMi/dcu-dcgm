@@ -1,4 +1,6 @@
 # DCU DCGM
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FProject-HAMi%2Fdcu-dcgm.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FProject-HAMi%2Fdcu-dcgm?ref=badge_shield)
+
 
 ## 组件信息
 
@@ -55,3 +57,7 @@ func main(){
 ```
 
 “# dcu-dcgm”
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FProject-HAMi%2Fdcu-dcgm.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FProject-HAMi%2Fdcu-dcgm?ref=badge_large)
