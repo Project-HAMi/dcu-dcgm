@@ -10,9 +10,9 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
-	"g.sugon.com/das/dcgm-dcu/pkg/dcgm"
-	_ "g.sugon.com/das/dcgm-dcu/pkg/service/docs"
-	"g.sugon.com/das/dcgm-dcu/pkg/service/router"
+	"github.com/Project-HAMi/dcu-dcgm/pkg/dcgm"
+	_ "github.com/Project-HAMi/dcu-dcgm/pkg/service/docs"
+	"github.com/Project-HAMi/dcu-dcgm/pkg/service/router"
 )
 
 var (

@@ -6,7 +6,7 @@ import (
 
 	"github.com/golang/glog"
 
-	"g.sugon.com/das/dcgm-dcu/pkg/dcgm"
+	"github.com/Project-HAMi/dcu-dcgm/pkg/dcgm"
 )
 
 func main() {

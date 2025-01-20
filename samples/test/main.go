@@ -5,7 +5,7 @@ import (
 
 	"github.com/golang/glog"
 
-	"g.sugon.com/das/dcgm-dcu/pkg/dcgm"
+	"github.com/Project-HAMi/dcu-dcgm/pkg/dcgm"
 )
 
 func main() {
@@ -38,5 +38,6 @@ func main() {
 	dcgm.EccBlocksInfo(0)
 	//dcgm.VDeviceSingleInfo(0)
 	//dcgm.VDeviceSingleInfo(1)
-	dcgm.AllDeviceInfos()
+	//dcgm.AllDeviceInfos()
+	dcgm.DeviceInfos()
 }
